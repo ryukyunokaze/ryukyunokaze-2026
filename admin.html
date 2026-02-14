@@ -6,166 +6,115 @@
   <title>【管理者】チケット管理システム</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* --- レイアウト改善：中央寄せ --- */
-    body { background: #f1f5f9; margin: 0; padding: 0; font-family: sans-serif; }
-    .admin-wrapper { 
-      max-width: 1100px; 
-      margin: 0 auto; 
-      background: #fff; 
-      min-height: 100vh; 
-      box-shadow: 0 0 20px rgba(0,0,0,0.05);
-    }
-    .admin-container { padding: 20px; }
+    /* --- レイアウトベース（スクロール問題を解決） --- */
+    body { background: #f1f5f9; margin: 0; font-family: sans-serif; color: #1e293b; -webkit-overflow-scrolling: touch; }
+    .admin-wrapper { max-width: 800px; margin: 0 auto; background: #fff; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+    .content-area { padding: 15px; padding-bottom: 100px; }
 
-    /* --- ダッシュボード --- */
-    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-    .stat-card { background: white; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; }
-    .stat-card h3 { font-size: 0.85rem; color: #64748b; margin: 0 0 10px; }
-    .stat-card p { font-size: 1.4rem; font-weight: bold; margin: 0; color: #1e3a8a; }
-    .stat-card.highlight { background: #1e3a8a; color: white; }
-    .stat-card.highlight h3, .stat-card.highlight p { color: white; }
+    /* --- ヘッダー・カード --- */
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .stat-card { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; }
+    .stat-card h3 { font-size: 0.75rem; color: #64748b; margin: 0 0 5px; }
+    .stat-card p { font-size: 1.1rem; font-weight: bold; margin: 0; color: #1e3a8a; }
+    .stat-card.blue { background: #1e3a8a; color: white; border: none; }
+    .stat-card.blue h3, .stat-card.blue p { color: white; }
 
-    /* --- メニュー・タブ --- */
-    .admin-menu { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #eee; }
-    .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
-    .tab-btn { padding: 10px 30px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: #edf2f7; color: #4a5568; }
-    .tab-btn.active { background: #1e3a8a; color: white; }
+    /* --- ナビゲーション（インデックス形式） --- */
+    .nav-tabs { display: flex; background: #f1f5f9; border-radius: 10px; padding: 4px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+    .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: #64748b; background: transparent; transition: 0.2s; }
+    .tab-btn.active { background: white; color: #1e3a8a; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-    /* --- 検索窓 --- */
-    .search-container { max-width: 600px; margin: 0 auto 20px; }
-    #searchInput { width: 100%; padding: 12px 20px; border: 2px solid #3b82f6; border-radius: 30px; font-size: 16px; box-sizing: border-box; }
+    /* --- メニュー・検索 --- */
+    .quick-menu { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; }
+    .q-btn { padding: 8px 15px; border-radius: 20px; font-size: 11px; text-decoration: none; font-weight: bold; color: white; border: none; cursor: pointer; }
+    #searchInput { width: 100%; padding: 12px 20px; border: 2px solid #3b82f6; border-radius: 25px; font-size: 16px; box-sizing: border-box; margin-bottom: 15px; outline: none; }
 
-    /* --- テーブル調整 --- */
-    #admin-table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
-    #admin-table th { background: #f8fafc; padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: center; }
-    #admin-table td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+    /* --- リストアイテム（スッキリ表示） --- */
+    .order-item { border-bottom: 1px solid #f1f5f9; padding: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .order-item:active { background: #f8fafc; }
+    .order-name { font-weight: bold; font-size: 1rem; }
+    .status-badge { padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
 
-    /* --- 分析カード --- */
-    .analysis-card { background: #f8fafc; border-left: 5px solid #1e3a8a; text-align: left; padding: 15px; }
-    .analysis-val { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; border-bottom: 1px dashed #e2e8f0; padding-bottom: 4px; }
+    /* --- 集計ページ --- */
+    .analysis-card { background: #f8fafc; padding: 15px; border-radius: 10px; border-left: 5px solid #1e3a8a; margin-bottom: 15px; }
+    .ana-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #e2e8f0; font-size: 0.9rem; }
 
-    /* --- スマホ対応 --- */
-    @media screen and (max-width: 768px) {
-      .admin-wrapper { max-width: 100%; }
-      #admin-table { display: none; }
-      .mobile-row { background: white; border-bottom: 1px solid #e2e8f0; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-      .fixed-header { position: sticky; top: 0; z-index: 1000; background: #fff; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    }
+    /* モーダル内の入力欄 */
+    .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .edit-input { padding: 10px; border: 1px solid #cbd5e0; border-radius: 5px; width: 100%; box-sizing: border-box; }
 
-    /* 印刷 */
-    @media print { .no-print { display: none !important; } .admin-wrapper { box-shadow: none; max-width: 100%; } }
+    @media print { .no-print { display: none !important; } }
   </style>
 </head>
-
 <body style="display:none;" id="admin-body">
   <div class="admin-wrapper">
-    <div class="admin-container">
-      
-      <div class="fixed-header">
-        <header style="text-align: center; margin-bottom: 15px;">
-          <h1 style="font-size: 1.5rem; color: #1e3a8a;">🎫 チケット管理パネル</h1>
-        </header>
+    <div class="content-area">
+      <header style="text-align:center; margin-bottom:15px;">
+        <h1 style="font-size: 1.1rem; color: #1e3a8a; letter-spacing: 1px;">🎫 チケット管理パネル</h1>
+      </header>
 
-        <div class="dashboard-grid no-print">
-          <div class="stat-card">
-            <h3>総申込件数</h3>
-            <p><span id="stat-total-orders">0</span> 件</p>
-          </div>
-          <div class="stat-card highlight">
-            <h3>売上合計</h3>
-            <p><span id="stat-total-money">0</span> 円</p>
-          </div>
-          <div class="stat-card">
-            <h3>入金済み合計</h3>
-            <p style="color:#10b981;"><span id="stat-paid-money">0</span> 円</p>
-          </div>
+      <div class="dashboard-grid no-print">
+        <div class="stat-card">
+          <h3>総申込（件数 / 人数）</h3>
+          <p><span id="stat-total-orders">0</span>件 / <span id="stat-total-persons">0</span>名</p>
         </div>
+        <div class="stat-card blue">
+          <h3>売上合計（内入金）</h3>
+          <p><span id="stat-total-money">0</span>円</p>
+          <div style="font-size: 0.65rem; opacity: 0.9;">(入金済み: <span id="stat-paid-money">0</span>円)</div>
+        </div>
+      </div>
 
-        <div class="admin-menu no-print">
-          <a href="index.html" target="_blank" class="nav-btn" style="background:#1e3a8a; color:white; padding:8px 15px; border-radius:6px; text-decoration:none; font-size:13px;">🌐 オンラインフォーム</a>
-          <a href="direct_entry.html" target="_blank" class="nav-btn" style="background:#059669; color:white; padding:8px 15px; border-radius:6px; text-decoration:none; font-size:13px;">➕ 手売り登録</a>
-          <button onclick="fetchData()" class="nav-btn" style="background:#64748b; color:white; padding:8px 15px; border-radius:6px; border:none; cursor:pointer; font-size:13px;">🔄 データを更新</button>
-          <button onclick="printList()" class="nav-btn" style="background:#000; color:white; padding:8px 15px; border-radius:6px; border:none; cursor:pointer; font-size:13px;">🖨️ 印刷</button>
-        </div>
+      <div class="quick-menu no-print">
+        <a href="index.html" target="_blank" class="q-btn" style="background:#3b82f6;">🌐 フォーム</a>
+        <a href="direct_entry.html" target="_blank" class="q-btn" style="background:#10b981;">➕ 手売り登録</a>
+        <button onclick="fetchData()" class="q-btn" style="background:#64748b;">🔄 更新</button>
+      </div>
 
-        <div class="nav-tabs no-print">
-          <button id="btn-list" onclick="showPage('list')" class="tab-btn active">📋 注文一覧</button>
-          <button id="btn-analysis" onclick="showPage('analysis')" class="tab-btn">📊 集計データ</button>
-        </div>
-
-        <div id="search-area" class="search-container no-print">
-          <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="名前・電話番号で検索...">
-        </div>
+      <div class="nav-tabs no-print">
+        <button id="btn-list" onclick="showPage('list')" class="tab-btn active">📋 注文一覧</button>
+        <button id="btn-analysis" onclick="showPage('analysis')" class="tab-btn">📊 集計データ</button>
       </div>
 
       <div id="page-list">
-        <div style="overflow-x: auto;">
-          <table id="admin-table">
-            <thead>
-              <tr>
-                <th style="width: 80px;">番号</th>
-                <th style="text-align: left;">お名前</th>
-                <th style="width: 120px;">操作</th> 
-                <th style="width: 100px;">状態</th>
-                <th style="width: 100px;">受取</th>
-                <th style="width: 120px; text-align: right;">金額</th>
-                <th style="width: 80px;">内訳</th>
-              </tr>
-            </thead>
-            <tbody id="admin-list"></tbody>
-          </table>
-        </div>
-        <div id="page-list-content" class="mobile-only no-print"></div>
+        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="お名前で検索..." class="no-print">
+        <div id="admin-list" style="background:white; border-radius:12px; border:1px solid #e2e8f0;"></div>
       </div>
 
-      <div id="page-analysis" style="display: none; padding-top: 10px;">
-        <div class="dashboard-grid">
-          <div class="stat-card analysis-card">
-            <h4>📍 地域別</h4>
-            <div class="analysis-val"><span>高崎市内</span><span id="ana-takasaki">0</span></div>
-            <div class="analysis-val"><span>群馬県内(他)</span><span id="ana-gunma">0</span></div>
-            <div class="analysis-val"><span>県外</span><span id="ana-outside">0</span></div>
-          </div>
-          <div class="stat-card analysis-card" style="border-left-color:#ef4444;">
-            <h4>💎 Sエリア</h4>
-            <div class="analysis-val"><span>大人</span><span id="ana-s-a">0</span></div>
-            <div class="analysis-val"><span>子供</span><span id="ana-s-c">0</span></div>
-            <div class="analysis-val" style="color:#ef4444; border:none;"><span>合計額</span><span id="ana-s-money">0</span></div>
-          </div>
-          <div class="stat-card analysis-card" style="border-left-color:#3b82f6;">
-            <h4>🎫 一般エリア</h4>
-            <div class="analysis-val"><span>大人</span><span id="ana-g-a">0</span></div>
-            <div class="analysis-val"><span>子供</span><span id="ana-g-c">0</span></div>
-            <div class="analysis-val" style="color:#3b82f6; border:none;"><span>合計額</span><span id="ana-g-money">0</span></div>
-          </div>
-          <div class="stat-card analysis-card" style="border-left-color:#f59e0b;">
-            <h4>渠道別</h4>
-            <div class="analysis-val"><span>オンライン</span><span id="ana-sales-online">0</span></div>
-            <div class="analysis-val"><span>手売り</span><span id="ana-sales-direct">0</span></div>
-            <div class="analysis-val"><span>当日</span><span id="ana-sales-door">0</span></div>
-          </div>
+      <div id="page-analysis" style="display: none;">
+        <div class="analysis-card">
+          <h4 style="margin:0 0 10px; color:#1e3a8a;">属性・地域</h4>
+          <div class="ana-row"><span>子供連れ申込数</span><strong id="ana-child-orders">0</strong></div>
+          <div class="ana-row"><span>高崎市内</span><span id="ana-takasaki">0</span></div>
+          <div class="ana-row"><span>群馬県内(他)</span><span id="ana-gunma">0</span></div>
+          <div class="ana-row"><span>県外</span><span id="ana-outside">0</span></div>
+        </div>
+        <div class="analysis-card" style="border-left-color:#ef4444;">
+          <h4 style="margin:0 0 10px; color:#ef4444;">Sエリア内訳</h4>
+          <div class="ana-row"><span>大人 / 子供</span><span><span id="ana-s-a">0</span> / <span id="ana-s-c">0</span></span></div>
+          <div class="ana-row"><span>S小計</span><strong id="ana-s-money">0</strong></div>
+        </div>
+        <div class="analysis-card" style="border-left-color:#3b82f6;">
+          <h4 style="margin:0 0 10px; color:#3b82f6;">一般エリア内訳</h4>
+          <div class="ana-row"><span>大人 / 子供</span><span><span id="ana-g-a">0</span> / <span id="ana-g-c">0</span></span></div>
+          <div class="ana-row"><span>一般小計</span><strong id="ana-g-money">0</strong></div>
         </div>
       </div>
     </div>
   </div>
 
   <div id="detail-modal" class="modal">
-    <div class="modal-content" style="max-width: 500px; border-radius: 15px;">
+    <div class="modal-content" style="max-width: 480px; border-radius: 16px;">
       <span class="close-btn" onclick="closeModal()">&times;</span>
-      <h2 id="modal-title" style="text-align:center; color:#1e3a8a;">詳細情報</h2>
+      <h2 id="modal-title" style="text-align:center; color:#1e3a8a; font-size:1.2rem;">詳細</h2>
       <div id="modal-body"></div>
     </div>
   </div>
 
   <script>
-    const pass = prompt("管理者パスワードを入力してください");
-    if (pass === "1234") { 
-      document.getElementById("admin-body").style.display = "block";
-    } else {
-      alert("パスワードが違います");
-      window.location.href = "index.html";
-    }
+    const pass = prompt("パスワードを入力");
+    if (pass === "1234") { document.getElementById("admin-body").style.display = "block"; }
+    else { window.location.href = "index.html"; }
   </script>
   <script src="admin.js"></script>
 </body>
