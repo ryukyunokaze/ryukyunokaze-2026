@@ -93,6 +93,10 @@ function openModal(id, mode) {
   const p = currentData.find(item => item.id === id);
   if (!p) return;
   const body = document.getElementById("modal-body");
+
+  / 🌟 GitHub PagesのURL（QR表示ページの場所）
+  const mySiteUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026"; 
+  const userQrUrl = `${mySiteUrl}/qr.html?id=${p.id}`;
   
   const headerHtml = `
     <div style="padding:12px; background:#f8fafc; border-radius:10px; border-bottom:2px solid #e2e8f0; margin-bottom:15px;">
@@ -118,8 +122,8 @@ function openModal(id, mode) {
         </div>
 
         <div style="background:#f1f5f9; padding:10px; border-radius:8px; margin-bottom:10px;">
-          <div>📅 受付: ${p.timestamp || '---'}</div>
-          <div>💰 入金: ${p.paid_at || '未'} / 🚚 発送: ${p.sent_at || '未'}</div>
+          <div>受付: ${p.timestamp || '---'}</div>
+          <div>入金: ${p.paid_at || '未'} / 発送: ${p.sent_at || '未'}</div>
           <hr style="border:none; border-top:1px dashed #ccc;">
           <div>住所: 〒${p.zip||''} ${p.pref||''}${p.city||''}${p.rest||''}</div>
         </div>
@@ -130,7 +134,15 @@ function openModal(id, mode) {
           <div style="text-align:right; font-weight:bold; color:#ef4444; font-size:1.1rem;">合計: ${(Number(p.total)||0).toLocaleString()} 円</div>
         </div>
 
-        ${isQR ? `<div style="text-align:center; margin-top:10px;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${p.id}"><p style="font-size:0.6rem;">お客様提示用QR</p></div>` : ''}
+        ${p.status === "入金済み" || p.status === "完了" ? `
+          <div style="background:#fffbeb; border:1px solid #fcd34d; padding:10px; border-radius:8px; text-align:center; margin-bottom:10px;">
+            <div style="font-size:0.7rem; font-weight:bold; color:#b45309; margin-bottom:5px;">お客様用QRコード（確認用）</div>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${p.id}" style="width:100px; height:100px; border:4px solid #fff;">
+            <div style="font-size:0.6rem; color:#666; margin-top:5px; word-break:break-all;">
+              URL: <a href="${userQrUrl}" target="_blank">${userQrUrl}</a>
+            </div>
+          </div>
+        ` : `<p style="text-align:center; color:#94a3b8; font-size:0.8rem;">※入金後にQRコードが表示されます</p>`}
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:15px;">
           <button onclick="handleStatusMail('${p.id}', 'PAYMENT')" style="background:#10b981; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">入金＆メール</button>
