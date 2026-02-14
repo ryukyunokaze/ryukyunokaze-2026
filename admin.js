@@ -12,12 +12,13 @@ async function fetchData() {
     
     const setVal = (id, val) => { if(document.getElementById(id)) document.getElementById(id).innerText = val; };
     
-    // 統計・集計の反映
+    // 基本統計（件数・人数・売上）
     setVal("stat-total-orders", result.stats.total_orders || 0);
     setVal("stat-total-persons", result.stats.total_persons || 0);
     setVal("stat-total-money", (Number(result.stats.total_money) || 0).toLocaleString());
     setVal("stat-paid-money", (Number(result.stats.paid_money) || 0).toLocaleString());
 
+    // 集計データの反映（0問題を解決）
     const ana = result.analysis;
     if (ana) {
       setVal("ana-takasaki", ana.region.gunma_takasaki || 0);
@@ -26,8 +27,10 @@ async function fetchData() {
       setVal("ana-child-orders", ana.with_child_count || 0);
       setVal("ana-s-a", ana.area_details.s_area.adult || 0);
       setVal("ana-s-c", ana.area_details.s_area.child || 0);
+      setVal("ana-s-money", (ana.area_details.s_area.amount || 0).toLocaleString());
       setVal("ana-g-a", ana.area_details.g_area.adult || 0);
       setVal("ana-g-c", ana.area_details.g_area.child || 0);
+      setVal("ana-g-money", (ana.area_details.g_area.amount || 0).toLocaleString());
     }
     renderList(currentData);
   } catch (e) { console.error(e); }
@@ -61,7 +64,6 @@ function openModal(id, mode) {
   if (!p) return;
   const body = document.getElementById("modal-body");
   
-  // 共通ヘッダー（ID小さく、名前太字）
   const headerHtml = `
     <div style="padding: 12px; background: #f8fafc; border-radius: 10px; border-bottom: 2px solid #e2e8f0; margin-bottom: 15px;">
         <div style="font-size: 0.7rem; color: #94a3b8;">${p.id}</div>
@@ -71,10 +73,10 @@ function openModal(id, mode) {
 
   if (mode === 'view') {
     let breakdown = "";
-    if(p.s_a > 0) breakdown += `<li>S席 大人: ${p.s_a}枚</li>`;
-    if(p.s_c > 0) breakdown += `<li>S席 子供: ${p.s_c}枚</li>`;
+    if(p.s_a > 0) breakdown += `<li>S 大人: ${p.s_a}枚</li>`;
+    if(p.s_c > 0) breakdown += `<li>S 子供: ${p.s_c}名</li>`;
     if(p.g_a > 0) breakdown += `<li>一般 大人: ${p.g_a}枚</li>`;
-    if(p.g_c > 0) breakdown += `<li>一般 子供: ${p.g_c}枚</li>`;
+    if(p.g_c > 0) breakdown += `<li>一般 子供: ${p.g_c}名</li>`;
 
     body.innerHTML = `
       ${headerHtml}
@@ -105,44 +107,45 @@ function openModal(id, mode) {
       <div style="display:flex; flex-direction:column; gap:12px; max-height:70vh; overflow-y:auto; padding:5px;">
         <div>
           <label style="font-size:0.7rem; color:#64748b;">郵便番号・住所</label>
-          <input type="text" id="edit-zip" value="${p.zip||''}" onblur="autoZip(this.value)" placeholder="郵便番号" style="width:100%; padding:8px; margin-bottom:5px;">
-          <input type="text" id="edit-pref" value="${p.pref||''}" placeholder="都道府県" style="width:100%; padding:8px; margin-bottom:5px;">
-          <input type="text" id="edit-city" value="${p.city||''}" placeholder="市区町村" style="width:100%; padding:8px; margin-bottom:5px;">
-          <input type="text" id="edit-rest" value="${p.rest||''}" placeholder="番地・建物" style="width:100%; padding:8px;">
+          <input type="text" id="edit-zip" value="${p.zip||''}" onblur="autoZip(this.value)" placeholder="郵便番号(7桁)" style="width:100%; box-sizing:border-box; padding:8px; margin-bottom:5px;">
+          <input type="text" id="edit-pref" value="${p.pref||''}" placeholder="都道府県" style="width:100%; box-sizing:border-box; padding:8px; margin-bottom:5px;">
+          <input type="text" id="edit-city" value="${p.city||''}" placeholder="市区町村" style="width:100%; box-sizing:border-box; padding:8px; margin-bottom:5px;">
+          <input type="text" id="edit-rest" value="${p.rest||''}" placeholder="番地・建物" style="width:100%; box-sizing:border-box; padding:8px;">
         </div>
-
+        
         <div style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
-          <div style="font-weight:bold; font-size:0.8rem; margin-bottom:10px; color:#1e3a8a;">🎟 チケット枚数入力</div>
+          <div style="font-weight:bold; font-size:0.8rem; margin-bottom:10px; color:#1e3a8a;">🎟 枚数入力</div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div><label style="font-size:0.7rem;">Sエリア 大人</label><input type="number" id="edit-sa" value="${p.s_a}" oninput="reCalc()" style="width:100%; padding:8px;"></div>
-            <div><label style="font-size:0.7rem;">Sエリア 子供</label><input type="number" id="edit-sc" value="${p.s_c}" oninput="reCalc()" style="width:100%; padding:8px;"></div>
-            <div><label style="font-size:0.7rem;">一般エリア 大人</label><input type="number" id="edit-ga" value="${p.g_a}" oninput="reCalc()" style="width:100%; padding:8px;"></div>
-            <div><label style="font-size:0.7rem;">一般エリア 子供</label><input type="number" id="edit-gc" value="${p.g_c}" oninput="reCalc()" style="width:100%; padding:8px;"></div>
+            <div><label style="font-size:0.7rem;">S 大人</label><input type="number" id="edit-sa" value="${p.s_a}" oninput="reCalc()" style="width:100%; padding:8px;"></div>
+            <div><label style="font-size:0.7rem;">S 子供</label><input type="number" id="edit-sc" value="${p.s_c}" oninput="reCalc()" style="width:100%; padding:8px;"></div>
+            <div><label style="font-size:0.7rem;">一般 大人</label><input type="number" id="edit-ga" value="${p.g_a}" oninput="reCalc()" style="width:100%; padding:8px;"></div>
+            <div><label style="font-size:0.7rem;">一般 子供</label><input type="number" id="edit-gc" value="${p.g_c}" oninput="reCalc()" style="width:100%; padding:8px;"></div>
           </div>
           <div style="margin-top:10px; text-align:right; font-weight:bold;">合計金額: <span id="display-total" style="color:red;">${(Number(p.total)||0).toLocaleString()}</span> 円</div>
           <input type="hidden" id="edit-total" value="${p.total}">
         </div>
 
         <div style="display:flex; flex-direction:column; gap:8px;">
-          <label style="font-size:0.7rem; color:#64748b;">連絡先・備考</label>
-          <input type="tel" id="edit-tel" value="${p.tel||''}" placeholder="電話番号" style="width:100%; padding:8px;">
-          <input type="email" id="edit-email" value="${p.email||''}" placeholder="メール" style="width:100%; padding:8px;">
-          <textarea id="edit-remarks" style="width:100%; height:100px; padding:10px;">${p.remarks||''}</textarea>
+          <label style="font-size:0.7rem; color:#64748b;">電話・メール・備考</label>
+          <input type="tel" id="edit-tel" value="${p.tel||''}" placeholder="電話番号" style="width:100%; box-sizing:border-box; padding:8px;">
+          <input type="email" id="edit-email" value="${p.email||''}" placeholder="メール" style="width:100%; box-sizing:border-box; padding:8px;">
+          <textarea id="edit-remarks" style="width:100%; height:80px; box-sizing:border-box; padding:10px; border:1px solid #cbd5e0; border-radius:5px;">${p.remarks||''}</textarea>
         </div>
 
-        <select id="edit-status" style="padding:10px; border-radius:5px;">
+        <select id="edit-status" style="padding:10px; border-radius:5px; border:1px solid #cbd5e0;">
           <option value="未入金" ${p.status==='未入金'?'selected':''}>未入金</option>
           <option value="入金済み" ${p.status==='入金済み'?'selected':''}>入金済み</option>
           <option value="完了" ${p.status==='完了'?'selected':''}>完了</option>
           <option value="キャンセル" ${p.status==='キャンセル'?'selected':''}>キャンセル</option>
         </select>
 
-        <button onclick="saveEdit()" style="background:#1e3a8a; color:white; padding:15px; border-radius:8px; font-weight:bold; border:none; cursor:pointer;">💾 保存する</button>
+        <button onclick="saveEdit()" style="background:#1e3a8a; color:white; padding:15px; border-radius:8px; font-weight:bold; border:none; cursor:pointer;">💾 この内容で上書き保存</button>
       </div>`;
   }
   document.getElementById("detail-modal").style.display = "block";
 }
 
+// 機能関数
 function reCalc() {
   const sa = Number(document.getElementById("edit-sa").value)||0; const sc = Number(document.getElementById("edit-sc").value)||0;
   const ga = Number(document.getElementById("edit-ga").value)||0; const gc = Number(document.getElementById("edit-gc").value)||0;
@@ -150,19 +153,16 @@ function reCalc() {
   document.getElementById("edit-total").value = total;
   document.getElementById("display-total").innerText = total.toLocaleString();
 }
-
 function showPage(p) {
   document.getElementById('page-list').style.display = (p==='list')?'block':'none';
   document.getElementById('page-analysis').style.display = (p==='analysis')?'block':'none';
-  document.getElementById('btn-list').classList.toggle('active', page === 'list');
-  document.getElementById('btn-analysis').classList.toggle('active', page === 'analysis');
+  document.getElementById('btn-list').classList.toggle('active', p === 'list');
+  document.getElementById('btn-analysis').classList.toggle('active', p === 'analysis');
 }
-
 function filterTable() {
   const q = document.getElementById("searchInput").value.toLowerCase();
   document.querySelectorAll(".order-item").forEach(item => { item.style.display = item.innerText.toLowerCase().includes(q) ? "flex" : "none"; });
 }
-
 async function autoZip(z) {
   if (z.length >= 7) {
     const r = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${z}`);
@@ -170,7 +170,6 @@ async function autoZip(z) {
     if (d.results) { document.getElementById("edit-pref").value = d.results[0].address1; document.getElementById("edit-city").value = d.results[0].address2 + d.results[0].address3; }
   }
 }
-
 async function updateStatus(id, s) { if(confirm(s + " に更新しますか？")) { await fetch(url, { method: "POST", body: JSON.stringify({ type: "updateStatus", id: id, status: s }) }); fetchData(); closeModal(); } }
 async function deleteOrder(id) { if(confirm("削除しますか？")) { await fetch(url, { method: "POST", body: JSON.stringify({ type: "updateStatus", id: id, status: "キャンセル" }) }); fetchData(); closeModal(); } }
 async function saveEdit() {
