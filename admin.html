@@ -2,11 +2,11 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>【管理者】チケット管理システム</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* 既存のデザインを完全に維持 */
+    /* --- 既存のデザインを完全に維持 --- */
     .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
     .stat-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eef2f6; text-align: center; }
     .stat-card h3 { font-size: 0.85rem; color: #64748b; margin: 0 0 10px; }
@@ -17,31 +17,49 @@
     #searchInput { width: 100%; padding: 12px 20px; border: 2px solid #3b82f6; border-radius: 30px; font-size: 16px; box-sizing: border-box; outline: none; }
     .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
 
-    /* ナビゲーションタブのデザイン */
     .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
     .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; background: #edf2f7; color: #4a5568; }
     .tab-btn.active { background: #1e3a8a; color: white; }
     
-    /* 集計カードの装飾 */
     .analysis-card { background: #f8fafc; border-left: 5px solid #1e3a8a; text-align: left; padding: 15px; }
     .analysis-card h4 { margin: 0 0 10px; font-size: 0.9rem; color: #1e3a8a; }
     .analysis-val { font-size: 1.2rem; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 5px; }
 
-    /* 【追加】スマホで表を横スクロール可能にする設定（見た目は変えません） */
-    .table-scroll-area {
-      width: 100%;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      border: 1px solid #e2e8f0;
-    }
-    table {
-      min-width: 800px; /* テーブルが潰れないように最小幅を確保 */
-    }
-
+    /* --- 【重要】スマホ専用：スリムリスト & 検索窓固定の設定 --- */
     @media screen and (max-width: 768px) {
       .admin-container { padding: 10px; }
-      .fixed-header { position: static; } /* スマホではヘッダー固定を解除して見やすく */
-      .opt-btn { padding: 10px 12px !important; font-size: 14px !important; margin: 2px 0; }
+      
+      /* ヘッダーと検索窓を画面上部に固定 */
+      .fixed-header { 
+        position: sticky; 
+        top: 0; 
+        z-index: 1000; 
+        background: #f8fafc; 
+        padding-bottom: 10px;
+        margin: -10px -10px 10px -10px;
+        padding: 10px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      }
+      
+      /* スマホではPC用の表を隠す */
+      #admin-table { display: none; }
+      
+      /* スマホ用スリムリスト行のスタイル */
+      .mobile-row {
+        background: white;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 12px 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+      }
+      .mobile-row:active { background: #f1f5f9; }
+
+      /* 分析（集計）カードはスマホでも1列で見やすく */
+      #page-analysis .dashboard-grid {
+        grid-template-columns: 1fr !important;
+      }
     }
 
     /* 印刷用設定 */
@@ -49,33 +67,26 @@
       .no-print { display: none !important; }
       .print-only { display: table-cell !important; }
       table { width: 100%; border-collapse: collapse; min-width: auto; }
-      table th:nth-child(6), table td:nth-child(6) { width: 100px !important; text-align: right !important; white-space: nowrap !important; }
     }
 </style>
 </head>
 
-<body style="display:none;" id="admin-body"> <div class="admin-container">
+<body style="display:none;" id="admin-body"> 
+  <div class="admin-container">
     <div class="fixed-header">
       <header>
         <h1>🎫 チケット管理パネル</h1>
       </header>
 
       <div class="dashboard-grid">
-       <div class="stat-card">
-         <h3>総申込件数</h3>
-         <p><span id="stat-total-orders">0</span> 件</p>
-         </div>
-         <div class="stat-card">
-         <h3>総申込人数</h3>
-         <p><span id="stat-total-persons">0</span> 名</p>
-         </div>
-         <div class="stat-card highlight" style="min-width: 250px;">
-         <h3>売上合計</h3>
-         <p><span id="stat-total-money">0</span> 円</p>
-         <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.9;">
-         (内入金済: <span id="stat-paid-money">0</span> 円)
+        <div class="stat-card">
+          <h3>総申込件数</h3>
+          <p><span id="stat-total-orders">0</span> 件</p>
         </div>
-       </div>
+        <div class="stat-card highlight">
+          <h3>売上合計</h3>
+          <p><span id="stat-total-money">0</span> 円</p>
+        </div>
       </div>
 
       <div class="nav-tabs">
@@ -87,34 +98,32 @@
         <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="名前・電話番号で検索...">
       </div>
 
-      <div class="admin-menu">
-        <div class="menu-right">
-          <a href="direct_entry.html" target="_blank" class="nav-btn sale">➕ 手売り登録</a>
-          <a href="index.html" target="_blank" class="nav-btn form">🌐 予約フォーム</a>
-          <button onclick="printList()" class="nav-btn print">🖨️ 印刷用リスト出力</button>
-          <button onclick="fetchData()" class="nav-btn print">🔄 更新</button>
+      <div class="admin-menu no-print">
+        <div style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
+          <a href="direct_entry.html" target="_blank" class="nav-btn sale" style="font-size: 12px; padding: 8px 12px;">➕ 手売り登録</a>
+          <button onclick="printList()" class="nav-btn print" style="font-size: 12px; padding: 8px 12px;">🖨️ 印刷出力</button>
+          <button onclick="fetchData()" class="nav-btn print" style="font-size: 12px; padding: 8px 12px;">🔄 更新</button>
         </div>
       </div>
     </div>
 
-    <div id="page-list" class="table-scroll-area">
+    <div id="page-list">
       <table id="admin-table">
         <thead>
           <tr>
             <th class="print-only">確認</th>
-            <th>受付番号</th>
+            <th>番号</th>
             <th>お名前</th>
-            <th class="text-left no-print">操作</th> 
+            <th class="no-print">操作</th> 
             <th>ステータス</th>
-            <th class="no-print">受取方法</th>
-            <th class="print-only">合計金額</th>
-            <th class="no-print">販売区分</th>
-            <th>枚数内訳</th> 
-            <th>QRコード</th> </tr>
+            <th class="no-print">受取</th>
+            <th class="print-only">金額</th>
+            <th>内訳</th>
+          </tr>
         </thead>
-      <tbody id="admin-list"></tbody>
+        <tbody id="admin-list"></tbody>
       </table>
-    </div>
+      </div>
 
     <div id="page-analysis" style="display: none; padding-top: 20px;">
       <div class="dashboard-grid">
@@ -161,7 +170,7 @@
   <script>
     // パスワード認証（admin.jsの前に実行）
     const pass = prompt("管理者パスワードを入力してください");
-    if (pass === "1234") { // パスワードはここで自由に変えられます
+    if (pass === "1234") { 
       document.getElementById("admin-body").style.display = "block";
     } else {
       alert("パスワードが違います");

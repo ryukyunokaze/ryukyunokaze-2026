@@ -3,26 +3,6 @@ let currentData = [];
 let selectedId = "";
 
 /**
- * 起動時にパスワードを確認してからデータを取得
- */
-window.onload = () => {
-  // 🌟 パスワード入力（この数字はadmin.html側と合わせておくとスムーズです）
-  const password = prompt("管理者パスワードを入力してください");
-
-  if (password === "000000") { 
-    fetchData(); 
-  } else {
-    alert("パスワードが正しくありません。");
-    document.body.innerHTML = `
-      <div style="text-align:center; margin-top:100px; font-family:sans-serif;">
-        <h1>🔒 Access Denied</h1>
-        <p>正しいパスワードを入力してページを再読み込みしてください。</p>
-        <button onclick="location.reload()" style="padding:10px 20px; cursor:pointer;">再試行</button>
-      </div>`;
-  }
-};
-
-/**
  * データの取得と反映
  */
 async function fetchData() {
@@ -37,13 +17,11 @@ async function fetchData() {
     const stats = result.stats;
     const ana = result.analysis;
 
-    // 🌟 IDが存在する場合のみ代入（エラー防止用の補助関数）
     const setVal = (id, val) => {
       const el = document.getElementById(id);
       if(el) el.innerText = val;
     };
 
-    // 統計カードの更新
     setVal("stat-total-orders", stats.total_orders);
     setVal("stat-total-persons", stats.total_persons);
     setVal("stat-total-money", stats.total_money.toLocaleString());
@@ -74,59 +52,57 @@ async function fetchData() {
 }
 
 /**
- * テーブル描画（今のレイアウトを維持）
+ * テーブル ＆ スマホ用スリムリスト描画
  */
 function renderTable(data) {
   const listBody = document.getElementById("admin-list");
-  listBody.innerHTML = "";
+  const listPage = document.getElementById("page-list");
   
-  data.forEach(row => {
-    let sAreaParts = [];
-    if (Number(row.s_a) > 0) sAreaParts.push(`S大${row.s_a}`);
-    if (Number(row.s_c) > 0) sAreaParts.push(`S子${row.s_c}`);
-    
-    let gAreaParts = [];
-    if (Number(row.g_a) > 0) gAreaParts.push(`般大${row.g_a}`);
-    if (Number(row.g_c) > 0) gAreaParts.push(`般子${row.g_c}`);
+  listBody.innerHTML = "";
+  // 既存のスマホ用リストがあれば削除
+  document.querySelectorAll('.mobile-row').forEach(el => el.remove());
 
-    let displayLines = [];
-    if (sAreaParts.length > 0) displayLines.push(`${sAreaParts.join(' ')}`);
-    if (gAreaParts.length > 0) displayLines.push(`${gAreaParts.join(' ')}`);
-    
-    const countsDisplay = displayLines.join('<br>') || "---";
+  data.forEach(row => {
     const totalDisplay = (Number(row.total) || 0).toLocaleString();
     const safeStatus = (row.status || "未設定").replace(/\s+/g, '').replace(/[()]/g, '');
-
+    
+    // --- 【PC用】テーブル行 (QR列は削除) ---
     const tr = document.createElement("tr");
-
     tr.innerHTML = `
       <td class="print-only"></td> 
       <td>${row.id || '---'}</td>
       <td><strong>${row.name || '名前なし'}</strong></td>
-      
-      <td class="no-print" style="min-width: 150px;">
-        <div style="display: flex; gap: 4px;">
-          <button onclick="openModal('${row.id}', 'view')" class="opt-btn" style="padding: 6px; background:#ebfdf7; border:1px solid #c2eadd; border-radius:4px; cursor:pointer;">詳細</button>
-          <button onclick="openModal('${row.id}', 'edit')" class="opt-btn" style="padding: 6px; background:#d6e5ff; border:1px solid #b8cfff; border-radius:4px; cursor:pointer;">編集</button>
-          <button onclick="quickCancel('${row.id}')" class="opt-btn btn-del" style="padding: 6px; background:#ffdde7; border:1px solid #ffb8cf; border-radius:4px; cursor:pointer;">消</button>
-        </div>
+      <td class="no-print">
+        <button onclick="openModal('${row.id}', 'view')" class="opt-btn" style="padding:6px 10px; background:#ebfdf7; border:1px solid #c2eadd; border-radius:4px; cursor:pointer;">詳細</button>
       </td>
-
       <td><span class="status-badge status-${safeStatus}">${row.status || '未設定'}</span></td>
       <td class="no-print">${row.shipping || '---'}</td>
       <td class="print-only" style="font-weight: bold; text-align: right;">${totalDisplay}</td>
       <td class="no-print">${row.salesType || '---'}</td>
-      <td style="font-size: 0.8rem;">${countsDisplay}</td>
-      <td class="no-print">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=${row.id}" width="40" height="40" style="background:#eee; vertical-align:middle;">
-      </td>
+      <td style="font-size: 0.8rem;">${row.s_a > 0 ? 'S' : ''}${row.g_a > 0 ? '般' : ''}</td>
     `;
     listBody.appendChild(tr);
+
+    // --- 【スマホ用】スリムリスト行 ---
+    const mRow = document.createElement("div");
+    mRow.className = "mobile-row no-print";
+    mRow.onclick = () => openModal(row.id, 'view');
+    mRow.innerHTML = `
+      <div style="flex: 1;">
+        <div style="font-size: 0.7rem; color: #94a3b8;">${row.id}</div>
+        <div style="font-size: 1rem; font-weight: bold; color: #1e293b;">${row.name} 様</div>
+      </div>
+      <div style="text-align: right; min-width: 100px;">
+        <span class="status-badge status-${safeStatus}" style="font-size: 0.7rem; padding: 2px 6px;">${row.status}</span>
+        <div style="font-size: 0.9rem; font-weight: bold; color: #1e3a8a; margin-top: 4px;">${totalDisplay}円</div>
+      </div>
+    `;
+    listPage.appendChild(mRow);
   });
 }
 
 /**
- * 注文詳細（今のデザインのまま、QRコードを表示）
+ * 注文詳細（QRコードはここで一括表示）
  */
 function openModal(id, mode) {
   selectedId = id;
@@ -141,7 +117,7 @@ function openModal(id, mode) {
   const totalCount = sa + sc + ga + gc;
 
   if (mode === 'view') {
-    document.getElementById("modal-title").innerText = "📋 注文詳細・操作";
+    document.getElementById("modal-title").innerText = "📋 予約詳細・操作";
     
     let ticketRows = "";
     if (sa > 0) ticketRows += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Sエリア大人</span><span>${sa} 枚</span></div>`;
@@ -152,22 +128,25 @@ function openModal(id, mode) {
     body.innerHTML = `
       <div class="view-container">
         <div style="display:flex; gap:10px; margin-bottom:15px;">
-          <button onclick="location.href='tel:${p.tel || ''}'" style="flex:1; background:#38a169; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">📞 電話</button>
-          <button onclick="location.href='mailto:${p.email || ''}'" style="flex:1; background:#3182ce; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">✉️ メール</button>
+          <button onclick="location.href='tel:${p.tel}'" style="flex:1; background:#38a169; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">📞 電話</button>
+          <button onclick="location.href='mailto:${p.email}'" style="flex:1; background:#3182ce; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">✉️ メール</button>
         </div>
 
         <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:15px;">
-          <button onclick="handleNotifyAction('${p.id}', 'PAYMENT')" style="background:#38a169; color:white; padding:12px; border-radius:8px; font-weight:bold; border:none; cursor:pointer;">💰 入金確認メール ＆ 更新</button>
-          <button onclick="handleNotifyAction('${p.id}', 'COMPLETE')" style="background:#1e3a8a; color:white; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; border:none;">🎟 QR・発送連絡メール ＆ 完了</button>
+          <button onclick="handleNotifyAction('${p.id}', 'PAYMENT')" style="background:#38a169; color:white; padding:12px; border-radius:8px; font-weight:bold; border:none;">💰 入金確認 ＆ ステータス更新</button>
+          <button onclick="handleNotifyAction('${p.id}', 'COMPLETE')" style="background:#1e3a8a; color:white; padding:12px; border-radius:8px; font-weight:bold; border:none;">🎟 QR・発送連絡 ＆ 完了</button>
         </div>
 
-        <div style="background:#f8fafc; padding:12px; border:radius:8px; margin-bottom:15px; border:1px solid #cbd5e0;">
-          <h5 style="margin:0 0 10px; font-size:12px; color:#64748b;">🎟 注文内訳 (合計: ${(Number(p.total) || 0).toLocaleString()} 円)</h5>
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; margin-bottom:15px; border:1px solid #cbd5e0;">
+          <h5 style="margin:0 0 10px; font-size:12px; color:#64748b;">🎟 注文内訳 (受取: ${p.shipping || '---'})</h5>
           ${ticketRows}
+          <div style="text-align:right; margin-top:10px; font-weight:bold; font-size:1.2rem; color:#e53e3e;">
+            合計：${(Number(p.total) || 0).toLocaleString()} 円
+          </div>
         </div>
 
-        <div style="margin-top:10px; text-align:center;">
-          <h5 style="margin:0 0 10px; font-size:12px; color:#64748b;">🎟 チケット用QRコード</h5>
+        <div style="margin-top:20px; text-align:center;">
+          <h5 style="margin:0 0 10px; font-size:12px; color:#64748b;">🎟 発行QRコード (${totalCount}枚分)</h5>
           <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">
             ${generateQRHtml(p.id, totalCount)}
           </div>
@@ -175,19 +154,19 @@ function openModal(id, mode) {
       </div>`;
   } else {
     // 編集モード（今のデザイン維持）
-    document.getElementById("modal-title").innerText = "✏️ 注文内容の編集";
+    document.getElementById("modal-title").innerText = "✏️ 内容の修正";
     body.innerHTML = `
       <div style="display:flex; flex-direction:column; gap:10px;">
-        <label>お名前</label><input type="text" id="edit-name" value="${p.name || ''}" style="padding:8px;">
-        <label>電話番号</label><input type="tel" id="edit-tel" value="${p.tel || ''}" style="padding:8px;">
+        <label>お名前</label><input type="text" id="edit-name" value="${p.name || ''}" style="padding:10px; border:1px solid #ccc; border-radius:5px;">
+        <label>電話番号</label><input type="tel" id="edit-tel" value="${p.tel || ''}" style="padding:10px; border:1px solid #ccc; border-radius:5px;">
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-          <div><label>S大</label><input type="number" id="edit-sa" value="${sa}" oninput="reCalcTotal()" style="width:100%; padding:8px;"></div>
-          <div><label>S子</label><input type="number" id="edit-sc" value="${sc}" oninput="reCalcTotal()" style="width:100%; padding:8px;"></div>
-          <div><label>般大</label><input type="number" id="edit-ga" value="${ga}" oninput="reCalcTotal()" style="width:100%; padding:8px;"></div>
-          <div><label>般子</label><input type="number" id="edit-gc" value="${gc}" oninput="reCalcTotal()" style="width:100%; padding:8px;"></div>
+          <div><label>S大</label><input type="number" id="edit-sa" value="${sa}" oninput="reCalcTotal()" style="width:100%; padding:10px;"></div>
+          <div><label>S子</label><input type="number" id="edit-sc" value="${sc}" oninput="reCalcTotal()" style="width:100%; padding:10px;"></div>
+          <div><label>般大</label><input type="number" id="edit-ga" value="${ga}" oninput="reCalcTotal()" style="width:100%; padding:10px;"></div>
+          <div><label>般子</label><input type="number" id="edit-gc" value="${gc}" oninput="reCalcTotal()" style="width:100%; padding:10px;"></div>
         </div>
-        <label>合計金額</label><input type="number" id="edit-total" value="${p.total || 0}" style="padding:8px; background:#eee;" readonly>
-        <button onclick="saveEdit()" style="background:#1e3a8a; color:white; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; border:none; margin-top:10px;">💾 変更を保存する</button>
+        <label>合計金額</label><input type="number" id="edit-total" value="${p.total || 0}" style="padding:10px; background:#eee;" readonly>
+        <button onclick="saveEdit()" style="background:#1e3a8a; color:white; padding:15px; border-radius:8px; font-weight:bold; cursor:pointer; border:none; margin-top:10px;">💾 変更を保存して更新</button>
       </div>`;
   }
   document.getElementById("detail-modal").style.display = "block";
@@ -199,12 +178,21 @@ function generateQRHtml(id, count) {
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${id}-${i}`;
     html += `<div style="text-align:center;"><img src="${qrUrl}" width="80"><br><span style="font-size:10px;">${i}/${count}</span></div>`;
   }
-  return html || "<p>枚数0です</p>";
+  return html || "<p style='color:#999;'>枚数0です</p>";
 }
 
-/**
- * ページ切り替え（バグ修正済み）
- */
+function filterTable() {
+  const query = document.getElementById("searchInput").value.toLowerCase();
+  // PC用の絞り込み
+  document.querySelectorAll("#admin-list tr").forEach(row => {
+    row.style.display = row.innerText.toLowerCase().includes(query) ? "" : "none";
+  });
+  // スマホ用の絞り込み
+  document.querySelectorAll(".mobile-row").forEach(row => {
+    row.style.display = row.innerText.toLowerCase().includes(query) ? "" : "none";
+  });
+}
+
 function showPage(page) {
   const listPage = document.getElementById('page-list');
   const analysisPage = document.getElementById('page-analysis');
@@ -214,56 +202,33 @@ function showPage(page) {
   if (page === 'list') {
     if(listPage) listPage.style.display = 'block';
     if(analysisPage) analysisPage.style.display = 'none';
-    if(btnList) { btnList.style.background = '#1e3a8a'; btnList.style.color = 'white'; }
-    if(btnAna) { btnAna.style.background = '#edf2f7'; btnAna.style.color = '#1a202c'; }
+    if(btnList) { btnList.classList.add('active'); }
+    if(btnAna) { btnAna.classList.remove('active'); }
   } else {
     if(listPage) listPage.style.display = 'none';
     if(analysisPage) analysisPage.style.display = 'block';
-    if(btnAna) { btnAna.style.background = '#805ad5'; btnAna.style.color = 'white'; }
-    if(btnList) { btnList.style.background = '#edf2f7'; btnList.style.color = '#1a202c'; }
+    if(btnAna) { btnAna.classList.add('active'); }
+    if(btnList) { btnList.classList.remove('active'); }
   }
 }
 
-/**
- * メール送信 & ステータス更新（今の機能を維持）
- */
 async function handleNotifyAction(id, type) {
   const p = currentData.find(item => item.id === id);
-  if (!p || !p.email) return alert("メールアドレスが取得できません。");
-
+  if (!p || !p.email) return alert("メールアドレスが見つかりません。");
   let nextStatus = (type === 'PAYMENT') ? "入金済み" : "完了";
-  
   try {
     const response = await fetch(url, {
       method: "POST",
       body: JSON.stringify({ type: "updateStatus", id: id, status: nextStatus })
     });
-    
     if (response.ok) {
-      let subject = (type === 'PAYMENT') ? "【入金確認】代金のお支払いを確認いたしました" : "【重要】チケットQRコードのご送付";
-      let body = `${p.name} 様\n\nご入金を確認いたしました。\nステータスを「${nextStatus}」に更新しました。\n\n▼チケット表示URL（仮）\nhttps://ryukyunokaze.github.io/ryukyunokaze-2026/qr.html?id=${p.id}`;
-
-      const mailtoLink = `mailto:${p.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      
-      const a = document.createElement('a');
-      a.href = mailtoLink;
-      a.click();
-
-      alert(`ステータスを「${nextStatus}」に更新しました。`);
+      let subject = (type === 'PAYMENT') ? "【入金確認】琉球の風 チケット代金受領のお知らせ" : "【重要】琉球の風 チケットQRコードのご案内";
+      let body = `${p.name} 様\n\nお世話になっております。琉球の風 事務局です。\n\nステータスを「${nextStatus}」に更新いたしました。\n\n▼チケット表示はこちらから\nhttps://ryukyunokaze.github.io/ryukyunokaze-2026/qr.html?id=${p.id}`;
+      window.location.href = `mailto:${p.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       fetchData(); 
       closeModal();
     }
-  } catch (e) {
-    alert("更新エラーが発生しました。");
-  }
-}
-
-// 補助機能
-function filterTable() {
-  const query = document.getElementById("searchInput").value.toLowerCase();
-  document.querySelectorAll("#admin-list tr").forEach(row => {
-    row.style.display = row.innerText.toLowerCase().includes(query) ? "" : "none";
-  });
+  } catch (e) { alert("更新に失敗しました。"); }
 }
 
 function reCalcTotal() {
@@ -271,7 +236,6 @@ function reCalcTotal() {
   const sc = Number(document.getElementById("edit-sc").value) || 0;
   const ga = Number(document.getElementById("edit-ga").value) || 0;
   const gc = Number(document.getElementById("edit-gc").value) || 0;
-  // 単価設定（必要に応じて調整してください）
   document.getElementById("edit-total").value = (sa * 3500) + (sc * 3500) + (ga * 1500) + (gc * 1500); 
 }
 
