@@ -1,4 +1,4 @@
-const url = "https://script.google.com/macros/s/AKfycbxQi_NtTx-33KDrUkC8jG9AAnh4zXfxerPzC-PJqhhGB46j3fw_YPhChbBTBG9PJV4cwg/exec"; 
+const url = "https://script.google.com/macros/s/AKfycby9WCUeSZ9cQ_81Bartq2MYQVxlrwQ_C4cTMi__miDtrmQff_remoBIdIlpBk6jNidHZg/exec"; 
 let currentData = [];
 let selectedId = "";
 
@@ -162,7 +162,7 @@ function printTicket(id) {
       <div style="flex: 3; padding: 15px; border-right: 1.5mm dashed #000; position: relative; text-align: left;">
         <img src="${logoUrl}" style="width: 50px; float: left; margin-right: 12px;" onerror="this.src='https://img.icons8.com/color/96/000000/island.png'">
         <div>
-          <p style="font-size: 0.65rem; margin: 0; color: #666;">5th Anniversary solo performance "Mabui"</p>
+          <p style="font-size: 0.65rem; margin: 0; color: #666;">RYUKYU NO KAZE ~OKINAWA MATSURI IN TAKASAKI~2026</p>
           <h1 style="font-size: 1.3rem; font-weight: bold; color: #1e3a8a; margin: 0;">琉球の風 2026</h1>
         </div>
         <div style="margin-top: 15px;">
