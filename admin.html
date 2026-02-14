@@ -38,11 +38,36 @@
     .analysis-card { background: #f8fafc; padding: 15px; border-radius: 10px; border-left: 5px solid #1e3a8a; margin-bottom: 15px; }
     .ana-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #e2e8f0; font-size: 0.9rem; }
 
-    /* 印刷用 */
-    #print-ticket-area { display: none; }
-    @media print { 
-      .no-print { display: none !important; } 
-      #print-ticket-area { display: block !important; padding: 40px; border: 3px double #000; }
+    /* --- 🖨️ 印刷専用：A4 1枚に4枚のチケットを配置 --- */
+    @media print {
+      /* 管理画面の全要素を隠す */
+      body * { visibility: hidden; }
+      .no-print, .admin-wrapper, .modal, #detail-modal { display: none !important; }
+
+      /* 印刷エリアだけを有効化 */
+      #print-ticket-area, #print-ticket-area * { visibility: visible; }
+      #print-ticket-area {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 210mm; /* A4幅 */
+        margin: 0;
+        padding: 0;
+      }
+
+      /* 各チケットの枠組み（A4縦に4つ並べる） */
+      .ticket-page-wrapper {
+        width: 190mm;
+        height: 68mm; /* A4(297mm)を4分割(約74mm)より少し小さくして余白を確保 */
+        margin: 2mm auto; /* チケット間のわずかな隙間 */
+        border: 1px dashed #ccc; /* カット用のガイド線 */
+        display: flex;
+        box-sizing: border-box;
+        page-break-inside: avoid;
+      }
+
+      @page { size: A4 portrait; margin: 5mm 0; }
     }
   </style>
 </head>

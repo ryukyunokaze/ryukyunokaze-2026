@@ -181,36 +181,53 @@ async function handleStatusMail(id, action) {
   fetchData(); closeModal();
 }
 
+* 🎫 ぴあ風・本格チケット印刷（A4縦4分割・人数分出力）
+ */
 function printTicket(id) {
   const p = currentData.find(item => item.id === id);
   const totalTickets = Number(p.s_a) + Number(p.s_c) + Number(p.g_a) + Number(p.g_c);
-  
-  // 🌟 印刷用にも人数分のQRを並べる
-  let qrPrintHtml = "";
-  for (let i = 1; i <= totalTickets; i++) {
-    qrPrintHtml += `
-      <div style="text-align:center;">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${p.id}-${i}" style="width:80px; height:80px; border:1px solid #eee;">
-        <div style="font-size:0.5rem;">${p.id}-${i}</div>
-      </div>`;
-  }
+  const printArea = document.getElementById("print-content");
+  printArea.innerHTML = ""; // 以前の情報をクリア
 
-  document.getElementById("print-content").innerHTML = `
-    <style>
-      .t-box { width: 190mm; height: 65mm; border: 1px solid #000; margin: 10px auto; display: flex; font-family: sans-serif; overflow: hidden; }
-      .t-main { flex: 2.5; padding: 15px; border-right: 1.5mm dashed #000; }
-      .t-stub { flex: 1.5; padding: 10px; background: #fafafa; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; justify-content: center; }
-    </style>
-    <div class="t-box">
-      <div class="t-main">
-        <h1 style="color:#1e3a8a; margin:0;">琉球の風 2026</h1>
-        <p style="font-size:0.8rem; margin:5px 0;"> solo performance "Mabui"</p>
-        <div style="margin-top:15px; font-weight:bold;">${p.name} 様 (${totalTickets}名)</div>
-        <div style="text-align:right; font-size:1.2rem; font-weight:bold; margin-top:10px;">¥${Number(p.total).toLocaleString()}</div>
+  const logoUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026/logo.png"; 
+
+  // 購入枚数（人数）分だけループしてチケットを生成
+  for (let i = 1; i <= totalTickets; i++) {
+    const individualId = `${p.id}-${i}`; // 受付番号-枝番
+    
+    // 券種情報の整理（個別のチケットには「本券1枚につき1名」と表示）
+    const ticketHtml = `
+      <div class="ticket-page-wrapper">
+        <div style="flex: 3; padding: 15px; border-right: 1.5mm dashed #000; position: relative; text-align: left;">
+          <img src="${logoUrl}" style="width: 45px; float: left; margin-right: 12px;" onerror="this.src='https://img.icons8.com/color/96/000000/island.png'">
+          <div>
+            <p style="font-size: 0.65rem; margin: 0; color: #666;">5th Anniversary performance "Mabui"</p>
+            <h1 style="font-size: 1.3rem; font-weight: bold; color: #1e3a8a; margin: 0;">琉球の風 2026</h1>
+          </div>
+          
+          <div style="margin-top: 15px;">
+            <div style="font-size: 0.6rem; color: #999; font-family: monospace;">SERIAL: ${individualId}</div>
+            <div style="font-size: 1.1rem; font-weight: bold; border-bottom: 1.5px solid #000; display: inline-block;">${p.name} 様</div>
+            <p style="font-size: 0.75rem; margin-top: 8px;">【全席指定】本券1枚につき1名様有効</p>
+          </div>
+
+          <div style="position: absolute; bottom: 12px; right: 20px; text-align: right;">
+            <div style="font-size: 0.6rem; color: #666;">Total (incl. tax)</div>
+            <div style="font-size: 1.3rem; font-weight: bold;">¥${Number(p.total).toLocaleString()}</div>
+          </div>
+        </div>
+
+        <div style="flex: 1; padding: 10px; background: #fafafa; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+          <div style="font-size: 0.5rem; color: #999; margin-bottom: 5px;">${individualId}</div>
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${individualId}" style="width: 85px; height: 85px; border: 1px solid #eee; background: #fff;">
+          <div style="font-size: 0.6rem; font-weight: bold; margin-top: 8px;">琉球の風 2026</div>
+          <div style="font-size: 0.55rem; color: #444;">${p.name} 様</div>
+        </div>
       </div>
-      <div class="t-stub">${qrPrintHtml}</div>
-    </div>
-  `;
+    `;
+    printArea.innerHTML += ticketHtml;
+  }
+  
   window.print();
 }
 
