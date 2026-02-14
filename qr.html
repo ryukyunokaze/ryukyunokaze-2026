@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>琉球の風 2026 入場QRコード</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; background: #f1f5f9; padding: 40px 20px; color: #1e293b; }
+    .qr-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
+    h1 { font-size: 1.2rem; margin-bottom: 20px; color: #1e3a8a; }
+    #qr-image { margin: 20px 0; border: 8px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+    .info { font-size: 0.9rem; margin-top: 15px; line-height: 1.6; text-align: left; background: #f8fafc; padding: 15px; border-radius: 10px; }
+    .warning { font-size: 0.8rem; color: #ef4444; margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="qr-card">
+    <h1>琉球の風 2026<br>入場用QRコード</h1>
+    <div id="loading">読み込み中...</div>
+    <img id="qr-image" src="" alt="QRコード" style="display:none;">
+    <div class="info">
+      <div id="display-id"></div>
+      <div id="display-name"></div>
+    </div>
+    <p class="warning">※当日、受付にてこの画面をご提示ください。</p>
+  </div>
+
+  <script>
+    // URLからIDを取得
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+
+    if (id) {
+      document.getElementById('loading').style.display = 'none';
+      const qrImg = document.getElementById('qr-image');
+      // 高精度なQR生成APIを使用
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${id}`;
+      qrImg.style.display = 'inline-block';
+      document.getElementById('display-id').innerHTML = `<strong>受付番号:</strong> ${id}`;
+    } else {
+      document.getElementById('loading').innerText = 'エラー: IDが見つかりません';
+    }
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>琉球の風 2026 入場QRコード</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; background: #f1f5f9; padding: 40px 20px; color: #1e293b; }
+    .qr-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
+    h1 { font-size: 1.2rem; margin-bottom: 20px; color: #1e3a8a; }
+    #qr-image { margin: 20px 0; border: 8px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+    .info { font-size: 0.9rem; margin-top: 15px; line-height: 1.6; text-align: left; background: #f8fafc; padding: 15px; border-radius: 10px; }
+    .warning { font-size: 0.8rem; color: #ef4444; margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="qr-card">
+    <h1>琉球の風 2026<br>入場用QRコード</h1>
+    <div id="loading">読み込み中...</div>
+    <img id="qr-image" src="" alt="QRコード" style="display:none;">
+    <div class="info">
+      <div id="display-id"></div>
+      <div id="display-name"></div>
+    </div>
+    <p class="warning">※当日、受付にてこの画面をご提示ください。</p>
+  </div>
+
+  <script>
+    // URLからIDを取得
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+
+    if (id) {
+      document.getElementById('loading').style.display = 'none';
+      const qrImg = document.getElementById('qr-image');
+      // 高精度なQR生成APIを使用
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${id}`;
+      qrImg.style.display = 'inline-block';
+      document.getElementById('display-id').innerHTML = `<strong>受付番号:</strong> ${id}`;
+    } else {
+      document.getElementById('loading').innerText = 'エラー: IDが見つかりません';
+    }
+  </script>
+</body>
+</html>
