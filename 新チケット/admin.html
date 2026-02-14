@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【管理者】チケット管理システム</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* 既存のデザインを維持 */
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    .stat-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eef2f6; text-align: center; }
+    .stat-card h3 { font-size: 0.85rem; color: #64748b; margin: 0 0 10px; }
+    .stat-card p { font-size: 1.4rem; font-weight: bold; margin: 0; color: #1e3a8a; }
+    .stat-card.highlight { background: #1e3a8a; color: white; border: none; }
+    .stat-card.highlight h3, .stat-card.highlight p { color: white; }
+    .search-container { margin-bottom: 20px; }
+    #searchInput { width: 100%; padding: 12px 20px; border: 2px solid #3b82f6; border-radius: 30px; font-size: 16px; box-sizing: border-box; outline: none; }
+    .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+
+    /* ナビゲーションタブのデザイン */
+    .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+    .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; background: #edf2f7; color: #4a5568; }
+    .tab-btn.active { background: #1e3a8a; color: white; }
+    
+    /* 集計カードの装飾 */
+    .analysis-card { background: #f8fafc; border-left: 5px solid #1e3a8a; text-align: left; padding: 15px; }
+    .analysis-card h4 { margin: 0 0 10px; font-size: 0.9rem; color: #1e3a8a; }
+    .analysis-val { font-size: 1.2rem; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 5px; }
+
+    /* スマホ向けの調整 */
+    @media screen and (max-width: 768px) {
+      .opt-btn {
+        padding: 10px 12px !important;
+        font-size: 14px !important;
+        margin: 2px 0;
+      }
+      table td:nth-child(3), table td:nth-child(4) {
+        min-width: 100px;
+      }
+      .table-scroll-area {
+        overflow-x: auto;
+      }
+    }
+
+    /* 印刷用設定（合計金額の列幅調整含む） */
+    @media print {
+      .no-print { display: none !important; }
+      .print-only { display: table-cell !important; }
+      table { width: 100%; border-collapse: collapse; }
+      /* 合計金額の列を右寄せ・幅広にする */
+      table th:nth-child(6), table td:nth-child(6) {
+        width: 100px !important;
+        text-align: right !important;
+        white-space: nowrap !important;
+      }
+    }
+</style>
+</head>
+
+<body>
+  <div class="admin-container">
+    <div class="fixed-header">
+      <header>
+        <h1>🎫 チケット管理パネル</h1>
+      </header>
+
+      <div class="dashboard-grid">
+       <div class="stat-card">
+         <h3>総申込件数</h3>
+         <p><span id="stat-total-orders">0</span> 件</p>
+         </div>
+         <div class="stat-card">
+         <h3>総申込人数</h3>
+         <p><span id="stat-total-persons">0</span> 名</p>
+         </div>
+         <div class="stat-card highlight" style="min-width: 250px;">
+         <h3>売上合計</h3>
+         <p><span id="stat-total-money">0</span> 円</p>
+         <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.9;">
+         (内入金済: <span id="stat-paid-money">0</span> 円)
+        </div>
+       </div>
+      </div>
+
+      <div class="nav-tabs">
+        <button id="btn-list" onclick="showPage('list')" class="tab-btn active">📋 注文一覧</button>
+        <button id="btn-analysis" onclick="showPage('analysis')" class="tab-btn">📊 詳細データ集計</button>
+      </div>
+
+      <div id="search-area" class="search-container">
+        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="名前・電話番号で検索...">
+      </div>
+
+      <div class="admin-menu">
+        <div class="menu-right">
+          <a href="direct_entry.html" target="_blank" class="nav-btn sale">➕ 手売り登録</a>
+          <a href="index.html" target="_blank" class="nav-btn form">🌐 予約フォーム</a>
+          <button onclick="printList()" class="nav-btn print">🖨️ 印刷用リスト出力</button>
+          <button onclick="fetchData()" class="nav-btn print">🔄 更新</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-list" class="table-scroll-area">
+      <table id="admin-table">
+        <thead>
+  　　　　<tr>
+   　　　　 <th class="print-only">確認</th>
+   　　　　 <th>受付番号</th>
+   　　　　 <th>お名前</th>
+   　　　　 <th class="text-left no-print">操作</th> <th>ステータス</th>
+   　　　　 <th class="no-print">受取方法</th>
+   　　　　 <th class="print-only">合計金額</th>
+   　　　　 <th class="no-print">販売区分</th>
+   　　　　 <th>枚数内訳</th> 
+  　　　　</tr>
+　　　　</thead>
+      <tbody id="admin-list"></tbody>
+      </table>
+    </div>
+
+    <div id="page-analysis" style="display: none; padding-top: 20px;">
+      <div class="dashboard-grid">
+        <div class="stat-card analysis-card" style="border-left-color: #ed8936;">
+          <h4>渠道別（販売区分）集計</h4>
+          <div class="analysis-val"><span>オンライン申込</span><span><span id="ana-sales-online">0</span>件</span></div>
+          <div class="analysis-val"><span>直接販売（手売り）</span><span><span id="ana-sales-direct">0</span>件</span></div>
+          <div class="analysis-val"><span>当日販売</span><span><span id="ana-sales-door">0</span>件</span></div>
+        </div>
+        <div class="stat-card analysis-card">
+          <h4>📍 地域別お申し込み</h4>
+          <div class="analysis-val"><span>高崎市内</span><span id="ana-takasaki">0</span></div>
+          <div class="analysis-val"><span>群馬県内(他)</span><span id="ana-gunma">0</span></div>
+          <div class="analysis-val"><span>県外</span><span id="ana-outside">0</span></div>
+        </div>
+        <div class="stat-card analysis-card" style="border-left-color: #38a169;">
+          <h4>👨‍👩‍👧‍👦 属性集計</h4>
+          <div class="analysis-val"><span>子供連れ申込</span><span id="ana-child-orders">0</span></div>
+          <p style="font-size: 0.7rem; color: #64748b; margin-top: 5px;">※大人と子供をセットで申し込んでいる件数</p>
+        </div>
+        <div class="stat-card analysis-card" style="border-left-color: #e53e3e;">
+          <h4>💎 Sエリア詳細</h4>
+          <div class="analysis-val"><span>大人</span><span><span id="ana-s-a">0</span>名</span></div>
+          <div class="analysis-val"><span>子供</span><span><span id="ana-s-c">0</span>名</span></div>
+          <div class="analysis-val" style="color: #e53e3e; border-top: 1px dashed #ccc; padding-top: 5px;"><span>小計</span><span><span id="ana-s-money">0</span>円</span></div>
+        </div>
+        <div class="stat-card analysis-card" style="border-left-color: #718096;">
+          <h4>🎫 一般エリア詳細</h4>
+          <div class="analysis-val"><span>大人</span><span><span id="ana-g-a">0</span>名</span></div>
+          <div class="analysis-val"><span>子供</span><span><span id="ana-g-c">0</span>名</span></div>
+          <div class="analysis-val" style="color: #e53e3e; border-top: 1px dashed #ccc; padding-top: 5px;"><span>小計</span><span><span id="ana-g-money">0</span>円</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="detail-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal()">&times;</span>
+      <h2 id="modal-title">詳細情報</h2>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
