@@ -7,7 +7,7 @@ let selectedId = "";
  */
 async function fetchData() {
   const adminList = document.getElementById("admin-list");
-  if(adminList) adminList.innerHTML = "<tr><td colspan='10' style='text-align:center;'>データ読み込み中...</td></tr>";
+  if(adminList) adminList.innerHTML = "<tr><td colspan='10' style='text-align:center;'>読み込み中...</td></tr>";
 
   try {
     const response = await fetch(`${url}?type=getAdmin`);
@@ -22,13 +22,12 @@ async function fetchData() {
       if(el) el.innerText = val;
     };
 
-    // 基本統計
+    // 統計・分析データの反映（左寄り防止のため数値を整える）
     setVal("stat-total-orders", stats.total_orders || 0);
     setVal("stat-total-persons", stats.total_persons || 0);
     setVal("stat-total-money", (Number(stats.total_money) || 0).toLocaleString());
     setVal("stat-paid-money", (Number(stats.paid_money) || 0).toLocaleString());
 
-    // 分析データ（集計ページ用）
     if (ana) {
       setVal("ana-takasaki", ana.region.gunma_takasaki || 0);
       setVal("ana-gunma", ana.region.gunma_other || 0);
@@ -49,12 +48,11 @@ async function fetchData() {
     
   } catch (e) {
     console.error("Fetch Error:", e);
-    if(adminList) adminList.innerHTML = "<tr><td colspan='10' style='text-align:center; color:red;'>データ取得失敗</td></tr>";
   }
 }
 
 /**
- * テーブル描画（スクロール対応）
+ * テーブル描画（PC・スマホ両対応）
  */
 function renderTable(data) {
   const listBody = document.getElementById("admin-list");
@@ -67,24 +65,22 @@ function renderTable(data) {
     const totalDisplay = (Number(row.total) || 0).toLocaleString();
     const safeStatus = (row.status || "未設定").replace(/\s+/g, '').replace(/[()]/g, '');
     
-    // PC用テーブル行
+    // PC用テーブル行（レイアウト調整：右寄せなどを指定）
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td class="print-only"></td> 
-      <td>${row.id || '---'}</td>
-      <td><strong>${row.name || '名前なし'}</strong></td>
-      <td class="no-print">
-        <button onclick="openModal('${row.id}', 'view')" class="opt-btn">詳細</button>
-        <button onclick="openModal('${row.id}', 'edit')" class="opt-btn" style="background:#fef3c7; color:#92400e;">編集</button>
+      <td>${row.id}</td>
+      <td style="text-align:left;"><strong>${row.name} 様</strong></td>
+      <td>
+        <button onclick="openModal('${row.id}', 'view')" class="opt-btn" style="background:#e0f2fe; color:#0369a1;">詳細・操作</button>
       </td>
-      <td><span class="status-badge status-${safeStatus}">${row.status || '未設定'}</span></td>
-      <td class="no-print">${row.shipping || '---'}</td>
-      <td class="no-print">${row.salesType || '---'}</td>
-      <td style="font-size: 0.8rem;">${row.s_a > 0 ? 'S' : ''}${row.g_a > 0 ? '般' : ''}</td>
+      <td><span class="status-badge status-${safeStatus}">${row.status}</span></td>
+      <td style="text-align:right; font-weight:bold;">${totalDisplay}円</td>
+      <td>${row.shipping}</td>
+      <td style="font-size:0.8rem;">${row.s_a>0?'S':''}${row.g_a>0?'般':''}</td>
     `;
     if(listBody) listBody.appendChild(tr);
 
-    // スマホ用スリムリスト
+    // スマホ用行
     const mRow = document.createElement("div");
     mRow.className = "mobile-row no-print";
     mRow.onclick = () => openModal(row.id, 'view');
@@ -103,29 +99,7 @@ function renderTable(data) {
 }
 
 /**
- * ページ切り替え機能
- */
-function showPage(page) {
-  const listPage = document.getElementById('page-list');
-  const analysisPage = document.getElementById('page-analysis');
-  const btnList = document.getElementById('btn-list');
-  const btnAna = document.getElementById('btn-analysis');
-
-  if (page === 'list') {
-    listPage.style.display = 'block';
-    analysisPage.style.display = 'none';
-    btnList.classList.add('active');
-    btnAna.classList.remove('active');
-  } else {
-    listPage.style.display = 'none';
-    analysisPage.style.display = 'block';
-    btnAna.classList.add('active');
-    btnList.classList.remove('active');
-  }
-}
-
-/**
- * 詳細・編集モーダル
+ * 詳細・編集・操作モーダル
  */
 function openModal(id, mode) {
   selectedId = id;
@@ -136,52 +110,102 @@ function openModal(id, mode) {
   const modalTitle = document.getElementById("modal-title");
   
   if (mode === 'view') {
-    modalTitle.innerText = "📋 予約詳細";
+    modalTitle.innerText = "📋 予約詳細・一括操作";
+    const isQR = p.shipping.includes("QR");
+    
     body.innerHTML = `
-      <div style="display:flex; gap:10px; margin-bottom:15px;">
-        <button onclick="location.href='tel:${p.tel}'" style="flex:1; background:#38a169; color:white; padding:12px; border:none; border-radius:8px;">📞 電話</button>
-        <button onclick="handleNotifyAction('${p.id}', 'PAYMENT')" style="flex:1; background:#1e3a8a; color:white; padding:12px; border:none; border-radius:8px;">💰 入金済みへ</button>
+      <div style="display:flex; gap:8px; margin-bottom:15px;">
+        <button onclick="location.href='tel:${p.tel}'" style="flex:1; background:#38a169; color:white; padding:10px; border-radius:6px; border:none;">📞 電話</button>
+        <button onclick="location.href='mailto:${p.email}'" style="flex:1; background:#3182ce; color:white; padding:10px; border-radius:6px; border:none;">✉️ メール</button>
       </div>
-      <div style="background:#f1f5f9; padding:15px; border-radius:8px;">
-        <p><strong>名前:</strong> ${p.name} 様</p>
-        <p><strong>合計:</strong> ${Number(p.total).toLocaleString()} 円</p>
-        <p><strong>受取:</strong> ${p.shipping}</p>
-        <p><strong>状態:</strong> ${p.status}</p>
+
+      <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
+        <div style="display:flex; justify-content:space-between;"><span>受付番号:</span> <strong>${p.id}</strong></div>
+        <div style="display:flex; justify-content:space-between;"><span>お名前:</span> <strong>${p.name} 様</strong></div>
+        <div style="display:flex; justify-content:space-between;"><span>合計金額:</span> <strong style="color:red;">${(Number(p.total)||0).toLocaleString()} 円</strong></div>
+        <div style="display:flex; justify-content:space-between;"><span>受取方法:</span> <strong>${p.shipping}</strong></div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:15px;">
+        <button onclick="updateStatus('${p.id}', '入金済み')" ${isQR && p.status==='入金済み' ? 'disabled style="background:#ccc;"' : 'style="background:#38a169; color:white;"'} class="action-btn">💰 入金確認</button>
+        <button onclick="updateStatus('${p.id}', '完了')" style="background:#1e3a8a; color:white;" class="action-btn">🎟 発送/完了</button>
+        <button onclick="openModal('${p.id}', 'edit')" style="background:#f59e0b; color:white;" class="action-btn">✏️ 全データ修正</button>
+        <button onclick="deleteOrder('${p.id}')" style="background:#e53e3e; color:white;" class="action-btn">🗑 キャンセル/削除</button>
       </div>
     `;
   } else {
-    modalTitle.innerText = "✏️ 内容の編集";
+    modalTitle.innerText = "✏️ 全データの修正";
     body.innerHTML = `
-      <div style="display:flex; flex-direction:column; gap:10px;">
-        <label>お名前</label><input type="text" id="edit-name" value="${p.name}" style="padding:10px; border:1px solid #ccc;">
-        <label>合計金額</label><input type="number" id="edit-total" value="${p.total}" style="padding:10px; border:1px solid #ccc;">
-        <button onclick="saveEdit()" style="background:#1e3a8a; color:white; padding:12px; border:none; border-radius:8px; margin-top:10px;">💾 保存する</button>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <label style="font-size:0.8rem;">名前</label><input type="text" id="edit-name" value="${p.name}">
+        <label style="font-size:0.8rem;">電話</label><input type="tel" id="edit-tel" value="${p.tel}">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
+          <label>S大</label><input type="number" id="edit-sa" value="${p.s_a}">
+          <label>S子</label><input type="number" id="edit-sc" value="${p.s_c}">
+          <label>般大</label><input type="number" id="edit-ga" value="${p.g_a}">
+          <label>般子</label><input type="number" id="edit-gc" value="${p.g_c}">
+        </div>
+        <label>ステータス</label>
+        <select id="edit-status" style="padding:8px; border-radius:5px;">
+          <option value="未入金" ${p.status==='未入金'?'selected':''}>未入金</option>
+          <option value="入金済み" ${p.status==='入金済み'?'selected':''}>入金済み</option>
+          <option value="完了" ${p.status==='完了'?'selected':''}>完了</option>
+          <option value="キャンセル" ${p.status==='キャンセル'?'selected':''}>キャンセル</option>
+        </select>
+        <label>合計金額</label><input type="number" id="edit-total" value="${p.total}">
+        <button onclick="saveFullEdit()" style="background:#1e3a8a; color:white; padding:12px; border-radius:8px; margin-top:10px; border:none; font-weight:bold;">💾 この内容で上書き保存</button>
       </div>
     `;
   }
   document.getElementById("detail-modal").style.display = "block";
 }
 
-function closeModal() { document.getElementById("detail-modal").style.display = "none"; }
+/**
+ * データの操作関数
+ */
+async function updateStatus(id, status) {
+  if(!confirm(`ステータスを「${status}」に変更しますか？`)) return;
+  await fetch(url, { method: "POST", body: JSON.stringify({ type: "updateStatus", id: id, status: status }) });
+  fetchData(); closeModal();
+}
 
-async function saveEdit() {
+async function saveFullEdit() {
   const data = {
-    type: "editData",
-    id: selectedId,
+    type: "editData", id: selectedId,
     name: document.getElementById("edit-name").value,
-    total: document.getElementById("edit-total").value
+    tel: document.getElementById("edit-tel").value,
+    s_a: document.getElementById("edit-sa").value, s_c: document.getElementById("edit-sc").value,
+    g_a: document.getElementById("edit-ga").value, g_c: document.getElementById("edit-gc").value,
+    total: document.getElementById("edit-total").value,
+    status: document.getElementById("edit-status").value
   };
   await fetch(url, { method: "POST", body: JSON.stringify(data) });
-  alert("保存しました");
-  closeModal();
-  fetchData();
+  alert("データを更新しました");
+  fetchData(); closeModal();
 }
 
-async function handleNotifyAction(id, type) {
-  const status = (type === 'PAYMENT') ? "入金済み" : "完了";
-  await fetch(url, { method: "POST", body: JSON.stringify({ type: "updateStatus", id: id, status: status }) });
-  fetchData();
-  closeModal();
+async function deleteOrder(id) {
+  if(!confirm("この予約をキャンセル（削除扱い）にしますか？")) return;
+  await fetch(url, { method: "POST", body: JSON.stringify({ type: "updateStatus", id: id, status: "キャンセル" }) });
+  fetchData(); closeModal();
 }
 
+/**
+ * ページ切り替え
+ */
+function showPage(page) {
+  const listPage = document.getElementById('page-list');
+  const analysisPage = document.getElementById('page-analysis');
+  if(page === 'list') {
+    listPage.style.display = 'block'; analysisPage.style.display = 'none';
+    document.getElementById('btn-list').classList.add('active');
+    document.getElementById('btn-analysis').classList.remove('active');
+  } else {
+    listPage.style.display = 'none'; analysisPage.style.display = 'block';
+    document.getElementById('btn-analysis').classList.add('active');
+    document.getElementById('btn-list').classList.remove('active');
+  }
+}
+
+function closeModal() { document.getElementById("detail-modal").style.display = "none"; }
 window.onload = fetchData;
