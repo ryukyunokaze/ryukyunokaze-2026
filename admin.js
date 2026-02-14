@@ -163,44 +163,65 @@ function openModal(id, mode) {
 /**
  * 4. 🖨️ A4縦4分割印刷用
  */
+* 🎫 ぴあ風・本格チケット印刷（1人1枚・ロゴ・属性・単価表示版）
+ */
 function printTicket(id) {
   const p = currentData.find(item => item.id === id);
-  const totalTickets = Number(p.s_a) + Number(p.s_c) + Number(p.g_a) + Number(p.g_c);
   const printArea = document.getElementById("print-content");
   printArea.innerHTML = ""; 
 
+  // 🌟 ロゴ画像のURLを設定してください（ない場合は仮のアイコンが出ます）
   const logoUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026/logo.png"; 
 
-  for (let i = 1; i <= totalTickets; i++) {
-    const individualId = `${p.id}-${i}`;
-    const ticketHtml = `
-      <div class="ticket-page-wrapper" style="width:185mm; height:68mm; border:1px solid #333; margin:2mm auto; display:flex; font-family:sans-serif; background:#fff; page-break-inside:avoid; position:relative; text-align:left;">
-        <div style="flex:3; padding:15px; border-right:1.5mm dashed #000; position:relative;">
-          <img src="${logoUrl}" style="width:45px; float:left; margin-right:12px;" onerror="this.src='https://img.icons8.com/color/96/000000/island.png'">
-          <div>
-            <p style="font-size:0.65rem; margin:0; color:#666;">5th Anniversary performance "Mabui"</p>
-            <h1 style="font-size:1.3rem; font-weight:bold; color:#1e3a8a; margin:0;">琉球の風 2026</h1>
-          </div>
-          <div style="margin-top:15px;">
-            <div style="font-size:0.6rem; color:#999; font-family:monospace;">SERIAL: ${individualId}</div>
-            <div style="font-size:1.15rem; font-weight:bold; border-bottom:1.5px solid #000; display:inline-block;">${p.name} 様</div>
-            <p style="font-size:0.75rem; margin-top:8px;">本券1枚につき1名様有効 / 注文No: ${p.id}</p>
-          </div>
-          <div style="position:absolute; bottom:12px; right:20px; text-align:right;">
-            <div style="font-size:0.6rem; color:#666;">Total (tax incl.)</div>
-            <div style="font-size:1.4rem; font-weight:bold;">¥${Number(p.total).toLocaleString()}</div>
-          </div>
+  // 各チケットの情報を配列にまとめる（大人・子供を分けるため）
+  let tickets = [];
+  for(let i=0; i<p.s_a; i++) tickets.push({ type: "Sエリア (大人)", price: 3500 });
+  for(let i=0; i<p.s_c; i++) tickets.push({ type: "Sエリア (子供)", price: 1500 });
+  for(let i=0; i<p.g_a; i++) tickets.push({ type: "一般エリア (大人)", price: 1500 }); // 単価は運営設定に準拠
+  for(let i=0; i<p.g_c; i++) tickets.push({ type: "一般エリア (子供)", price: 1500 });
+
+  // 生成されたチケット配列をループして描画
+  tickets.forEach((t, index) => {
+    const individualId = `${p.id}-${index + 1}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${individualId}`;
+    
+    const ticketDiv = document.createElement("div");
+    ticketDiv.className = "ticket-page-wrapper"; // HTML側のCSS（A4縦4分割）を適用
+    ticketDiv.innerHTML = `
+      <div style="flex: 3; padding: 15px; border-right: 1.5mm dashed #000; position: relative; text-align: left;">
+        <img src="${logoUrl}" style="width: 50px; float: left; margin-right: 12px;" onerror="this.src='https://img.icons8.com/color/96/000000/island.png'">
+        <div>
+          <p style="font-size: 0.65rem; margin: 0; color: #666;">5th Anniversary solo performance "Mabui"</p>
+          <h1 style="font-size: 1.3rem; font-weight: bold; color: #1e3a8a; margin: 0;">琉球の風 2026</h1>
         </div>
-        <div style="flex:1; padding:10px; background:#fafafa; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-          <div style="font-size:0.5rem; color:#999; margin-bottom:5px;">${individualId}</div>
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${individualId}" style="width:90px; height:90px; border:1px solid #eee; background:#fff;">
-          <div style="font-size:0.6rem; font-weight:bold; margin-top:10px;">琉球の風 2026</div>
-          <div style="font-size:0.55rem;">入場用QR</div>
+        
+        <div style="margin-top: 15px;">
+          <div style="font-size: 0.6rem; color: #999; font-family: monospace;">SERIAL: ${individualId}</div>
+          <div style="font-size: 1.15rem; font-weight: bold; border-bottom: 1.5px solid #000; display: inline-block;">${p.name} 様</div>
+          
+          <div style="margin-top: 10px; font-size: 1.1rem; font-weight: bold; color: #1e3a8a;">
+            【 ${t.type} 】
+          </div>
+          <p style="font-size: 0.75rem; margin-top: 5px;">本券1枚につき指定の1名様のみ有効</p>
+        </div>
+
+        <div style="position: absolute; bottom: 12px; right: 20px; text-align: right;">
+          <div style="font-size: 0.6rem; color: #666;">Ticket Price (tax incl.)</div>
+          <div style="font-size: 1.4rem; font-weight: bold;">¥${t.price.toLocaleString()}</div>
         </div>
       </div>
+
+      <div style="flex: 1; padding: 10px; background: #fafafa; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+        <img src="${logoUrl}" style="width: 25px; margin-bottom: 5px; opacity: 0.5;" onerror="this.style.display='none'">
+        <div style="font-size: 0.5rem; color: #999; margin-bottom: 3px;">${individualId}</div>
+        <img src="${qrUrl}" style="width: 85px; height: 85px; border: 1px solid #eee; background: #fff;" alt="QR">
+        <div style="font-size: 0.6rem; font-weight: bold; margin-top: 8px;">琉球の風 2026</div>
+        <div style="font-size: 0.55rem; font-weight: bold; color: #1e3a8a;">${t.type.includes("大人") ? "大人" : "子供"}</div>
+      </div>
     `;
-    printArea.innerHTML += ticketHtml;
-  }
+    printArea.appendChild(ticketDiv);
+  });
+  
   window.print();
 }
 
