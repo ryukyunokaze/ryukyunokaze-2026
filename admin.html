@@ -6,7 +6,7 @@
   <title>【管理者】チケット管理システム</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* 既存のデザインを維持 */
+    /* 既存のデザインを完全に維持 */
     .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
     .stat-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eef2f6; text-align: center; }
     .stat-card h3 { font-size: 0.85rem; color: #64748b; margin: 0 0 10px; }
@@ -27,38 +27,34 @@
     .analysis-card h4 { margin: 0 0 10px; font-size: 0.9rem; color: #1e3a8a; }
     .analysis-val { font-size: 1.2rem; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 5px; }
 
-    /* スマホ向けの調整 */
-    @media screen and (max-width: 768px) {
-      .opt-btn {
-        padding: 10px 12px !important;
-        font-size: 14px !important;
-        margin: 2px 0;
-      }
-      table td:nth-child(3), table td:nth-child(4) {
-        min-width: 100px;
-      }
-      .table-scroll-area {
-        overflow-x: auto;
-      }
+    /* 【追加】スマホで表を横スクロール可能にする設定（見た目は変えません） */
+    .table-scroll-area {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid #e2e8f0;
+    }
+    table {
+      min-width: 800px; /* テーブルが潰れないように最小幅を確保 */
     }
 
-    /* 印刷用設定（合計金額の列幅調整含む） */
+    @media screen and (max-width: 768px) {
+      .admin-container { padding: 10px; }
+      .fixed-header { position: static; } /* スマホではヘッダー固定を解除して見やすく */
+      .opt-btn { padding: 10px 12px !important; font-size: 14px !important; margin: 2px 0; }
+    }
+
+    /* 印刷用設定 */
     @media print {
       .no-print { display: none !important; }
       .print-only { display: table-cell !important; }
-      table { width: 100%; border-collapse: collapse; }
-      /* 合計金額の列を右寄せ・幅広にする */
-      table th:nth-child(6), table td:nth-child(6) {
-        width: 100px !important;
-        text-align: right !important;
-        white-space: nowrap !important;
-      }
+      table { width: 100%; border-collapse: collapse; min-width: auto; }
+      table th:nth-child(6), table td:nth-child(6) { width: 100px !important; text-align: right !important; white-space: nowrap !important; }
     }
 </style>
 </head>
 
-<body>
-  <div class="admin-container">
+<body style="display:none;" id="admin-body"> <div class="admin-container">
     <div class="fixed-header">
       <header>
         <h1>🎫 チケット管理パネル</h1>
@@ -104,17 +100,18 @@
     <div id="page-list" class="table-scroll-area">
       <table id="admin-table">
         <thead>
-  　　　　<tr>
-   　　　　 <th class="print-only">確認</th>
-   　　　　 <th>受付番号</th>
-   　　　　 <th>お名前</th>
-   　　　　 <th class="text-left no-print">操作</th> <th>ステータス</th>
-   　　　　 <th class="no-print">受取方法</th>
-   　　　　 <th class="print-only">合計金額</th>
-   　　　　 <th class="no-print">販売区分</th>
-   　　　　 <th>枚数内訳</th> 
-  　　　　</tr>
-　　　　</thead>
+          <tr>
+            <th class="print-only">確認</th>
+            <th>受付番号</th>
+            <th>お名前</th>
+            <th class="text-left no-print">操作</th> 
+            <th>ステータス</th>
+            <th class="no-print">受取方法</th>
+            <th class="print-only">合計金額</th>
+            <th class="no-print">販売区分</th>
+            <th>枚数内訳</th> 
+            <th>QRコード</th> </tr>
+        </thead>
       <tbody id="admin-list"></tbody>
       </table>
     </div>
@@ -136,7 +133,6 @@
         <div class="stat-card analysis-card" style="border-left-color: #38a169;">
           <h4>👨‍👩‍👧‍👦 属性集計</h4>
           <div class="analysis-val"><span>子供連れ申込</span><span id="ana-child-orders">0</span></div>
-          <p style="font-size: 0.7rem; color: #64748b; margin-top: 5px;">※大人と子供をセットで申し込んでいる件数</p>
         </div>
         <div class="stat-card analysis-card" style="border-left-color: #e53e3e;">
           <h4>💎 Sエリア詳細</h4>
@@ -162,6 +158,16 @@
     </div>
   </div>
 
+  <script>
+    // パスワード認証（admin.jsの前に実行）
+    const pass = prompt("管理者パスワードを入力してください");
+    if (pass === "1234") { // パスワードはここで自由に変えられます
+      document.getElementById("admin-body").style.display = "block";
+    } else {
+      alert("パスワードが違います");
+      window.location.href = "index.html";
+    }
+  </script>
   <script src="admin.js"></script>
 </body>
 </html>
