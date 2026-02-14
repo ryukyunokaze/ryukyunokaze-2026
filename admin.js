@@ -11,13 +11,11 @@ async function fetchData() {
     currentData = result.orders.reverse(); 
     const setVal = (id, val) => { if(document.getElementById(id)) document.getElementById(id).innerText = val; };
     
-    // 統計反映
     setVal("stat-total-orders", result.stats.total_orders || 0);
     setVal("stat-total-persons", result.stats.total_persons || 0);
     setVal("stat-total-money", (Number(result.stats.total_money) || 0).toLocaleString());
     setVal("stat-paid-money", (Number(result.stats.paid_money) || 0).toLocaleString());
 
-    // 集計反映
     const ana = result.analysis;
     if (ana) {
       setVal("ana-takasaki", ana.region.gunma_takasaki || 0);
@@ -55,6 +53,39 @@ function renderList(data) {
     `;
     listDiv.appendChild(item);
   });
+}
+
+/**
+ * 🌟 メール起動 ＆ ステータス更新
+ */
+async function handleStatusMail(id, action) {
+  const p = currentData.find(item => item.id === id);
+  if (!p || !p.email) return alert("メールアドレスが登録されていません。");
+
+  const status = (action === 'PAYMENT') ? "入金済み" : "完了";
+  const now = new Date().toLocaleString("ja-JP");
+  
+  if(!confirm(status + " に更新してメール画面を起動しますか？")) return;
+
+  // 1. 先にメーラーを起動（ブラウザのブロックを防ぐため）
+  let subject = (action === 'PAYMENT') ? "【入金確認】琉球の風 2026 受領のお知らせ" : "【重要】琉球の風 2026 チケット発送のご案内";
+  let body = `${p.name} 様\n\nお世話になっております。琉球の風 事務局です。\n${status}の処理が完了いたしました。\n\n${p.shipping.includes("QR") ? "▼QRコード表示はこちら\nhttps://ryukyunokaze.github.io/ryukyunokaze-2026/qr.html?id="+p.id : "郵送にてお届けいたしますので、到着まで少々お待ちください。"}\n\n当日お会いできるのを楽しみにしております。`;
+  
+  const mailtoUrl = `mailto:${p.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  
+  // 安全なメーラー起動
+  const a = document.createElement('a');
+  a.href = mailtoUrl;
+  a.click();
+
+  // 2. その後、GAS側のステータスを更新
+  try {
+    await fetch(url, { method: "POST", body: JSON.stringify({ type: "updateStatus", id: id, status: status, date: now }) });
+    fetchData(); 
+    closeModal();
+  } catch (e) {
+    alert("ステータス更新に失敗しました。手動で更新してください。");
+  }
 }
 
 function openModal(id, mode) {
@@ -102,27 +133,28 @@ function openModal(id, mode) {
         ${isQR ? `<div style="text-align:center; margin-top:10px;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${p.id}"><p style="font-size:0.6rem;">お客様提示用QR</p></div>` : ''}
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:15px;">
-          <button onclick="handleStatusMail('${p.id}', 'PAYMENT')" style="background:#10b981; color:white; padding:10px; border:none; border-radius:8px; font-weight:bold;">入金＆メール</button>
-          <button onclick="handleStatusMail('${p.id}', 'COMPLETE')" style="background:#1e3a8a; color:white; padding:10px; border:none; border-radius:8px; font-weight:bold;">完了＆メール</button>
-          <button onclick="openModal('${p.id}', 'edit')" style="background:#f59e0b; color:white; padding:10px; border:none; border-radius:8px; font-weight:bold;">✏️ 編集</button>
-          <button onclick="printTicket('${p.id}')" style="background:#000; color:white; padding:10px; border:none; border-radius:8px; font-weight:bold;">🖨️ 印刷用</button>
+          <button onclick="handleStatusMail('${p.id}', 'PAYMENT')" style="background:#10b981; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">入金＆メール</button>
+          <button onclick="handleStatusMail('${p.id}', 'COMPLETE')" style="background:#1e3a8a; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">完了＆メール</button>
+          <button onclick="openModal('${p.id}', 'edit')" style="background:#f59e0b; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">✏️ 編集</button>
+          <button onclick="printTicket('${p.id}')" style="background:#000; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">🖨️ 印刷用</button>
         </div>
       </div>
     `;
   } else {
+    // 編集画面（チケット枚数ラベルを明確化）
     body.innerHTML = `
       ${headerHtml}
-      <div style="display:flex; flex-direction:column; gap:10px; max-height:60vh; overflow-y:auto; padding:5px;">
+      <div style="display:flex; flex-direction:column; gap:12px; max-height:60vh; overflow-y:auto; padding:5px;">
         <input type="text" id="edit-zip" value="${p.zip||''}" onblur="autoZip(this.value)" placeholder="郵便番号" style="padding:10px;">
         <input type="text" id="edit-pref" value="${p.pref||''}" placeholder="都道府県" style="padding:10px;">
         <input type="text" id="edit-city" value="${p.city||''}" placeholder="市区町村" style="padding:10px;">
         <input type="text" id="edit-rest" value="${p.rest||''}" placeholder="番地・建物" style="padding:10px;">
         <div style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
             <div><label style="font-size:0.6rem;">S 大人</label><input type="number" id="edit-sa" value="${p.s_a}" oninput="reCalc()" style="width:100%; padding:8px;"></div>
             <div><label style="font-size:0.6rem;">S 子供</label><input type="number" id="edit-sc" value="${p.s_c}" oninput="reCalc()" style="width:100%; padding:8px;"></div>
-            <div><label style="font-size:0.6rem;">一般 大人</label><input type="number" id="edit-ga" value="${p.g_a}" oninput="reCalc()" style="width:100%; padding:8px;"></div>
-            <div><label style="font-size:0.6rem;">一般 子供</label><input type="number" id="edit-gc" value="${p.g_c}" oninput="reCalc()" style="width:100%; padding:8px;"></div>
+            <div><label style="font-size:0.7rem;">一般 大人</label><input type="number" id="edit-ga" value="${p.g_a}" oninput="reCalc()" style="width:100%; padding:8px;"></div>
+            <div><label style="font-size:0.7rem;">一般 子供</label><input type="number" id="edit-gc" value="${p.g_c}" oninput="reCalc()" style="width:100%; padding:8px;"></div>
           </div>
           <div style="text-align:right; margin-top:8px; font-weight:bold; color:red;">合計: <span id="display-total">${(Number(p.total)||0).toLocaleString()}</span>円</div>
           <input type="hidden" id="edit-total" value="${p.total}">
@@ -134,25 +166,7 @@ function openModal(id, mode) {
   document.getElementById("detail-modal").style.display = "block";
 }
 
-// ---------------------------------------------------------
-// 補助機能
-// ---------------------------------------------------------
-
-async function handleStatusMail(id, action) {
-  const p = currentData.find(item => item.id === id);
-  const status = (action === 'PAYMENT') ? "入金済み" : "完了";
-  const now = new Date().toLocaleString("ja-JP");
-  if(!confirm(status + " に更新してメール画面を起動しますか？")) return;
-
-  await fetch(url, { method: "POST", body: JSON.stringify({ type: "updateStatus", id: id, status: status, date: now }) });
-
-  let subject = (action === 'PAYMENT') ? "【入金確認】琉球の風 2026 受領のお知らせ" : "【重要】琉球の風 2026 チケット発送のご案内";
-  let body = `${p.name} 様\n\nお世話になっております。琉球の風 事務局です。\n${status}の処理が完了いたしました。\n\n${p.shipping.includes("QR") ? "▼QRコード表示はこちら\nhttps://ryukyunokaze.github.io/ryukyunokaze-2026/qr.html?id="+p.id : "お手元に届くまで少々お待ちください。"}`;
-  
-  window.location.href = `mailto:${p.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  fetchData(); closeModal();
-}
-
+// 共通機能
 function printTicket(id) {
   const p = currentData.find(item => item.id === id);
   document.getElementById("print-content").innerHTML = `
@@ -200,6 +214,9 @@ async function saveEdit() {
   await fetch(url, { method: "POST", body: JSON.stringify(d) });
   fetchData(); closeModal();
 }
+
+async function updateStatus(id, s) { if(confirm(s + " に更新しますか？")) { await fetch(url, { method: "POST", body: JSON.stringify({ type: "updateStatus", id: id, status: s }) }); fetchData(); closeModal(); } }
+async function deleteOrder(id) { if(confirm("削除しますか？")) { await fetch(url, { method: "POST", body: JSON.stringify({ type: "updateStatus", id: id, status: "キャンセル" }) }); fetchData(); closeModal(); } }
 
 function closeModal() { document.getElementById("detail-modal").style.display = "none"; }
 window.onload = fetchData;
