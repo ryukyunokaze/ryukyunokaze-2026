@@ -6,12 +6,11 @@
   <title>【管理者】チケット管理システム</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* --- レイアウトベース --- */
     body { background: #f1f5f9; margin: 0; font-family: sans-serif; color: #1e293b; overflow-y: scroll; }
     .admin-wrapper { max-width: 900px; margin: 0 auto; min-height: 100vh; background: #fff; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
     .content-area { padding: 15px; }
 
-    /* --- ヘッダー・カード（件数と人数を分離） --- */
+    /* --- カードデザイン（3枚に分離） --- */
     .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
     .stat-card { background: #fff; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; }
     .stat-card h3 { font-size: 0.7rem; color: #64748b; margin: 0 0 5px; }
@@ -26,17 +25,16 @@
     .quick-menu { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
     .q-btn { padding: 8px 15px; border-radius: 20px; font-size: 11px; text-decoration: none; font-weight: bold; color: white; border: none; cursor: pointer; }
 
-    /* --- リストアイテム --- */
+    /* --- 一覧リスト --- */
     #searchInput { width: 100%; padding: 12px 20px; border: 2px solid #3b82f6; border-radius: 25px; font-size: 16px; box-sizing: border-box; margin-bottom: 15px; outline: none; }
     .order-item { border-bottom: 1px solid #f1f5f9; padding: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-    .order-item:active { background: #f8fafc; }
     .status-badge { padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
 
     /* --- 集計ページ --- */
     .analysis-card { background: #f8fafc; padding: 15px; border-radius: 10px; border-left: 5px solid #1e3a8a; margin-bottom: 15px; }
     .ana-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #e2e8f0; font-size: 0.9rem; }
 
-    @media print { .no-print { display: none !important; } .admin-wrapper { box-shadow: none; } }
+    @media print { .no-print { display: none !important; } }
     @media screen and (max-width: 600px) { .dashboard-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -89,9 +87,9 @@
           <div class="ana-row"><span>県外</span><span id="ana-outside">0</span></div>
         </div>
         <div class="analysis-card" style="border-left-color:#ef4444;">
-          <h4 style="margin:0 0 10px;">エリア別集計</h4>
-          <div class="ana-row"><span>S大人 / S子供</span><span><span id="ana-s-a">0</span> / <span id="ana-s-c">0</span></span></div>
-          <div class="ana-row"><span>一般大人 / 一般子供</span><span><span id="ana-g-a">0</span> / <span id="ana-g-c">0</span></span></div>
+          <h4 style="margin:0 0 10px;">チケット内訳</h4>
+          <div class="ana-row"><span>Sエリア (大人/子)</span><span><span id="ana-s-a">0</span> / <span id="ana-s-c">0</span></span></div>
+          <div class="ana-row"><span>一般エリア (大人/子)</span><span><span id="ana-g-a">0</span> / <span id="ana-g-c">0</span></span></div>
         </div>
       </div>
     </div>
@@ -100,7 +98,6 @@
   <div id="detail-modal" class="modal">
     <div class="modal-content" style="max-width: 500px; border-radius: 15px;">
       <span class="close-btn" onclick="closeModal()">&times;</span>
-      <h2 id="modal-title" style="display:none;"></h2>
       <div id="modal-body"></div>
     </div>
   </div>

@@ -9,21 +9,25 @@ async function fetchData() {
     const response = await fetch(`${url}?type=getAdmin`);
     const result = await response.json();
     currentData = result.orders.reverse(); 
+    
     const setVal = (id, val) => { if(document.getElementById(id)) document.getElementById(id).innerText = val; };
+    
+    // 統計・集計の反映
     setVal("stat-total-orders", result.stats.total_orders || 0);
     setVal("stat-total-persons", result.stats.total_persons || 0);
     setVal("stat-total-money", (Number(result.stats.total_money) || 0).toLocaleString());
     setVal("stat-paid-money", (Number(result.stats.paid_money) || 0).toLocaleString());
+
     const ana = result.analysis;
     if (ana) {
-      setVal("ana-takasaki", ana.region.gunma_takasaki);
-      setVal("ana-gunma", ana.region.gunma_other);
-      setVal("ana-outside", ana.region.out_of_pref);
-      setVal("ana-child-orders", ana.with_child_count);
-      setVal("ana-s-a", ana.area_details.s_area.adult);
-      setVal("ana-s-c", ana.area_details.s_area.child);
-      setVal("ana-g-a", ana.area_details.g_area.adult);
-      setVal("ana-g-c", ana.area_details.g_area.child);
+      setVal("ana-takasaki", ana.region.gunma_takasaki || 0);
+      setVal("ana-gunma", ana.region.gunma_other || 0);
+      setVal("ana-outside", ana.region.out_of_pref || 0);
+      setVal("ana-child-orders", ana.with_child_count || 0);
+      setVal("ana-s-a", ana.area_details.s_area.adult || 0);
+      setVal("ana-s-c", ana.area_details.s_area.child || 0);
+      setVal("ana-g-a", ana.area_details.g_area.adult || 0);
+      setVal("ana-g-c", ana.area_details.g_area.child || 0);
     }
     renderList(currentData);
   } catch (e) { console.error(e); }
@@ -106,7 +110,7 @@ function openModal(id, mode) {
           <input type="text" id="edit-city" value="${p.city||''}" placeholder="市区町村" style="width:100%; padding:8px; margin-bottom:5px;">
           <input type="text" id="edit-rest" value="${p.rest||''}" placeholder="番地・建物" style="width:100%; padding:8px;">
         </div>
-        
+
         <div style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
           <div style="font-weight:bold; font-size:0.8rem; margin-bottom:10px; color:#1e3a8a;">🎟 チケット枚数入力</div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
@@ -119,9 +123,11 @@ function openModal(id, mode) {
           <input type="hidden" id="edit-total" value="${p.total}">
         </div>
 
-        <div>
-          <label style="font-size:0.7rem; color:#64748b;">備考欄 (広め)</label>
-          <textarea id="edit-remarks" style="width:100%; height:120px; padding:10px; border:1px solid #cbd5e0; border-radius:5px; box-sizing:border-box;">${p.remarks||''}</textarea>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <label style="font-size:0.7rem; color:#64748b;">連絡先・備考</label>
+          <input type="tel" id="edit-tel" value="${p.tel||''}" placeholder="電話番号" style="width:100%; padding:8px;">
+          <input type="email" id="edit-email" value="${p.email||''}" placeholder="メール" style="width:100%; padding:8px;">
+          <textarea id="edit-remarks" style="width:100%; height:100px; padding:10px;">${p.remarks||''}</textarea>
         </div>
 
         <select id="edit-status" style="padding:10px; border-radius:5px;">
@@ -137,7 +143,6 @@ function openModal(id, mode) {
   document.getElementById("detail-modal").style.display = "block";
 }
 
-// 金額再計算
 function reCalc() {
   const sa = Number(document.getElementById("edit-sa").value)||0; const sc = Number(document.getElementById("edit-sc").value)||0;
   const ga = Number(document.getElementById("edit-ga").value)||0; const gc = Number(document.getElementById("edit-gc").value)||0;
@@ -149,8 +154,8 @@ function reCalc() {
 function showPage(p) {
   document.getElementById('page-list').style.display = (p==='list')?'block':'none';
   document.getElementById('page-analysis').style.display = (p==='analysis')?'block':'none';
-  document.getElementById('btn-list').classList.toggle('active', p==='list');
-  document.getElementById('btn-analysis').classList.toggle('active', p==='analysis');
+  document.getElementById('btn-list').classList.toggle('active', page === 'list');
+  document.getElementById('btn-analysis').classList.toggle('active', page === 'analysis');
 }
 
 function filterTable() {
@@ -170,7 +175,14 @@ async function updateStatus(id, s) { if(confirm(s + " に更新しますか？")
 async function deleteOrder(id) { if(confirm("削除しますか？")) { await fetch(url, { method: "POST", body: JSON.stringify({ type: "updateStatus", id: id, status: "キャンセル" }) }); fetchData(); closeModal(); } }
 async function saveEdit() {
   const d = {
-    type: "editData", id: selectedId, zip: document.getElementById("edit-zip").value, pref: document.getElementById("edit-pref").value, city: document.getElementById("edit-city").value, rest: document.getElementById("edit-rest").value, tel: document.getElementById("edit-tel").value, email: document.getElementById("edit-email").value, s_a: document.getElementById("edit-sa").value, s_c: document.getElementById("edit-sc").value, g_a: document.getElementById("edit-ga").value, g_c: document.getElementById("edit-gc").value, total: document.getElementById("edit-total").value, status: document.getElementById("edit-status").value, remarks: document.getElementById("edit-remarks").value
+    type: "editData", id: selectedId, 
+    zip: document.getElementById("edit-zip").value, pref: document.getElementById("edit-pref").value, 
+    city: document.getElementById("edit-city").value, rest: document.getElementById("edit-rest").value, 
+    tel: document.getElementById("edit-tel").value, email: document.getElementById("edit-email").value, 
+    s_a: document.getElementById("edit-sa").value, s_c: document.getElementById("edit-sc").value, 
+    g_a: document.getElementById("edit-ga").value, g_c: document.getElementById("edit-gc").value, 
+    total: document.getElementById("edit-total").value, status: document.getElementById("edit-status").value, 
+    remarks: document.getElementById("edit-remarks").value
   };
   await fetch(url, { method: "POST", body: JSON.stringify(d) });
   fetchData(); closeModal();
