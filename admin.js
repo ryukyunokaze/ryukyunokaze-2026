@@ -57,11 +57,11 @@ async function fetchData() {
  */
 function renderTable(data) {
   const listBody = document.getElementById("admin-list");
-  const listPage = document.getElementById("page-list");
-  
+  // 修正後：専用のスマホリスト用コンテナを指定します
+  const listPageContent = document.getElementById("page-list-content");
+
   listBody.innerHTML = "";
-  // 既存のスマホ用リストがあれば削除
-  document.querySelectorAll('.mobile-row').forEach(el => el.remove());
+  if(listPageContent) listPageContent.innerHTML = ""; // 既存のリストをクリア
 
   data.forEach(row => {
     const totalDisplay = (Number(row.total) || 0).toLocaleString();
@@ -88,7 +88,7 @@ function renderTable(data) {
     const mRow = document.createElement("div");
     mRow.className = "mobile-row no-print";
     mRow.onclick = () => openModal(row.id, 'view');
-    mRow.innerHTML = `
+    mRow.innerHTML = `...`;
       <div style="flex: 1;">
         <div style="font-size: 0.7rem; color: #94a3b8;">${row.id}</div>
         <div style="font-size: 1rem; font-weight: bold; color: #1e293b;">${row.name} 様</div>
@@ -98,7 +98,7 @@ function renderTable(data) {
         <div style="font-size: 0.9rem; font-weight: bold; color: #1e3a8a; margin-top: 4px;">${totalDisplay}円</div>
       </div>
     `;
-    listPage.appendChild(mRow);
+    if(listPageContent) listPageContent.appendChild(mRow); 
   });
 }
 

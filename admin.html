@@ -27,6 +27,11 @@
 
     /* --- 【重要】スマホ専用：スリムリスト & 検索窓固定の設定 --- */
     @media screen and (max-width: 768px) {
+      　.fixed-header {
+    　　position: relative; /* 固定を一旦解除して、ボタンが隠れるのを防ぐ */
+   　　margin-bottom: 20px;
+ 　　　 }
+　　}
       .admin-container { padding: 10px; }
       
       /* ヘッダーと検索窓を画面上部に固定 */
@@ -123,6 +128,7 @@
         </thead>
         <tbody id="admin-list"></tbody>
       </table>
+      <div id="page-list-content" class="mobile-only"></div>
       </div>
 
     <div id="page-analysis" style="display: none; padding-top: 20px;">
