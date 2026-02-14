@@ -14,13 +14,11 @@ async function fetchData() {
     currentData = result.orders.reverse(); 
     const setVal = (id, val) => { if(document.getElementById(id)) document.getElementById(id).innerText = val; };
     
-    // 基本統計
     setVal("stat-total-orders", result.stats.total_orders || 0);
     setVal("stat-total-persons", result.stats.total_persons || 0);
     setVal("stat-total-money", (Number(result.stats.total_money) || 0).toLocaleString());
     setVal("stat-paid-money", (Number(result.stats.paid_money) || 0).toLocaleString());
 
-    // 集計反映
     const ana = result.analysis;
     if (ana) {
       setVal("ana-takasaki", ana.region.gunma_takasaki || 0);
@@ -66,14 +64,13 @@ function renderList(data) {
 }
 
 /**
- * 3. 詳細モーダル表示
+ * 3. 詳細モーダル表示（QRコード人数分生成）
  */
 function openModal(id, mode) {
   selectedId = id;
   const p = currentData.find(item => item.id === id);
   if (!p) return;
   const body = document.getElementById("modal-body");
-  
   const mySiteUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026"; 
 
   const headerHtml = `
@@ -99,15 +96,12 @@ function openModal(id, mode) {
       qrHtml += `<div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;">`;
       for (let i = 1; i <= totalTickets; i++) {
         const branchId = `${p.id}-${i}`;
-        qrHtml += `
-          <div style="text-align:center; background:#fff; padding:5px; border:1px solid #eee; border-radius:5px; width:100px;">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${branchId}" style="width:80px; height:80px;">
-            <div style="font-size:0.55rem; color:#666;">${branchId}</div>
-          </div>`;
+        qrHtml += `<div style="text-align:center; background:#fff; padding:5px; border:1px solid #eee; border-radius:5px; width:100px;">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${branchId}" style="width:80px; height:80px;">
+          <div style="font-size:0.55rem; color:#666;">${branchId}</div>
+        </div>`;
       }
       qrHtml += `</div></div>`;
-    } else {
-      qrHtml = `<p style="text-align:center; color:#94a3b8; font-size:0.8rem; margin:15px 0;">※入金後にQRコードが表示されます</p>`;
     }
 
     body.innerHTML = `
@@ -161,32 +155,25 @@ function openModal(id, mode) {
 }
 
 /**
- * 4. 🖨️ A4縦4分割印刷用
- */
-* 🎫 ぴあ風・本格チケット印刷（1人1枚・ロゴ・属性・単価表示版）
+ * 4. 🖨️ A4縦4分割 チケット印刷機能（ロゴ・属性・単価対応）
  */
 function printTicket(id) {
   const p = currentData.find(item => item.id === id);
   const printArea = document.getElementById("print-content");
   printArea.innerHTML = ""; 
-
-  // 🌟 ロゴ画像のURLを設定してください（ない場合は仮のアイコンが出ます）
   const logoUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026/logo.png"; 
 
-  // 各チケットの情報を配列にまとめる（大人・子供を分けるため）
   let tickets = [];
   for(let i=0; i<p.s_a; i++) tickets.push({ type: "Sエリア (大人)", price: 3500 });
   for(let i=0; i<p.s_c; i++) tickets.push({ type: "Sエリア (子供)", price: 1500 });
-  for(let i=0; i<p.g_a; i++) tickets.push({ type: "一般エリア (大人)", price: 1500 }); // 単価は運営設定に準拠
+  for(let i=0; i<p.g_a; i++) tickets.push({ type: "一般エリア (大人)", price: 1500 });
   for(let i=0; i<p.g_c; i++) tickets.push({ type: "一般エリア (子供)", price: 1500 });
 
-  // 生成されたチケット配列をループして描画
   tickets.forEach((t, index) => {
     const individualId = `${p.id}-${index + 1}`;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${individualId}`;
-    
     const ticketDiv = document.createElement("div");
-    ticketDiv.className = "ticket-page-wrapper"; // HTML側のCSS（A4縦4分割）を適用
+    ticketDiv.className = "ticket-page-wrapper";
     ticketDiv.innerHTML = `
       <div style="flex: 3; padding: 15px; border-right: 1.5mm dashed #000; position: relative; text-align: left;">
         <img src="${logoUrl}" style="width: 50px; float: left; margin-right: 12px;" onerror="this.src='https://img.icons8.com/color/96/000000/island.png'">
@@ -194,34 +181,25 @@ function printTicket(id) {
           <p style="font-size: 0.65rem; margin: 0; color: #666;">5th Anniversary solo performance "Mabui"</p>
           <h1 style="font-size: 1.3rem; font-weight: bold; color: #1e3a8a; margin: 0;">琉球の風 2026</h1>
         </div>
-        
         <div style="margin-top: 15px;">
           <div style="font-size: 0.6rem; color: #999; font-family: monospace;">SERIAL: ${individualId}</div>
           <div style="font-size: 1.15rem; font-weight: bold; border-bottom: 1.5px solid #000; display: inline-block;">${p.name} 様</div>
-          
-          <div style="margin-top: 10px; font-size: 1.1rem; font-weight: bold; color: #1e3a8a;">
-            【 ${t.type} 】
-          </div>
+          <div style="margin-top: 10px; font-size: 1.1rem; font-weight: bold; color: #1e3a8a;">【 ${t.type} 】</div>
           <p style="font-size: 0.75rem; margin-top: 5px;">本券1枚につき指定の1名様のみ有効</p>
         </div>
-
         <div style="position: absolute; bottom: 12px; right: 20px; text-align: right;">
           <div style="font-size: 0.6rem; color: #666;">Ticket Price (tax incl.)</div>
           <div style="font-size: 1.4rem; font-weight: bold;">¥${t.price.toLocaleString()}</div>
         </div>
       </div>
-
       <div style="flex: 1; padding: 10px; background: #fafafa; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-        <img src="${logoUrl}" style="width: 25px; margin-bottom: 5px; opacity: 0.5;" onerror="this.style.display='none'">
         <div style="font-size: 0.5rem; color: #999; margin-bottom: 3px;">${individualId}</div>
-        <img src="${qrUrl}" style="width: 85px; height: 85px; border: 1px solid #eee; background: #fff;" alt="QR">
-        <div style="font-size: 0.6rem; font-weight: bold; margin-top: 8px;">琉球の風 2026</div>
+        <img src="${qrUrl}" style="width: 85px; height: 85px; border: 1px solid #eee; background: #fff;">
+        <div style="font-size: 0.6rem; font-weight: bold; margin-top: 10px;">琉球の風 2026</div>
         <div style="font-size: 0.55rem; font-weight: bold; color: #1e3a8a;">${t.type.includes("大人") ? "大人" : "子供"}</div>
-      </div>
-    `;
+      </div>`;
     printArea.appendChild(ticketDiv);
   });
-  
   window.print();
 }
 
@@ -232,13 +210,14 @@ async function handleStatusMail(id, action) {
   if(!confirm(status + " に更新してメールを起動しますか？")) return;
   const subject = (action === 'PAYMENT') ? "【入金確認】琉球の風 2026 受領通知" : "【発送連絡】琉球の風 2026 チケットお届け";
   const mySiteUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026"; 
-  const body = `${p.name} 様\n\n琉球の風 事務局です。\n${status}の処理が完了いたしました。\n\n${p.shipping.includes("QR") ? "▼QRコード表示URL\n" + mySiteUrl + "/qr.html?id=" + p.id + "-1" : "チケットは本日郵送いたしました。"}\n\n当日お待ちしております。`;
+  const body = `${p.name} 様\n\n琉球の風 事務局です。\n${status}の処理が完了いたしました。\n\n${p.shipping.includes("QR") ? "▼当日受付で提示するQRコードはコチラ\n" + mySiteUrl + "/qr.html?id=" + p.id + "-1" : "チケットは本日郵送いたしました。"}\n\n当日お待ちしております。`;
   const a = document.createElement('a');
   a.href = `mailto:${p.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   a.click();
   await fetch(url, { method: "POST", body: JSON.stringify({ type: "updateStatus", id: id, status: status }) });
   fetchData(); closeModal();
 }
+
 function reCalc() {
   const sa = Number(document.getElementById("edit-sa").value)||0; const sc = Number(document.getElementById("edit-sc").value)||0;
   const ga = Number(document.getElementById("edit-ga").value)||0; const gc = Number(document.getElementById("edit-gc").value)||0;
@@ -246,16 +225,19 @@ function reCalc() {
   document.getElementById("edit-total").value = total;
   document.getElementById("display-total").innerText = total.toLocaleString();
 }
+
 function showPage(p) {
   document.getElementById('page-list').style.display = (p==='list')?'block':'none';
   document.getElementById('page-analysis').style.display = (p==='analysis')?'block':'none';
   document.getElementById('btn-list').classList.toggle('active', p==='list');
   document.getElementById('btn-analysis').classList.toggle('active', p==='analysis');
 }
+
 function filterTable() {
   const q = document.getElementById("searchInput").value.toLowerCase();
   document.querySelectorAll(".order-item").forEach(item => { item.style.display = item.innerText.toLowerCase().includes(q) ? "flex" : "none"; });
 }
+
 async function autoZip(z) {
   if (z.length >= 7) {
     const r = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${z}`);
@@ -263,6 +245,7 @@ async function autoZip(z) {
     if (d.results) { document.getElementById("edit-pref").value = d.results[0].address1; document.getElementById("edit-city").value = d.results[0].address2 + d.results[0].address3; }
   }
 }
+
 async function saveEdit() {
   const d = {
     type: "editData", id: selectedId, zip: document.getElementById("edit-zip").value, pref: document.getElementById("edit-pref").value, city: document.getElementById("edit-city").value, rest: document.getElementById("edit-rest").value, s_a: document.getElementById("edit-sa").value, s_c: document.getElementById("edit-sc").value, g_a: document.getElementById("edit-ga").value, g_c: document.getElementById("edit-gc").value, total: document.getElementById("edit-total").value, remarks: document.getElementById("edit-remarks").value
@@ -270,5 +253,6 @@ async function saveEdit() {
   await fetch(url, { method: "POST", body: JSON.stringify(d) });
   fetchData(); closeModal();
 }
+
 function closeModal() { document.getElementById("detail-modal").style.display = "none"; }
 window.onload = fetchData;
