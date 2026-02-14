@@ -22,10 +22,11 @@ async function fetchData() {
       if(el) el.innerText = val;
     };
 
-    setVal("stat-total-orders", stats.total_orders);
-    setVal("stat-total-persons", stats.total_persons);
-    setVal("stat-total-money", stats.total_money.toLocaleString());
-    setVal("stat-paid-money", stats.paid_money.toLocaleString());
+    // 数字がなくてもエラーにならないように「|| 0」を付けます
+    　setVal("stat-total-orders", stats.total_orders || 0);
+    　setVal("stat-total-persons", stats.total_persons || 0);
+    　setVal("stat-total-money", (Number(stats.total_money) || 0).toLocaleString());
+    　setVal("stat-paid-money", (Number(stats.paid_money) || 0).toLocaleString());
 
     if (ana) {
       setVal("ana-takasaki", ana.region.gunma_takasaki);
