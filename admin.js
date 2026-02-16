@@ -187,18 +187,20 @@ function printTicket(id) {
   window.print();
 }
 
-/** 5. 補助関数（メール・住所検索・再計算維持） **/
-/** 5. 補助関数（メール・住所検索・再計算維持） **/
+/** * 5. 補助関数（メール・住所検索・再計算維持） 
+ */
 async function handleStatusMail(id, action) {
   const p = currentData.find(item => item.id === id);
   const status = (action === 'PAYMENT') ? "入金済み" : "完了";
   
   if(!confirm(status + " に更新してメールを起動しますか？")) return;
 
+  // 🌟 文字置き換え関数
   const replaceTags = (text) => {
     if (!text) return "";
     return text
-      .replace(/{event_title}/g, masterPrices.event_title || "").replace(/{name}/g, p.name || "");
+      .replace(/{event_title}/g, masterPrices.event_title || "")
+      .replace(/{name}/g, p.name || "");
   };
 
   const signature = "\n\n" + (masterPrices.mail_signature || "");
@@ -208,7 +210,7 @@ async function handleStatusMail(id, action) {
     subject = replaceTags(masterPrices.mail_pay_sub);
     bodyMain = replaceTags(masterPrices.mail_pay_body);
   } else {
-    // 受取方法（郵送 or QR）によってシートの項目を自動選択
+    // 🌟 受取方法（郵送 or QR）によってシートの項目を自動選択
     const isQR = p.shipping.includes("QR");
     subject = replaceTags(isQR ? masterPrices.mail_sent_sub_qr : masterPrices.mail_sent_sub_post);
     bodyMain = replaceTags(isQR ? masterPrices.mail_sent_body_qr : masterPrices.mail_sent_body_post);
@@ -219,11 +221,12 @@ async function handleStatusMail(id, action) {
 
   const fullBody = `${p.name} 様\n\n${bodyMain}${qrUrl}${signature}`;
 
-  // メーラーを起動
+  // 1. メーラーを起動
   window.location.href = `mailto:${p.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fullBody)}`;
 
-  // ステータスを更新
+  // 2. スプレッドシートのステータスを更新
   await fetch(url, { method: "POST", body: JSON.stringify({ type: "updateStatus", id: id, status: status }) });
+  
   fetchData(); 
   closeModal();
 } // 🌟 ここが抜けていた閉じカッコです
@@ -238,7 +241,7 @@ function reCalc() {
   let total = (sa * (masterPrices.s_a_price || 0)) + (sc * (masterPrices.s_c_price || 0)) + 
               (ga * (masterPrices.g_a_price || 0)) + (gc * (masterPrices.g_c_price || 0));
 
-  // 2. 日付判定
+  // 2. 日付判定（当日以降なら自動加算）
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const eventDate = new Date(masterPrices.event_date);
@@ -260,7 +263,9 @@ function showPage(p) {
 
 function filterTable() {
   const q = document.getElementById("searchInput").value.toLowerCase();
-  document.querySelectorAll(".order-item").forEach(item => { item.style.display = item.innerText.toLowerCase().includes(q) ? "flex" : "none"; });
+  document.querySelectorAll(".order-item").forEach(item => { 
+    item.style.display = item.innerText.toLowerCase().includes(q) ? "flex" : "none"; 
+  });
 }
 
 async function autoZip(z) {
@@ -294,5 +299,8 @@ async function saveEdit() {
   closeModal();
 }
 
-function closeModal() { document.getElementById("detail-modal").style.display = "none"; }
+function closeModal() { 
+  document.getElementById("detail-modal").style.display = "none"; 
+}
+
 window.onload = fetchData;
