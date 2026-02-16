@@ -1,4 +1,4 @@
-const url = "https://script.google.com/macros/s/AKfycbwSHgzeGeiVKYIYdH4UNFiKMreWTC96OjzhTBVi9zJeCY4SsbAZ5CSGQr6HlisjKDWprQ/exec"; 
+const url = "https://script.google.com/macros/s/AKfycbxZIEYGp-b-ksXsj3WoxuuoITSRHMTcSsVvb_2g-xwR4PICpZ77ek4TiwYXUcQ3dn99fA/exec"; 
 let currentData = [];
 let selectedId = "";
 let masterPrices = {}; 
