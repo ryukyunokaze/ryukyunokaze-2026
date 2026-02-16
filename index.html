@@ -82,9 +82,10 @@
           <input type="text" id="name" placeholder="例：山田 太郎">
         </div>
 
-        <div class="field-group">
-          <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #1e3a8a;">性別</label>
-          <select id="gender" name="gender" required style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: white;">
+        <div class="field-row" style="display: flex; gap: 10px; margin-bottom: 15px;">
+          <div class="field-group" style="flex: 1;">
+            <label style="display: block; font-weight: bold; color: #1e3a8a; margin-bottom: 5px;">性別</label>
+            <select id="gender" name="gender" required style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: white;">
             <option value="">選択してください</option>
             <option value="男性">男性</option>
             <option value="女性">女性</option>
@@ -92,10 +93,10 @@
           </select>
         </div>
 
-        <div class="field-group" style="margin-top: 15px;">
-          <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #1e3a8a;">年代</label>
-          <select id="age" name="age" required style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: white;">
-            <option value="">選択してください</option>
+        <div class="field-group" style="flex: 1;">
+            <label style="display: block; font-weight: bold; color: #1e3a8a; margin-bottom: 5px;">年代</label>
+            <select id="age" name="age" required style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: white;">
+            <option value="">選択</option>
             <option value="10代">10代</option>
             <option value="20代">20代</option>
             <option value="30代">30代</option>
