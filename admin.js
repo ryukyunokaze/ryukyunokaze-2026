@@ -188,6 +188,7 @@ function printTicket(id) {
 }
 
 /** 5. 補助関数（メール・住所検索・再計算維持） **/
+/** 5. 補助関数（メール・住所検索・再計算維持） **/
 async function handleStatusMail(id, action) {
   const p = currentData.find(item => item.id === id);
   const status = (action === 'PAYMENT') ? "入金済み" : "完了";
@@ -207,7 +208,7 @@ async function handleStatusMail(id, action) {
     subject = replaceTags(masterPrices.mail_pay_sub);
     bodyMain = replaceTags(masterPrices.mail_pay_body);
   } else {
-    // 🌟 受取方法（郵送 or QR）によってシートの項目を自動選択
+    // 受取方法（郵送 or QR）によってシートの項目を自動選択
     const isQR = p.shipping.includes("QR");
     subject = replaceTags(isQR ? masterPrices.mail_sent_sub_qr : masterPrices.mail_sent_sub_post);
     bodyMain = replaceTags(isQR ? masterPrices.mail_sent_body_qr : masterPrices.mail_sent_body_post);
@@ -218,33 +219,35 @@ async function handleStatusMail(id, action) {
 
   const fullBody = `${p.name} 様\n\n${bodyMain}${qrUrl}${signature}`;
 
+  // メーラーを起動
   window.location.href = `mailto:${p.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fullBody)}`;
 
+  // ステータスを更新
+  await fetch(url, { method: "POST", body: JSON.stringify({ type: "updateStatus", id: id, status: status }) });
+  fetchData(); 
+  closeModal();
+} // 🌟 ここが抜けていた閉じカッコです
 
 function reCalc() {
-  function reCalc() {
   const sa = parseInt(document.getElementById('edit-sa').value) || 0;
   const sc = parseInt(document.getElementById('edit-sc').value) || 0;
   const ga = parseInt(document.getElementById('edit-ga').value) || 0;
   const gc = parseInt(document.getElementById('edit-gc').value) || 0;
 
   // 1. 基本単価で計算
-  let total = (sa * masterPrices.s_a_price) + (sc * masterPrices.s_c_price) + 
-              (ga * masterPrices.g_a_price) + (gc * masterPrices.g_c_price);
+  let total = (sa * (masterPrices.s_a_price || 0)) + (sc * (masterPrices.s_c_price || 0)) + 
+              (ga * (masterPrices.g_a_price || 0)) + (gc * (masterPrices.g_c_price || 0));
 
-  // 2. 日付判定（シートの event_date を使用）
+  // 2. 日付判定
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // 時間をリセットして日付のみで比較
-  
+  today.setHours(0, 0, 0, 0);
   const eventDate = new Date(masterPrices.event_date);
   eventDate.setHours(0, 0, 0, 0);
 
-  // 今日がイベント当日以降なら加算
   if (today >= eventDate) {
     const doorFee = Number(masterPrices.door_ticket_fee) || 0;
-    total += (sa + ga) * doorFee; // 大人の枚数分だけ加算
+    total += (sa + ga) * doorFee;
   }
-
   document.getElementById('edit-total').value = total;
 }
 
@@ -264,16 +267,31 @@ async function autoZip(z) {
   if (z.length >= 7) {
     const r = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${z}`);
     const d = await r.json();
-    if (d.results) { document.getElementById("edit-pref").value = d.results[0].address1; document.getElementById("edit-city").value = d.results[0].address2 + d.results[0].address3; }
+    if (d.results) { 
+      document.getElementById("edit-pref").value = d.results[0].address1; 
+      document.getElementById("edit-city").value = d.results[0].address2 + d.results[0].address3; 
+    }
   }
 }
 
 async function saveEdit() {
   const d = {
-    type: "editData", id: selectedId, zip: document.getElementById("edit-zip").value, pref: document.getElementById("edit-pref").value, city: document.getElementById("edit-city").value, rest: document.getElementById("edit-rest").value, s_a: document.getElementById("edit-sa").value, s_c: document.getElementById("edit-sc").value, g_a: document.getElementById("edit-ga").value, g_c: document.getElementById("edit-gc").value, total: document.getElementById("edit-total").value, remarks: document.getElementById("edit-remarks").value
+    type: "editData", 
+    id: selectedId, 
+    zip: document.getElementById("edit-zip").value, 
+    pref: document.getElementById("edit-pref").value, 
+    city: document.getElementById("edit-city").value, 
+    rest: document.getElementById("edit-rest").value, 
+    s_a: document.getElementById("edit-sa").value, 
+    s_c: document.getElementById("edit-sc").value, 
+    g_a: document.getElementById("edit-ga").value, 
+    g_c: document.getElementById("edit-gc").value, 
+    total: document.getElementById("edit-total").value, 
+    remarks: document.getElementById("edit-remarks").value
   };
   await fetch(url, { method: "POST", body: JSON.stringify(d) });
-  fetchData(); closeModal();
+  fetchData(); 
+  closeModal();
 }
 
 function closeModal() { document.getElementById("detail-modal").style.display = "none"; }
