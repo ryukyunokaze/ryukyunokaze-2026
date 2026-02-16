@@ -1,7 +1,7 @@
 // =========================================
 // 1. 基本設定（あなたのGASのURLをここに貼る）
 // =========================================
-const url = "https://script.google.com/macros/s/AKfycbxGjdRPDHJKB15SlGMXD74kndMQoYNq8o_t3SPSbOQgl_wfndgSySOzSWcCvOWvDl5TcQ/exec"; 
+const url = "https://script.google.com/macros/s/AKfycbxZJoEMBnzVsVQ5GncxOvymwIV5HYXupUQtKKM5DEZqw9Ge5dkZTxnSdJOOQY3W35Rk3g/exec"; 
 
 // 公演日（当日料金判定用：必要に応じて日付を調整してください）
 const PERFORMANCE_DATE = new Date("2026-06-01T00:00:00");
@@ -88,6 +88,13 @@ function confirmOrder() {
   const name = document.getElementById("name").value;
   const tel = document.getElementById("tel").value;
   const email = document.getElementById("email").value;
+  const gender = document.querySelector('select[name="gender"]').value;
+  const age = document.querySelector('select[name="age"]').value;
+  // 未入力チェック（任意ですが入れると親切です）
+  if (!gender || !age) {
+    alert("性別と年代を選択してください。");
+    return;
+  }
   const zip = document.getElementById("zip").value;
   const pref = document.getElementById("pref").value;
   const city = document.getElementById("city").value;
@@ -104,7 +111,11 @@ function confirmOrder() {
   if (document.getElementById("conf-name")) document.getElementById("conf-name").innerText = name;
   if (document.getElementById("conf-tel")) document.getElementById("conf-tel").innerText = tel;
   if (document.getElementById("conf-email")) document.getElementById("conf-email").innerText = email;
+
   if (document.getElementById("conf-shipping")) document.getElementById("conf-shipping").innerText = shipping;
+  if (document.getElementById("conf-gender")) document.getElementById("conf-gender").innerText = gender;
+  if (document.getElementById("conf-age")) document.getElementById("conf-age").innerText = age;
+  
   if (document.getElementById("conf-address")) {
     document.getElementById("conf-address").innerText = `〒${zip} ${pref}${city}${rest}`;
   }
@@ -179,6 +190,8 @@ async function submitOrder() {
     g_c: document.getElementById("g_c").value,
     total: document.getElementById("totalDisplay").innerText.replace(/,/g, ''),
     shipping: document.getElementById("shipping").value,
+    gender: document.querySelector('select[name="gender"]').value,
+    age: document.querySelector('select[name="age"]').value
     salesType: "オンライン予約"
   };
 
