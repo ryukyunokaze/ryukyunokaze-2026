@@ -1,4 +1,4 @@
-const url = "https://script.google.com/macros/s/AKfycbyOcrkwCCapMiMcXhtXkZdG0eN9hr72slPl3MXVD0uLHO57DwxoQjIiy_tEqlIxrzFhmQ/exec"; 
+const url = "https://script.google.com/macros/s/AKfycbzhfkeHtk-ZPN3iSA5Chi_t46JqVG_6YGjxas0MgySYSM9Ypau_c8AxhGxfmVWCgd1LNw/exec"; 
 let currentData = [];
 let selectedId = "";
 
@@ -173,7 +173,7 @@ function printTicket(id) {
         </div>
         <div style="position: absolute; bottom: 12px; right: 20px; text-align: right;">
           <div style="font-size: 0.6rem; color: #666;">Ticket Price (tax incl.)</div>
-          <div style="font-size: 1.4rem; font-weight: bold;">¥${t.price.toLocaleString()}</div>
+          <div style="font-size: 1.3rem; font-weight: bold;">¥${(masterPrices[t.type.includes("Sエリア") ? (t.type.includes("大人") ? "s_a_price" : "s_c_price") : (t.type.includes("大人") ? "g_a_price" : "g_c_price")] || t.price).toLocaleString()}</div>
         </div>
       </div>
       <div style="flex: 1; padding: 10px; background: #fafafa; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
@@ -191,23 +191,61 @@ function printTicket(id) {
 async function handleStatusMail(id, action) {
   const p = currentData.find(item => item.id === id);
   const status = (action === 'PAYMENT') ? "入金済み" : "完了";
+  
   if(!confirm(status + " に更新してメールを起動しますか？")) return;
-  const subject = (action === 'PAYMENT') ? "【入金確認】琉球の風 2026 受領通知" : "【発送連絡】琉球の風 2026 チケットお届け";
-  const mySiteUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026"; 
-  const body = `${p.name} 様\n\n琉球の風 事務局です。\n${status}の処理が完了いたしました。\n\n${p.shipping.includes("QR") ? "▼QRコード表示URL\n" + mySiteUrl + "/qr.html?id=" + p.id + "-1" : "チケットは本日郵送いたしました。"}\n\n当日お待ちしております。`;
-  const a = document.createElement('a');
-  a.href = `mailto:${p.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  a.click();
-  await fetch(url, { method: "POST", body: JSON.stringify({ type: "updateStatus", id: id, status: status }) });
-  fetchData(); closeModal();
-}
+
+  const replaceTags = (text) => {
+    if (!text) return "";
+    return text
+      .replace(/{event_title}/g, masterPrices.event_title || "").replace(/{name}/g, p.name || "");
+  };
+
+  const signature = "\n\n" + (masterPrices.mail_signature || "");
+  let subject, bodyMain;
+
+  if (action === 'PAYMENT') {
+    subject = replaceTags(masterPrices.mail_pay_sub);
+    bodyMain = replaceTags(masterPrices.mail_pay_body);
+  } else {
+    // 🌟 受取方法（郵送 or QR）によってシートの項目を自動選択
+    const isQR = p.shipping.includes("QR");
+    subject = replaceTags(isQR ? masterPrices.mail_sent_sub_qr : masterPrices.mail_sent_sub_post);
+    bodyMain = replaceTags(isQR ? masterPrices.mail_sent_body_qr : masterPrices.mail_sent_body_post);
+  }
+
+  const mySiteUrl = window.location.origin + window.location.pathname.replace("admin.html", "");
+  const qrUrl = p.shipping.includes("QR") ? `\n\n▼QRコード表示URL\n${mySiteUrl}qr.html?id=${p.id}-1` : "";
+
+  const fullBody = `${p.name} 様\n\n${bodyMain}${qrUrl}${signature}`;
+
+  window.location.href = `mailto:${p.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fullBody)}`;
+
 
 function reCalc() {
-  const sa = Number(document.getElementById("edit-sa").value)||0; const sc = Number(document.getElementById("edit-sc").value)||0;
-  const ga = Number(document.getElementById("edit-ga").value)||0; const gc = Number(document.getElementById("edit-gc").value)||0;
-  const total = (sa+sc)*3500 + (ga+gc)*1500;
-  document.getElementById("edit-total").value = total;
-  document.getElementById("display-total").innerText = total.toLocaleString();
+  function reCalc() {
+  const sa = parseInt(document.getElementById('edit-sa').value) || 0;
+  const sc = parseInt(document.getElementById('edit-sc').value) || 0;
+  const ga = parseInt(document.getElementById('edit-ga').value) || 0;
+  const gc = parseInt(document.getElementById('edit-gc').value) || 0;
+
+  // 1. 基本単価で計算
+  let total = (sa * masterPrices.s_a_price) + (sc * masterPrices.s_c_price) + 
+              (ga * masterPrices.g_a_price) + (gc * masterPrices.g_c_price);
+
+  // 2. 日付判定（シートの event_date を使用）
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // 時間をリセットして日付のみで比較
+  
+  const eventDate = new Date(masterPrices.event_date);
+  eventDate.setHours(0, 0, 0, 0);
+
+  // 今日がイベント当日以降なら加算
+  if (today >= eventDate) {
+    const doorFee = Number(masterPrices.door_ticket_fee) || 0;
+    total += (sa + ga) * doorFee; // 大人の枚数分だけ加算
+  }
+
+  document.getElementById('edit-total').value = total;
 }
 
 function showPage(p) {

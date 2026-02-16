@@ -1,7 +1,7 @@
 // =========================================
 // 1. 基本設定（あなたのGASのURLをここに貼る）
 // =========================================
-const url = "https://script.google.com/macros/s/AKfycbyOcrkwCCapMiMcXhtXkZdG0eN9hr72slPl3MXVD0uLHO57DwxoQjIiy_tEqlIxrzFhmQ/exec"; 
+const url = "https://script.google.com/macros/s/AKfycbzhfkeHtk-ZPN3iSA5Chi_t46JqVG_6YGjxas0MgySYSM9Ypau_c8AxhGxfmVWCgd1LNw/exec"; 
 
 // 公演日（当日料金判定用：必要に応じて日付を調整してください）
 const PERFORMANCE_DATE = new Date("2026-06-01T00:00:00");
