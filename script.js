@@ -3,33 +3,39 @@
 // =========================================
 const url = "https://script.google.com/macros/s/AKfycbxZJoEMBnzVsVQ5GncxOvymwIV5HYXupUQtKKM5DEZqw9Ge5dkZTxnSdJOOQY3W35Rk3g/exec"; 
 
-// 設定データを保持する変数
+// 設定データを保持するグローバル変数
 let masterPrices = {};
 
-// ページ読み込み時に設定（単価・振込先）を取得 🌟新機能
+// 🌟 ページ読み込み時に設定を取得（単価・振込先）
 async function loadConfig() {
   try {
     const response = await fetch(`${url}?type=getConfig`);
     masterPrices = await response.json();
     
-    // 振込先案内を表示（Step4）
-    if(document.getElementById("bank-info-content")) {
-      document.getElementById("bank-info-content").innerText = masterPrices.bank_info || "設定シートを確認してください";
+    // 振込先案内を表示（Step4用）
+    const bankArea = document.getElementById("bank-info-content");
+    if(bankArea) {
+      bankArea.innerText = masterPrices.bank_info || "管理画面の『単価設定』で振込先を入力してください。";
     }
     
-    // 画面上の単価表示を更新
+    // 画面上の単価表示もシートに合わせる
     if(document.getElementById("price-sa-display")) document.getElementById("price-sa-display").innerText = (masterPrices.s_a_price || 3500).toLocaleString() + "円";
     if(document.getElementById("price-ga-display")) document.getElementById("price-ga-display").innerText = (masterPrices.g_a_price || 1500).toLocaleString() + "円";
     
     console.log("設定を読み込みました", masterPrices);
   } catch (e) {
     console.error("設定読み込みエラー:", e);
+    const bankArea = document.getElementById("bank-info-content");
+    if (bankArea) bankArea.innerText = "振込先情報の取得に失敗しました。";
   }
 }
-window.onload = loadConfig;
+
+// ページ読み込み完了時に実行
+window.addEventListener('load', loadConfig);
+
 
 // =========================================
-// 2. 枚数計算ロジック (calc) 🌟単価設定を参照
+// 2. 枚数計算ロジック (calc)
 // =========================================
 function calc() {
   const saCount = Number(document.getElementById("s_a").value) || 0;
@@ -43,7 +49,7 @@ function calc() {
   const gaPrice = masterPrices.g_a_price || 1500;
   const gcPrice = masterPrices.g_c_price || 0;
 
-  // 当日加算 (+500円) の判定
+  // 当日加算判定
   const now = new Date();
   const perfDate = masterPrices.event_date ? new Date(masterPrices.event_date) : new Date("2026-06-01");
   const addPrice = (now >= perfDate) ? (masterPrices.door_ticket_fee || 500) : 0; 
@@ -61,7 +67,7 @@ function calc() {
 }
 
 // =========================================
-// ステップ1 → ステップ2 (次へ進む)
+// 3. 画面遷移（Step1 ↔ Step2）
 // =========================================
 function goToStep2() {
   const sa = Number(document.getElementById("s_a").value) || 0;
@@ -86,38 +92,48 @@ function goToStep1Back() {
 }
 
 // =========================================
-// 4. ステップ2 → ステップ3 (最終確認) 🌟性別・年代取得
+// 4. ステップ2 → ステップ3 (最終確認) 
 // =========================================
 function confirmOrder() {
   const name = document.getElementById("name").value;
   const tel = document.getElementById("tel").value;
   const email = document.getElementById("email").value;
   
-  // 性別と年代の取得（プルダウン）
-  const gender = document.querySelector('select[name="gender"]').value;
-  const age = document.querySelector('select[name="age"]').value;
+  // 性別と年代の取得
+  const genderEl = document.querySelector('select[name="gender"]');
+  const ageEl = document.querySelector('select[name="age"]');
+  const gender = genderEl ? genderEl.value : "";
+  const age = ageEl ? ageEl.value : "";
 
   if (!name || !tel || !email || !gender || !age) {
     alert("必須項目（お名前・性別・年代・電話番号・メールアドレス）をすべて入力してください。");
     return;
   }
 
+  // --- 確認画面への反映 ---
+  if (document.getElementById("conf-name")) document.getElementById("conf-name").innerText = name;
+  if (document.getElementById("conf-gender")) document.getElementById("conf-gender").innerText = gender;
+  if (document.getElementById("conf-age")) document.getElementById("conf-age").innerText = age;
+  if (document.getElementById("conf-tel")) document.getElementById("conf-tel").innerText = tel;
+  if (document.getElementById("conf-email")) document.getElementById("conf-email").innerText = email;
+  
   const zip = document.getElementById("zip").value;
   const pref = document.getElementById("pref").value;
   const city = document.getElementById("city").value;
   const rest = document.getElementById("rest").value;
+  if (document.getElementById("conf-address")) {
+    document.getElementById("conf-address").innerText = `〒${zip} ${pref}${city}${rest}`;
+  }
+  
   const shipping = document.getElementById("shipping").value;
-  const remarks = document.getElementById("remarks").value;
-
-  // 確認画面へセット
-  if (document.getElementById("conf-name")) document.getElementById("conf-name").innerText = name;
-  if (document.getElementById("conf-tel")) document.getElementById("conf-tel").innerText = tel;
-  if (document.getElementById("conf-email")) document.getElementById("conf-email").innerText = email;
   if (document.getElementById("conf-shipping")) document.getElementById("conf-shipping").innerText = shipping;
-  if (document.getElementById("conf-address")) document.getElementById("conf-address").innerText = `〒${zip} ${pref}${city}${rest}`;
-  if (document.getElementById("conf-remarks")) document.getElementById("conf-remarks").innerText = remarks || "特になし";
 
-  // 枚数詳細
+  const remarks = document.getElementById("remarks").value;
+  if (document.getElementById("conf-remarks")) {
+    document.getElementById("conf-remarks").innerText = remarks || "特になし";
+  }
+
+  // 枚数詳細のテキスト作成
   const sa = Number(document.getElementById("s_a").value) || 0;
   const sc = Number(document.getElementById("s_c").value) || 0;
   const ga = Number(document.getElementById("g_a").value) || 0;
@@ -132,6 +148,7 @@ function confirmOrder() {
   const total = document.getElementById("totalDisplay").innerText;
   if (document.getElementById("conf-total")) document.getElementById("conf-total").innerText = total;
 
+  // 画面切り替え
   document.getElementById("step2").style.display = "none";
   document.getElementById("step3").style.display = "block";
   window.scrollTo(0, 0);
@@ -144,7 +161,7 @@ function goToStep2Back() {
 }
 
 // =========================================
-// 5. 注文確定（GASへ送信） 🌟性別・年代をデータに追加
+// 5. 注文確定（GASへ送信）
 // =========================================
 async function submitOrder() {
   const btn = document.querySelector(".submit-btn-final");
@@ -170,7 +187,7 @@ async function submitOrder() {
     total: document.getElementById("totalDisplay").innerText.replace(/,/g, ''),
     shipping: document.getElementById("shipping").value,
     gender: document.querySelector('select[name="gender"]').value,
-    age: document.querySelector('select[name="age"]').value, // 🌟 カンマ漏れ修正
+    age: document.querySelector('select[name="age"]').value,
     salesType: "オンライン予約"
   };
 
