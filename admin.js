@@ -1,6 +1,7 @@
 const url = "https://script.google.com/macros/s/AKfycbxGjdRPDHJKB15SlGMXD74kndMQoYNq8o_t3SPSbOQgl_wfndgSySOzSWcCvOWvDl5TcQ/exec"; 
 let currentData = [];
 let selectedId = "";
+let masterPrices = {}; // 🌟 追加：設定データを保存する箱
 
 /**
  * 1. データの取得と反映（統計・集計機能維持）
@@ -12,6 +13,7 @@ async function fetchData() {
     const response = await fetch(`${url}?type=getAdmin`);
     const result = await response.json();
     currentData = result.orders.reverse(); 
+    masterPrices = result.config; //
     const setVal = (id, val) => { if(document.getElementById(id)) document.getElementById(id).innerText = val; };
     
     setVal("stat-total-orders", result.stats.total_orders || 0);
