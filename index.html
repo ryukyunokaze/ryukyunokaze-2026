@@ -71,13 +71,39 @@
       </div>
       
       <button class="submit-btn-main" onclick="goToStep2()">購入者情報の入力へ進む</button>
-    </div> <div id="step2" style="display: none;">
+    </div>
+
+    <div id="step2" style="display: none;">
       <div class="info-card">
         <h2 class="step-title">👤 ご購入者情報の入力</h2>
         
         <div class="field-group">
           <label>お名前（フルネーム）</label>
           <input type="text" id="name" placeholder="例：山田 太郎">
+        </div>
+
+        <div class="field-group">
+          <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #1e3a8a;">性別</label>
+          <select id="gender" name="gender" required style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: white;">
+            <option value="">選択してください</option>
+            <option value="男性">男性</option>
+            <option value="女性">女性</option>
+            <option value="回答しない">回答しない</option>
+          </select>
+        </div>
+
+        <div class="field-group" style="margin-top: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #1e3a8a;">年代</label>
+          <select id="age" name="age" required style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: white;">
+            <option value="">選択してください</option>
+            <option value="10代">10代</option>
+            <option value="20代">20代</option>
+            <option value="30代">30代</option>
+            <option value="40代">40代</option>
+            <option value="50代">50代</option>
+            <option value="60代">60代</option>
+            <option value="70代以上">70代以上</option>
+          </select>
         </div>
 
         <div class="field-row">
@@ -130,7 +156,9 @@
           <button type="button" class="back-btn" onclick="goToStep1Back()">← 枚数選択に戻る</button>
         </div>
       </div>
-    </div> <div id="step3" style="display: none;">
+    </div>
+
+    <div id="step3" style="display: none;">
       <div class="info-card">
         <h2 class="step-title">📋 ご注文内容の最終確認</h2>
         
@@ -152,19 +180,21 @@
         <button type="button" class="submit-btn-final" onclick="submitOrder()">🚀 この内容で注文を確定する</button>
         <button type="button" class="back-btn" onclick="goToStep2Back()">← 入力内容を修正する</button>
       </div>
-    </div> <div id="step4" style="display: none;">
+    </div>
+
+    <div id="step4" style="display: none;">
       <div class="info-card" style="text-align: center; padding: 50px 20px;">
         <div style="font-size: 60px; color: #10b981; margin-bottom: 20px;">✅</div>
         <h2 style="color: #1e3a8a; margin-bottom: 15px;">ご注文ありがとうございます！</h2>
-        <div style="background: #fff9db; padding: 15px; border-radius: 10px; text-align: left; margin-bottom: 20px;">
-          <strong>【お振込先案内】</strong><br>
-          〇〇銀行 △△支店 普通 1234567<br>
-          名義：エイサー実行委員会
+        <div style="background: #fff9db; padding: 15px; border-radius: 10px; text-align: left; margin-bottom: 20px; white-space: pre-wrap;">
+<strong id="bank-info-title">【お振込先案内】</strong>
+<span id="bank-info-content">読み込み中...</span>
         </div>
         <button onclick="location.reload()" class="back-btn">トップページへ戻る</button>
       </div>
     </div>
 
-  </div> <script src="script.js"></script>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
