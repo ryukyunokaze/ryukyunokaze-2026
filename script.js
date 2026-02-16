@@ -1,7 +1,7 @@
 // =========================================
 // 1. 基本設定
 // =========================================
-const url = "https://script.google.com/macros/s/AKfycbzsjbpbxC3GfTj3Ec9F62dhGeeI7RoWQgHeUBj-4qaHBfKoXwKiRS57L8ohIOWyWE0N7g/exec"; 
+const url = "https://script.google.com/macros/s/AKfycbwtX-r19SSoAo7Fg29mXodvYa09ru_RsWdX1BTvAK2PMtFAf0hrjfC_5uUgKqApF1B_Zg/exec"; 
 
 // 設定データを保持するグローバル変数
 let masterPrices = {};
