@@ -1,13 +1,35 @@
 // =========================================
-// 1. 基本設定（あなたのGASのURLをここに貼る）
+// 1. 基本設定
 // =========================================
-const url = "https://script.google.com/macros/s/AKfycbxZJoEMBnzVsVQ5GncxOvymwIV5HYXupUQtKKM5DEZqw9Ge5dkZTxnSdJOOQY3W35Rk3g/exec"; 
+const url = "https://script.google.com/macros/s/AKfycbZJoEMBnzVsVQ5GncxOvymwIV5HYXupUQtKKM5DEZqw9Ge5dkZTxnSdJOOQY3W35Rk3g/exec"; 
 
-// 公演日（当日料金判定用：必要に応じて日付を調整してください）
-const PERFORMANCE_DATE = new Date("2026-06-01T00:00:00");
+// 設定データを保持する変数
+let masterPrices = {};
+
+// ページ読み込み時に設定（単価・振込先）を取得 🌟新機能
+async function loadConfig() {
+  try {
+    const response = await fetch(`${url}?type=getConfig`);
+    masterPrices = await response.json();
+    
+    // 振込先案内を表示（Step4）
+    if(document.getElementById("bank-info-content")) {
+      document.getElementById("bank-info-content").innerText = masterPrices.bank_info || "設定シートを確認してください";
+    }
+    
+    // 画面上の単価表示を更新
+    if(document.getElementById("price-sa-display")) document.getElementById("price-sa-display").innerText = (masterPrices.s_a_price || 3500).toLocaleString() + "円";
+    if(document.getElementById("price-ga-display")) document.getElementById("price-ga-display").innerText = (masterPrices.g_a_price || 1500).toLocaleString() + "円";
+    
+    console.log("設定を読み込みました", masterPrices);
+  } catch (e) {
+    console.error("設定読み込みエラー:", e);
+  }
+}
+window.onload = loadConfig;
 
 // =========================================
-// 2. 枚数計算ロジック (calc)
+// 2. 枚数計算ロジック (calc) 🌟単価設定を参照
 // =========================================
 function calc() {
   const saCount = Number(document.getElementById("s_a").value) || 0;
@@ -15,31 +37,33 @@ function calc() {
   const gaCount = Number(document.getElementById("g_a").value) || 0;
   const gcCount = Number(document.getElementById("g_c").value) || 0;
 
+  // 設定シートの単価、なければデフォルト値を使用
+  const saPrice = masterPrices.s_a_price || 3500;
+  const scPrice = masterPrices.s_c_price || 0;
+  const gaPrice = masterPrices.g_a_price || 1500;
+  const gcPrice = masterPrices.g_c_price || 0;
+
   // 当日加算 (+500円) の判定
   const now = new Date();
-  const addPrice = (now >= PERFORMANCE_DATE) ? 500 : 0; 
+  const perfDate = masterPrices.event_date ? new Date(masterPrices.event_date) : new Date("2026-06-01");
+  const addPrice = (now >= perfDate) ? (masterPrices.door_ticket_fee || 500) : 0; 
 
-  // 金額計算（大人にのみ加算、子供は0円固定）
-  const total = (saCount * (3500 + addPrice)) + 
-                (scCount * 0) + 
-                (gaCount * (1500 + addPrice)) + 
-                (gcCount * 0);
+  // 金額計算
+  const total = (saCount * (saPrice + addPrice)) + 
+                (scCount * scPrice) + 
+                (gaCount * (gaPrice + addPrice)) + 
+                (gcCount * gcPrice);
 
-  // 表示の更新
   const display = document.getElementById("totalDisplay");
   if (display) {
     display.innerText = total.toLocaleString();
   }
 }
 
-
 // =========================================
 // ステップ1 → ステップ2 (次へ進む)
 // =========================================
 function goToStep2() {
-  console.log("goToStep2 が呼び出されました");
-
-  // 入力値の取得
   const sa = Number(document.getElementById("s_a").value) || 0;
   const sc = Number(document.getElementById("s_c").value) || 0;
   const ga = Number(document.getElementById("g_a").value) || 0;
@@ -50,80 +74,50 @@ function goToStep2() {
     return;
   }
 
-  // ★各関数の中で、操作したいIDを都度定義するのが最も確実です
-  const step1 = document.getElementById("step1");
-  const step2 = document.getElementById("step2");
-
-  if (step1 && step2) {
-    step1.style.display = "none";  // 枚数選択を隠す
-    step2.style.display = "block"; // 入力画面を出す
-    window.scrollTo(0, 0);
-  }
-} // ← ここで確実に goToStep2 を閉じます
-
-// =========================================
-// ステップ2 → ステップ1 (戻る)
-// =========================================
-function goToStep1Back() {
-  console.log("goToStep1Back が呼び出されました");
-  
-  // ★戻る関数の中でも、改めてIDを定義（取得）します
-  const step1 = document.getElementById("step1");
-  const step2 = document.getElementById("step2");
-
-  if (step1 && step2) {
-    step1.style.display = "block"; // 枚数選択を表示する
-    step2.style.display = "none";  // 入力画面を隠す
-    window.scrollTo(0, 0);
-  } else {
-    console.error("ステップ1または2のIDが見つかりません。");
-  }
+  document.getElementById("step1").style.display = "none";
+  document.getElementById("step2").style.display = "block";
+  window.scrollTo(0, 0);
 }
+
+function goToStep1Back() {
+  document.getElementById("step1").style.display = "block";
+  document.getElementById("step2").style.display = "none";
+  window.scrollTo(0, 0);
+}
+
 // =========================================
-// 4. ステップ2 → ステップ3 (情報入力から最終確認へ)
+// 4. ステップ2 → ステップ3 (最終確認) 🌟性別・年代取得
 // =========================================
 function confirmOrder() {
-  console.log("confirmOrder が呼び出されました");
-
   const name = document.getElementById("name").value;
   const tel = document.getElementById("tel").value;
   const email = document.getElementById("email").value;
+  
+  // 性別と年代の取得（プルダウン）
   const gender = document.querySelector('select[name="gender"]').value;
   const age = document.querySelector('select[name="age"]').value;
-  // 未入力チェック（任意ですが入れると親切です）
-  if (!gender || !age) {
-    alert("性別と年代を選択してください。");
+
+  if (!name || !tel || !email || !gender || !age) {
+    alert("必須項目（お名前・性別・年代・電話番号・メールアドレス）をすべて入力してください。");
     return;
   }
+
   const zip = document.getElementById("zip").value;
   const pref = document.getElementById("pref").value;
   const city = document.getElementById("city").value;
   const rest = document.getElementById("rest").value;
-  const shipping= document.getElementById("shipping").value;
-　const remarks = document.getElementById("remarks").value;
-  // 必須チェック
-  if (!name || !tel || !email) {
-    alert("お名前、電話番号、メールアドレスは必須入力です。");
-    return;
-  }
+  const shipping = document.getElementById("shipping").value;
+  const remarks = document.getElementById("remarks").value;
 
-  // --- 値のセット ---
+  // 確認画面へセット
   if (document.getElementById("conf-name")) document.getElementById("conf-name").innerText = name;
   if (document.getElementById("conf-tel")) document.getElementById("conf-tel").innerText = tel;
   if (document.getElementById("conf-email")) document.getElementById("conf-email").innerText = email;
-
   if (document.getElementById("conf-shipping")) document.getElementById("conf-shipping").innerText = shipping;
-  if (document.getElementById("conf-gender")) document.getElementById("conf-gender").innerText = gender;
-  if (document.getElementById("conf-age")) document.getElementById("conf-age").innerText = age;
-  
-  if (document.getElementById("conf-address")) {
-    document.getElementById("conf-address").innerText = `〒${zip} ${pref}${city}${rest}`;
-  }
-  if (document.getElementById("conf-remarks")) {
-    document.getElementById("conf-remarks").innerText = remarks || "特になし";
-  }
+  if (document.getElementById("conf-address")) document.getElementById("conf-address").innerText = `〒${zip} ${pref}${city}${rest}`;
+  if (document.getElementById("conf-remarks")) document.getElementById("conf-remarks").innerText = remarks || "特になし";
 
-  // 枚数詳細のテキスト作成（以前のコードを活用）
+  // 枚数詳細
   const sa = Number(document.getElementById("s_a").value) || 0;
   const sc = Number(document.getElementById("s_c").value) || 0;
   const ga = Number(document.getElementById("g_a").value) || 0;
@@ -133,39 +127,24 @@ function confirmOrder() {
   if (sc > 0) ticketHtml += `Sエリア 小学生以下：${sc}名<br>`;
   if (ga > 0) ticketHtml += `一般エリア 大人：${ga}枚<br>`;
   if (gc > 0) ticketHtml += `一般エリア 小学生以下：${gc}名<br>`;
-
-  if (document.getElementById("conf-ticket-details")) {
-    document.getElementById("conf-ticket-details").innerHTML = ticketHtml;
-  }
+  if (document.getElementById("conf-ticket-details")) document.getElementById("conf-ticket-details").innerHTML = ticketHtml;
 
   const total = document.getElementById("totalDisplay").innerText;
   if (document.getElementById("conf-total")) document.getElementById("conf-total").innerText = total;
 
-  // --- 画面切り替え ---
   document.getElementById("step2").style.display = "none";
   document.getElementById("step3").style.display = "block";
   window.scrollTo(0, 0);
 }
 
-// 【戻る処理】ステップ3（確認画面）からステップ2（入力画面）へ戻る
 function goToStep2Back() {
-  console.log("goToStep2Back が呼び出されました");
-  
-  const step2 = document.getElementById("step2");
-  const step3 = document.getElementById("step3");
-
-  if (step2 && step3) {
-    step3.style.display = "none";  // 確認画面を隠す
-    step2.style.display = "block"; // 入力画面を出す
-    window.scrollTo(0, 0);         // 画面トップへ移動
-  } else {
-    console.error("画面が見つかりません（ID: step2 または step3）");
-  }
+  document.getElementById("step3").style.display = "none";
+  document.getElementById("step2").style.display = "block";
+  window.scrollTo(0, 0);
 }
 
-
 // =========================================
-// 5. 注文確定（GASへ送信）
+// 5. 注文確定（GASへ送信） 🌟性別・年代をデータに追加
 // =========================================
 async function submitOrder() {
   const btn = document.querySelector(".submit-btn-final");
@@ -175,7 +154,7 @@ async function submitOrder() {
   }
 
   const data = {
-    type: "submitForm", // GAS側の処理名に合わせてください
+    type: "submitForm",
     name: document.getElementById("name").value,
     tel: document.getElementById("tel").value,
     email: document.getElementById("email").value,
@@ -191,12 +170,11 @@ async function submitOrder() {
     total: document.getElementById("totalDisplay").innerText.replace(/,/g, ''),
     shipping: document.getElementById("shipping").value,
     gender: document.querySelector('select[name="gender"]').value,
-    age: document.querySelector('select[name="age"]').value
+    age: document.querySelector('select[name="age"]').value, // 🌟 カンマ漏れ修正
     salesType: "オンライン予約"
   };
 
   try {
-    // 2. GASへ送信
     const response = await fetch(url, {
       method: "POST",
       body: JSON.stringify(data)
@@ -204,7 +182,6 @@ async function submitOrder() {
     const result = await response.json();
 
     if (result.result === "success") {
-      // 3. 送信成功：完了画面（ステップ4）へ
       document.getElementById("step3").style.display = "none";
       document.getElementById("step4").style.display = "block";
       window.scrollTo(0, 0);
