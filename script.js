@@ -2,7 +2,7 @@
 // 1. 基本設定
 // =========================================
 // 🌟 修正：最新のデプロイURLに貼り替えてください
-const url = "https://script.google.com/macros/s/AKfycbzvsv2eybuErW34Re_M5m0WSbNT9odxwhfdFwskdDarykfp7nv1PO_Z7czEFZoM8R_mxQ/exec"; 
+const url = "https://script.google.com/macros/s/AKfycbwCoOotyuBoVPla6am3IsFMAdhh8kldLB6Fm9XZVCBoIwqwJ_TbuARkW9bMLJCrF38rUw/exec"; 
 
 let masterPrices = {};
 
