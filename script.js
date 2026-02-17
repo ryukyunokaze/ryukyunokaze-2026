@@ -2,7 +2,7 @@
 // 1. 基本設定
 // =========================================
 // 🌟 修正：最新のデプロイURLに貼り替えてください
-const url = "https://script.google.com/macros/s/AKfycbyyC7jrlWyKxmUj40OM5CUyubWgWE8dC8DUvBd-QNU9TST2QoJh06WAJJ2NIfmAhPVlXA/exec"; 
+const url = "https://script.google.com/macros/s/AKfycbzB_v6RInCtjc5XjASQMFAQWMNI2tI7d1xgoOW9wH5rP6nt4jry_VXAa8nrmedT6gn1dw/exec"; 
 
 let masterPrices = {};
 
@@ -106,7 +106,25 @@ function confirmOrder() {
   
   document.getElementById("conf-shipping").innerText = document.getElementById("shipping").value;
   document.getElementById("conf-remarks").innerText = document.getElementById("remarks").value || "特になし";
+
+
+  // 🌟 枚数詳細を復活させる
+  const sa = Number(document.getElementById("s_a").value) || 0;
+  const sc = Number(document.getElementById("s_c").value) || 0;
+  const ga = Number(document.getElementById("g_a").value) || 0;
+  const gc = Number(document.getElementById("g_c").value) || 0;
+  
+  let ticketHtml = "";
+  if (sa > 0) ticketHtml += `Sエリア 大人：${sa}枚<br>`;
+  if (sc > 0) ticketHtml += `Sエリア 小学生以下：${sc}名<br>`;
+  if (ga > 0) ticketHtml += `一般エリア 大人：${ga}枚<br>`;
+  if (gc > 0) ticketHtml += `一般エリア 小学生以下：${gc}名<br>`;
+  
+  const ticketDisplay = document.getElementById("conf-ticket-details");
+  if (ticketDisplay) ticketDisplay.innerHTML = ticketHtml;
+
   document.getElementById("conf-total").innerText = document.getElementById("totalDisplay").innerText;
+  
 
   document.getElementById("step2").style.display = "none";
   document.getElementById("step3").style.display = "block";
@@ -137,13 +155,13 @@ async function submitOrder() {
     pref: document.getElementById("pref").value,
     city: document.getElementById("city").value,
     rest: document.getElementById("rest").value,
-    remarks: document.getElementById("remarks").value,
     s_a: document.getElementById("s_a").value,
     s_c: document.getElementById("s_c").value,
     g_a: document.getElementById("g_a").value,
     g_c: document.getElementById("g_c").value,
     total: document.getElementById("totalDisplay").innerText.replace(/,/g, ''),
     shipping: document.getElementById("shipping").value,
+    remarks: document.getElementById("remarks").value,
     gender: document.querySelector('select[name="gender"]').value,
     age: document.querySelector('select[name="age"]').value,
     salesType: "オンライン予約"
