@@ -24,8 +24,31 @@ async function fetchData() {
     
     setVal("stat-total-orders", result.stats.total_orders || 0);
     setVal("stat-total-persons", result.stats.total_persons || 0);
-    setVal("stat-total-money", (Number(result.stats.total_money) || 0).toLocaleString());
-    setVal("stat-paid-money", (Number(result.stats.paid_money) || 0).toLocaleString());
+    // --- 🌟 売上内訳の計算ロジックを追加 ---
+
+    let totalSales = 0; 
+    let paidSales = 0;  
+    currentData.forEach(p => {
+      if (p.status !== "キャンセル") {
+        const amount = Number(p.total) || 0;
+        totalSales += amount;
+        // 入金済み、完了、オキチケ、未入金オキチケ（オキチケ系は当日回収予定として計算に含める場合）
+        if (["入金済み", "完了", "オキチケ"].includes(p.status)) {
+          paidSales += amount;
+        }
+      }
+    });
+
+    // 統計カードの売上表示を上書き
+    const moneyEl = document.getElementById("stat-total-money");
+    if(moneyEl) {
+      moneyEl.innerHTML = `
+        ${totalSales.toLocaleString()} 円</div>
+        <div style="font-size:0.7rem; color:#cbd5e1; font-weight:normal; margin-top:2px;">
+          (内 ${paidSales.toLocaleString()} 円 入金済)
+        </div>
+      `;
+    }
 
     const ana = result.analysis;
     if (ana) {
@@ -392,7 +415,7 @@ function printTicket(id) {
         <h1 style="font-size: 1.3rem; font-weight: bold; color: #1e3a8a; margin: 0;">琉球の風 2026</h1>
         <div style="margin-top: 15px;">
           <div style="font-size: 0.6rem; color: #999;">SERIAL: ${branchId}</div>
-          <div style="font-size: 1.15rem; font-weight: bold; border-bottom: 1.5px solid #000; display: inline-block;">${p.name} 様</div>
+          <div style="margin-top: 15px;"></div>
           <div style="margin-top: 10px; font-size: 1.1rem; font-weight: bold; color: #1e3a8a;">【 ${t.type} 】</div>
         </div>
       </div>
