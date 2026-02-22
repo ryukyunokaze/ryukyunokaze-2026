@@ -166,34 +166,46 @@ function openModal(id, mode) {
           <button onclick="openModal('${p.id}', 'edit')" style="background:#f59e0b; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">✏️ 編集</button>
           <button onclick="printTicket('${p.id}')" style="background:#000; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">🎫 ぴあ風印刷</button>
         </div>
+        <button onclick="handleCancelStatus('${p.id}')" style="background:#fff; color:#e11d48; padding:10px; border-radius:10px; font-weight:bold; border:1.5px solid #e11d48; cursor:pointer; margin-top:5px;">🚫 この注文をキャンセルする</button>
+        </div>
       </div>
     `;
   } else {
     // 編集モード
     body.innerHTML = `
-      ${headerHtml}
-      <div style="display:flex; flex-direction:column; gap:10px; max-height:60vh; overflow-y:auto; padding:5px;">
-        <label style="font-size:0.7rem;">郵便番号</label>
-        <input type="text" id="edit-zip" value="${p.zip||''}" onblur="autoZip(this.value)" placeholder="郵便番号" style="padding:10px;">
-        <label style="font-size:0.7rem;">都道府県・市区町村</label>
-        <input type="text" id="edit-pref" value="${p.pref||''}" placeholder="都道府県" style="padding:10px;">
-        <input type="text" id="edit-city" value="${p.city||''}" placeholder="市区町村" style="padding:10px;">
-        <input type="text" id="edit-rest" value="${p.rest||''}" placeholder="番地・建物" style="padding:10px;">
-        
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; background:#f8fafc; padding:10px; border-radius:8px;">
-           <div><label style="font-size:0.7rem;">S大人</label><input type="number" id="edit-sa" value="${p.s_a}" oninput="reCalc()" style="width:100%; padding:5px;"></div>
-           <div><label style="font-size:0.7rem;">S子供</label><input type="number" id="edit-sc" value="${p.s_c}" oninput="reCalc()" style="width:100%; padding:5px;"></div>
-           <div><label style="font-size:0.7rem;">一般大</label><input type="number" id="edit-ga" value="${p.g_a}" oninput="reCalc()" style="width:100%; padding:5px;"></div>
-           <div><label style="font-size:0.7rem;">一般子</label><input type="number" id="edit-gc" value="${p.g_c}" oninput="reCalc()" style="width:100%; padding:5px;"></div>
-        </div>
-        
-        <div style="display:flex; flex-direction:column; gap:10px; max-height:60vh; overflow-y:auto; padding:5px;">
-    <label style="font-size:0.7rem; color:#64748b;">合計金額（チケット枚数より自動計算・編集不可）</label>
-    <input type="number" id="edit-total" value="${p.total}" readonly 
-      style="padding:10px; font-weight:bold; color:#64748b; background:#f1f5f9; border:1px solid #cbd5e1; cursor:not-allowed;">
+  ${headerHtml}
+  <div style="display:flex; flex-direction:column; gap:12px; max-height:65vh; overflow-y:auto; padding:5px;">
+    
+    <div style="background:#f8fafc; padding:15px; border-radius:12px; border:1px solid #e2e8f0;">
+      <p style="font-size:0.75rem; font-weight:bold; color:#1e3a8a; margin:0 0 10px;">📍 配送先情報</p>
+      <input type="text" id="edit-zip" value="${p.zip||''}" onblur="autoZip(this.value)" placeholder="郵便番号" style="width:100%; padding:10px; margin-bottom:8px; border-radius:6px; border:1px solid #cbd5e1;">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+        <input type="text" id="edit-pref" value="${p.pref||''}" placeholder="都道府県" style="padding:10px; border-radius:6px; border:1px solid #cbd5e1;">
+        <input type="text" id="edit-city" value="${p.city||''}" placeholder="市区町村" style="padding:10px; border-radius:6px; border:1px solid #cbd5e1;">
+      </div>
+      <input type="text" id="edit-rest" value="${p.rest||''}" placeholder="番地・建物名" style="width:100%; padding:10px; border-radius:6px; border:1px solid #cbd5e1;">
+    </div>
 
-    <textarea id="edit-remarks" placeholder="備考" style="height:80px; padding:10px;">${p.remarks||''}</textarea>
-    <button onclick="saveEdit()" style="background:#1e3a8a; color:white; padding:15px; border-radius:8px; font-weight:bold; border:none;">💾 保存</button>
+    <div style="background:#fff7ed; padding:15px; border-radius:12px; border:1px solid #ffedd5;">
+      <p style="font-size:0.75rem; font-weight:bold; color:#9a3412; margin:0 0 10px;">🎟️ チケット枚数</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div><label style="font-size:0.65rem;">S大人</label><input type="number" id="edit-sa" value="${p.s_a}" oninput="reCalc()" style="width:100%; padding:8px; border-radius:6px; border:1px solid #cbd5e1;"></div>
+        <div><label style="font-size:0.65rem;">S子供</label><input type="number" id="edit-sc" value="${p.s_c}" oninput="reCalc()" style="width:100%; padding:8px; border-radius:6px; border:1px solid #cbd5e1;"></div>
+        <div><label style="font-size:0.65rem;">一般大</label><input type="number" id="edit-ga" value="${p.g_a}" oninput="reCalc()" style="width:100%; padding:8px; border-radius:6px; border:1px solid #cbd5e1;"></div>
+        <div><label style="font-size:0.65rem;">一般子</label><input type="number" id="edit-gc" value="${p.g_c}" oninput="reCalc()" style="width:100%; padding:8px; border-radius:6px; border:1px solid #cbd5e1;"></div>
+      </div>
+      <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #fed7aa; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:0.75rem; font-weight:bold;">合計金額</span>
+        <input type="number" id="edit-total" value="${p.total}" readonly style="width:100px; border:none; background:transparent; text-align:right; font-weight:bold; color:#e11d48; font-size:1.1rem;">
+      </div>
+    </div>
+
+    <textarea id="edit-remarks" placeholder="備考・連絡事項" style="height:70px; padding:10px; border-radius:8px; border:1px solid #cbd5e1; font-size:0.85rem;">${p.remarks||''}</textarea>
+    
+    <div style="display:grid; grid-template-columns:1fr 2fr; gap:10px; margin-top:5px;">
+      <button onclick="handleCancel('${p.id}')" style="background:#f1f5f9; color:#64748b; padding:12px; border-radius:8px; font-weight:bold; border:1px solid #e2e8f0; cursor:pointer;">✖ キャンセル</button>
+      <button onclick="saveEdit()" style="background:#1e3a8a; color:white; padding:12px; border-radius:8px; font-weight:bold; border:none; cursor:pointer;">💾 変更を保存</button>
+    </div>
   </div>`;
 
   }
