@@ -113,18 +113,7 @@ function openModal(id, mode) {
   const p = currentData.find(item => item.id === id);
   if (!p) return;
   const body = document.getElementById("modal-body");
-  const paidStatus = (p.status === "入金済み" || p.status === "完了" || p.status === "オキチケ") ? p.paid_at : "未";
-  const sentStatus = (p.status === "完了") ? p.sent_at : "未";
 
-  const headerHtml = `
-    <div style="padding:12px; background:#f8fafc; border-radius:10px; border-bottom:2px solid #e2e8f0; margin-bottom:15px;">
-      <div style="font-size:0.7rem; color:#94a3b8;">${p.id}</div>
-      <div style="font-size:1.1rem; font-weight:bold;">${p.name} 様</div>
-      <div style="display:inline-block; background:${currentStatusColor}; color:white; font-size:0.75rem; padding:4px 12px; border-radius:6px; font-weight:bold;">
-        ステータス：${p.status || '未設定'}
-      </div>
-    </div>
-  `;
   // ステータスごとの色設定（文字もバッジもこの色を使います）
   const statusColors = {
     "未入金": "#e11d48", // 赤
@@ -134,9 +123,22 @@ function openModal(id, mode) {
     "オキチケ": "#f59e0b" // オレンジ
     };
   const currentStatusColor = statusColors[p.status] || "#64748b";
+  
+  const headerHtml = `
+    <div style="padding:12px; background:#f8fafc; border-radius:10px; border-bottom:2px solid #e2e8f0; margin-bottom:15px;">
+      <div style="font-size:0.7rem; color:#94a3b8;">${p.id}</div>
+      <div style="font-size:1.1rem; font-weight:bold;">${p.name} 様</div>
+      <div style="display:inline-block; background:${currentStatusColor}; color:white; font-size:0.75rem; padding:4px 12px; border-radius:6px; font-weight:bold;">
+        ステータス：${p.status || '未設定'}
+      </div>
+    </div>
+  `;
+  
+  const paidStatus = (p.status === "入金済み" || p.status === "完了" || p.status === "オキチケ") ? p.paid_at : "未";
+  const sentStatus = (p.status === "完了") ? p.sent_at : "未";
 
   if (mode === 'view') {
-    const totalCount = Number(p.s_a) + Number(p.s_c) + Number(p.g_a) + Number(p.g_c);
+    const totalCount = Number(p.s_a) + Number(p.s_c) + Number(p.g_a) + Number(p.g_c)
 
     let ticketDetailHtml = "";
     if (Number(p.s_a) > 0) ticketDetailHtml += `<div>Sエリア大人: ${p.s_a}枚</div>`;
@@ -145,7 +147,7 @@ function openModal(id, mode) {
     if (Number(p.g_c) > 0) ticketDetailHtml += `<div>一般エリア子供: ${p.g_c}枚</div>`;
 
     let qrHtml = "";
-    if (p.status !== "未入金") {
+    if (p.status !== "未入金" && p.status !== "キャンセル") {
       qrHtml += `<div style="background:#fffbeb; border:1px solid #fcd34d; padding:10px; border-radius:12px; margin-bottom:15px;">
                   <div style="font-size:0.75rem; font-weight:bold; color:#b45309; margin-bottom:10px; text-align:center;">入場用QR（${totalCount}個）</div>
                   <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;">`;
