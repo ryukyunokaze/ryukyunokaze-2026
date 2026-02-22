@@ -95,11 +95,11 @@
       </div>
 
       <div class="quick-menu no-print">
-        <a href="index.html" target="_blank" class="q-btn" style="background:#3b82f6;">🌐 フォーム</a>
-        <a href="direct_entry.html" target="_blank" class="q-btn" style="background:#10b981;">➕ 手売り登録</a>
-        <button onclick="fetchData()" class="q-btn" style="background:#64748b;">🔄 更新</button>
-        <button onclick="window.print()" class="q-btn" style="background:#000;">🖨️ 印刷</button>
-      </div>
+      <a href="index.html" target="_blank" class="q-btn" style="background:#3b82f6;">🌐 フォーム</a>
+      <a href="direct_entry.html" target="_blank" class="q-btn" style="background:#10b981;">➕ 手売り登録</a>
+      <button onclick="fetchData()" class="q-btn" style="background:#64748b;">🔄 更新</button>
+      <button onclick="printOrderList()" class="q-btn" style="background:#334155;">📋 名簿を印刷</button>
+     </div>
 
       <div class="nav-tabs no-print">
         <button id="btn-list" onclick="showPage('list')" class="tab-btn active">📋 注文一覧</button>
@@ -183,5 +183,7 @@
     else { window.location.href = "index.html"; }
   </script>
   <script src="admin.js"></script>
+
+  <div id="print-list-area" style="display:none;"></div>
 </body>
 </html>
