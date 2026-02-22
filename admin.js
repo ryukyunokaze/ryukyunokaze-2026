@@ -447,3 +447,73 @@ async function handleCancelStatus(id) {
     alert("通信エラーが発生しました。");
   }
 }
+
+/**
+ * 🖨️ 表示されている名簿（一覧表）を印刷する
+ */
+function printOrderList() {
+  const listItems = document.querySelectorAll(".order-item");
+  let printRows = "";
+  let count = 0;
+
+  listItems.forEach(item => {
+    if (item.style.display !== "none") {
+      const id = item.querySelector("div:first-child div:first-child").innerText;
+      const p = currentData.find(d => d.id === id);
+      if (p) {
+        count++;
+        printRows += `
+          <tr>
+            <td>${count}</td>
+            <td>${p.name}<br><small>${p.id}</small></td>
+            <td>${p.tel}</td>
+            <td>${p.shipping}</td>
+            <td>S大:${p.s_a} / S子:${p.s_c}<br>普大:${p.g_a} / 普子:${p.g_c}</td>
+            <td style="font-weight:bold;">${p.status}</td>
+            <td style="width:100px;"></td> </tr>`;
+      }
+    }
+  });
+
+  if (count === 0) {
+    alert("印刷するデータがありません。");
+    return;
+  }
+
+  const printWindow = window.open("", "_blank");
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>受注・オキチケ名簿</title>
+        <style>
+          body { font-family: sans-serif; padding: 20px; font-size: 12px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+          th { background: #eee; }
+          h2 { margin-bottom: 5px; }
+          .summary { margin-bottom: 20px; font-size: 14px; }
+        </style>
+      </head>
+      <body>
+        <h2>琉球の風 2026 注文名簿</h2>
+        <div class="summary">出力日: ${new Date().toLocaleString()} | 合計: ${count} 件</div>
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>お名前 / ID</th>
+              <th>電話番号</th>
+              <th>受取</th>
+              <th>枚数内訳</th>
+              <th>状態</th>
+              <th>確認欄</th>
+            </tr>
+          </thead>
+          <tbody>${printRows}</tbody>
+        </table>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.print();
+}
