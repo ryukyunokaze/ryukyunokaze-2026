@@ -211,14 +211,14 @@ function openModal(id, mode) {
   const currentStatusColor = statusColors[p.status] || "#64748b";
 
   const headerHtml = `
-    <div style="padding:15px; background:#f8fafc; border-radius:12px; border-bottom:2px solid #e2e8f0; margin-bottom:15px;">
-      <div style="font-size:0.7rem; color:#94a3b8; margin-bottom:4px;">ID: ${p.id}</div>
-      <div style="font-size:1.4rem; font-weight:bold; color:#1e293b; margin-bottom:8px;">${p.name} 様</div>
-      <div style="display:inline-block; background:${currentStatusColor}; color:white; font-size:0.8rem; padding:5px 14px; border-radius:8px; font-weight:bold;">
-        状況：${p.status || '未入金'}
+      <div style="background:#1e3a8a; color:white; padding:20px; text-align:center; border-radius:15px 15px 0 0;">
+        <div style="font-size:0.8rem; opacity:0.8; margin-bottom:5px;">ID: ${p.id}</div>
+        <h2 style="margin:0; font-size:1.4rem;">${p.name} 様</h2>
+        <div style="display:inline-block; margin-top:10px; padding:4px 12px; background:rgba(255,255,255,0.2); border-radius:20px; font-size:0.85rem; font-weight:bold;">
+          状況：${p.status}
+        </div>
       </div>
-    </div>
-  `;
+    `;
 
   const paidStatus = (p.status === "入金済み" || p.status === "完了" || p.status === "オキチケ") ? p.paid_at : "未";
   const sentStatus = (p.status === "完了") ? p.sent_at : "未";
@@ -246,88 +246,122 @@ function openModal(id, mode) {
       qrHtml += `</div></div>`;
     }
 
+    // --- 🌟 詳細閲覧モード：文字切れ防止・ゆったりレイアウト ---
     body.innerHTML = `
       ${headerHtml}
-      <div style="font-size:0.85rem; line-height:1.4;">
-        <div style="display:flex; gap:10px; margin-bottom:12px;">
-          <a href="tel:${p.tel}" style="flex:1; background:#10b981; color:white; padding:12px; border-radius:10px; text-decoration:none; text-align:center; font-weight:bold;">📞 電話</a>
-          <a href="mailto:${p.email}" style="flex:1; background:#3b82f6; color:white; padding:12px; border-radius:10px; text-decoration:none; text-align:center; font-weight:bold;">✉️ メール</a>
+      <div style="font-size:0.95rem; line-height:1.6; padding:15px; background:#f8fafc;">
+        
+        <div style="display:flex; gap:12px; margin-bottom:15px;">
+          <a href="tel:${p.tel}" style="flex:1; background:#10b981; color:white; padding:14px; border-radius:12px; text-decoration:none; text-align:center; font-weight:bold; box-shadow:0 2px 4px rgba(16,185,129,0.2);">📞 電話</a>
+          <a href="mailto:${p.email}" style="flex:1; background:#3b82f6; color:white; padding:14px; border-radius:12px; text-decoration:none; text-align:center; font-weight:bold; box-shadow:0 2px 4px rgba(59,130,246,0.2);">✉️ メール</a>
         </div>
-        <div style="background:#fff7ed; padding:12px; border-radius:12px; margin-bottom:12px; border:1px solid #fed7aa;">
-          <div style="font-size:0.75rem; font-weight:bold; color:#9a3412; margin-bottom:5px;">🎟️ 購入内容</div>
+
+        <div style="background:#fff7ed; padding:15px; border-radius:15px; margin-bottom:15px; border:1px solid #fed7aa; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
+          <div style="font-size:0.8rem; font-weight:bold; color:#9a3412; margin-bottom:8px; border-bottom:1px solid #fed7aa; padding-bottom:5px;">🎟️ 購入内容</div>
           <div style="display:flex; justify-content:space-between; align-items:flex-end;">
-            <div>${ticketDetailHtml}</div>
-            <div style="text-align:right; font-size:1.2rem; color:#e11d48; font-weight:bold;">合計 ${(Number(p.total)||0).toLocaleString()}円</div>
+            <div style="font-size:1rem; color:#444;">${ticketDetailHtml}</div>
+            <div style="text-align:right; font-size:1.4rem; color:#e11d48; font-weight:900;">合計 ${(Number(p.total)||0).toLocaleString()}円</div>
           </div>
         </div>
-        <div style="background:#f1f5f9; padding:12px; border-radius:12px; margin-bottom:12px; border:1px solid #e2e8f0;">
-          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-             <span style="font-weight:bold; color:#1e3a8a;">受取方法: ${p.shipping || '未設定'}</span>
+
+        <div style="background:#fff; padding:15px; border-radius:15px; margin-bottom:15px; border:1px solid #e2e8f0; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
+          <div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
+             <span style="font-weight:bold; color:#1e3a8a; font-size:1rem;">受取方法: ${p.shipping || '未設定'}</span>
              <span style="color:#64748b; font-size:0.75rem;">${p.timestamp}</span>
           </div>
-          <div style="display:flex; justify-content:space-between;">
-            <span style="font-weight:bold;">💰 入金: ${paidStatus}</span>
-            <span style="font-weight:bold;">🚚 発送: ${sentStatus}</span>
+          <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+            <span style="font-weight:bold; color:#334155;">💰 入金: <span style="color:${p.paid === '済' ? '#10b981' : '#e11d48'};">${paidStatus}</span></span>
+            <span style="font-weight:bold; color:#334155;">🚚 発送: <span style="color:${p.sent === '済' ? '#10b981' : '#64748b'};">${sentStatus}</span></span>
           </div>
-          <div style="color:#475569; padding-top:5px; border-top:1px dashed #cbd5e1; margin-top:5px;">
-            📍 〒${p.zip||''} ${p.pref||''}${p.city||''}${p.rest||''}
+          <div style="color:#475569; padding-top:10px; border-top:1px dashed #cbd5e1; font-size:0.9rem; line-height:1.5;">
+            <span style="color:#1e3a8a; font-weight:bold;">📍 お届け先:</span><br>
+            〒${p.zip||''} ${p.pref||''}${p.city||''}${p.rest||''}
           </div>
         </div>
-        <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:15px; font-size:0.8rem;">
-          <strong>📝 備考:</strong><br>${(p.remarks || "なし").replace(/\n/g, '<br>')}
+
+        <div style="background:#fff; padding:12px; border-radius:12px; border:1px solid #cbd5e1; margin-bottom:20px; font-size:0.9rem; line-height:1.6;">
+          <strong style="color:#475569; font-size:0.8rem;">📝 備考:</strong><br>
+          <div style="margin-top:5px;">${(p.remarks || "なし").replace(/\n/g, '<br>')}</div>
         </div>
+
         ${qrHtml}
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:15px;">
-          <button onclick="handleStatusMail('${p.id}', 'PAYMENT')" style="background:#10b981; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">入金＆メール</button>
-          <button onclick="handleStatusMail('${p.id}', 'COMPLETE')" style="background:#1e3a8a; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">発送＆メール</button>
-          <button onclick="openModal('${p.id}', 'edit')" style="background:#f59e0b; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">✏️ 編集</button>
-          <button onclick="printTicket('${p.id}')" style="background:#000; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">🎫 印刷</button>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:20px;">
+          <button onclick="handleStatusMail('${p.id}', 'PAYMENT')" style="background:#10b981; color:white; padding:15px; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">入金＆メール</button>
+          <button onclick="handleStatusMail('${p.id}', 'COMPLETE')" style="background:#1e3a8a; color:white; padding:15px; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">発送＆メール</button>
+          <button onclick="openModal('${p.id}', 'edit')" style="background:#f59e0b; color:white; padding:15px; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">✏️ 編集する</button>
+          <button onclick="printTicket('${p.id}')" style="background:#000; color:white; padding:15px; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">🎫 チケット印刷</button>
         </div>
-        <button type="button" onclick="handleCancelStatus('${p.id}')" style="width:100%; margin-top:15px; background:#fff; color:#e11d48; padding:12px; border-radius:10px; font-weight:bold; border:2px solid #e11d48; cursor:pointer;">🚫 この注文をキャンセルする</button>
+
+        <button type="button" onclick="handleCancelStatus('${p.id}')" style="width:100%; margin-top:20px; background:#fff; color:#e11d48; padding:15px; border-radius:12px; font-weight:bold; border:2px solid #e11d48; cursor:pointer; font-size:0.85rem;">🚫 この注文をキャンセルする</button>
       </div>
     `;
   } else {
+    // --- 🌟 編集モード：ゆとりを持たせ、文字切れを防止する構造 ---
     body.innerHTML = `
       ${headerHtml}
-      <div style="display:flex; flex-direction:column; gap:12px; max-height:75vh; overflow-y:auto; padding:5px;">
-        <div style="background:#f0fdf4; padding:15px; border-radius:12px; border:1px solid #dcfce7;">
-          <p style="font-size:0.75rem; font-weight:bold; color:#166534; margin:0 0 10px;">👤 連絡先編集</p>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-            <input type="text" id="edit-tel" value="${p.tel||''}" style="width:100%; padding:10px; border-radius:8px; border:1px solid #cbd5e1;">
-            <input type="text" id="edit-email" value="${p.email||''}" style="width:100%; padding:10px; border-radius:8px; border:1px solid #cbd5e1;">
+      <div style="display:flex; flex-direction:column; gap:10px; padding:15px; background:#f8fafc;">
+        
+        <div style="background:#f0fdf4; padding:20px; border-radius:15px; border:1px solid #dcfce7; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
+          <p style="font-weight:bold; color:#166534; margin:0 0 15px; display:flex; align-items:center; gap:5px;">👤 基本情報 & ステータス</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+            <div><label>電話番号</label><input type="text" id="edit-tel" value="${p.tel||''}"></div>
+            <div><label>メール</label><input type="text" id="edit-email" value="${p.email||''}"></div>
+            <div style="grid-column: span 2;">
+              <label>現在のステータス</label>
+              <select id="edit-status" style="width:100%; height:auto !important; padding:12px !important; border:1px solid #cbd5e1 !important; border-radius:8px; font-size:1rem;">
+                <option value="未入金" ${p.status === '未入金' ? 'selected' : ''}>未入金</option>
+                <option value="入金完了" ${p.status === '入金完了' ? 'selected' : ''}>入金完了</option>
+                <option value="完了" ${p.status === '完了' ? 'selected' : ''}>完了</option>
+                <option value="キャンセル" ${p.status === 'キャンセル' ? 'selected' : ''}>キャンセル</option>
+                <option value="オキチケ" ${p.status === 'オキチケ' ? 'selected' : ''}>オキチケ</option>
+                <option value="未入金オキチケ" ${p.status === '未入金オキチケ' ? 'selected' : ''}>未入金オキチケ</option>
+              </select>
+            </div>
           </div>
         </div>
-        <div style="background:#f1f5f9; padding:15px; border-radius:12px; border:1px solid #e2e8f0;">
-          <p style="font-size:0.75rem; font-weight:bold; color:#475569; margin:0 0 10px;">📍 お届け先</p>
-          <input type="text" id="edit-zip" value="${p.zip||''}" onblur="autoZip(this.value)" placeholder="郵便番号" style="width:100%; padding:10px; margin-bottom:8px; border-radius:8px; border:1px solid #cbd5e1;">
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-            <input type="text" id="edit-pref" value="${p.pref||''}" placeholder="都道府県" style="padding:10px; border-radius:8px; border:1px solid #cbd5e1;">
-            <input type="text" id="edit-city" value="${p.city||''}" placeholder="市区町村" style="padding:10px; border-radius:8px; border:1px solid #cbd5e1;">
+
+        <div style="background:#f1f5f9; padding:20px; border-radius:15px; border:1px solid #e2e8f0;">
+          <p style="font-weight:bold; color:#475569; margin:0 0 15px;">📍 お届け先</p>
+          <label>郵便番号</label><input type="text" id="edit-zip" value="${p.zip||''}" onblur="autoZip(this.value)">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:10px;">
+            <div><label>都道府県</label><input type="text" id="edit-pref" value="${p.pref||''}"></div>
+            <div><label>市区町村</label><input type="text" id="edit-city" value="${p.city||''}"></div>
           </div>
-          <input type="text" id="edit-rest" value="${p.rest||''}" placeholder="番地・建物名" style="width:100%; padding:10px; margin-top:8px; border-radius:8px; border:1px solid #cbd5e1;">
+          <label style="margin-top:15px; display:block;">番地・建物名</label>
+          <input type="text" id="edit-rest" value="${p.rest||''}">
         </div>
-        <div style="background:#fff7ed; padding:15px; border-radius:12px; border:1px solid #ffedd5;">
-          <p style="font-size:0.75rem; font-weight:bold; color:#9a3412; margin:0 0 10px;">🎟️ 注文内容 & 受取</p>
-          <select id="edit-shipping" style="width:100%; padding:10px; margin-bottom:12px; border-radius:8px;">
+
+        <div style="background:#fff7ed; padding:20px; border-radius:15px; border:1px solid #ffedd5;">
+          <p style="font-weight:bold; color:#9a3412; margin:0 0 15px;">🎟️ 注文内容 & 受取</p>
+          <label>受取方法</label>
+          <select id="edit-shipping" style="width:100%; height:auto !important; padding:12px !important; margin-bottom:15px; border:1px solid #cbd5e1 !important; border-radius:8px;">
             <option value="郵送" ${p.shipping === '郵送' ? 'selected' : ''}>郵送</option>
-            <option value="当日受取" ${p.shipping === '当日受取' ? 'selected' : ''}>当日受取</option>
+            <option value="QRコード" ${p.shipping === 'QRコード' ? 'selected' : ''}>QRコード</option>
             <option value="手渡し" ${p.shipping === '手渡し' ? 'selected' : ''}>手渡し</option>
           </select>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-            <input type="number" id="edit-sa" value="${p.s_a}" oninput="reCalc()">
-            <input type="number" id="edit-sc" value="${p.s_c}" oninput="reCalc()">
-            <input type="number" id="edit-ga" value="${p.g_a}" oninput="reCalc()">
-            <input type="number" id="edit-gc" value="${p.g_c}" oninput="reCalc()">
+          
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+            <div><label>S大人</label><input type="number" id="edit-sa" value="${p.s_a}" oninput="reCalc()"></div>
+            <div><label>S子供</label><input type="number" id="edit-sc" value="${p.s_c}" oninput="reCalc()"></div>
+            <div><label>一般大人</label><input type="number" id="edit-ga" value="${p.g_a}" oninput="reCalc()"></div>
+            <div><label>一般子供</label><input type="number" id="edit-gc" value="${p.g_c}" oninput="reCalc()"></div>
           </div>
-          <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #fed7aa; display:flex; justify-content:space-between;">
-            <span>合計</span><input type="number" id="edit-total" value="${p.total}" readonly style="border:none; color:#e11d48; font-weight:bold; width:100px; text-align:right;">
+          
+          <div style="display:flex; justify-content:space-between; align-items:center; border-top:2px solid #ffedd5; padding-top:15px; margin-top:5px;">
+            <span style="font-weight:bold; font-size:1rem;">合計金額</span>
+            <div style="color:#e11d48; font-size:1.5rem; font-weight:900;">
+              <input type="number" id="edit-total" value="${p.total}" readonly style="width:120px; border:none !important; background:transparent !important; color:#e11d48; font-weight:900; text-align:right; font-size:1.5rem;">円
+            </div>
           </div>
         </div>
-        <div style="background:#fff; padding:15px; border-radius:12px; border:1px solid #cbd5e1;">
-          <p style="font-size:0.75rem; font-weight:bold; color:#334155; margin:0 0 10px;">📝 備考</p>
-          <textarea id="edit-remarks" style="width:100%; height:120px; padding:10px; border-radius:8px;">${p.remarks||''}</textarea>
+
+        <div style="background:#fff; padding:20px; border-radius:15px; border:1px solid #cbd5e1; margin-bottom:20px;">
+          <label style="margin-bottom:10px; display:block;">📝 備考・連絡事項</label>
+          <textarea id="edit-remarks" style="width:100%; height:120px; padding:12px; box-sizing:border-box; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem;">${p.remarks||''}</textarea>
         </div>
-        <button type="button" onclick="saveEdit()" style="width:100%; background:#1e3a8a; color:white; padding:16px; border-radius:10px; font-weight:bold; border:none; cursor:pointer;">💾 変更を保存</button>
+        
+        <button type="button" onclick="saveEdit()" class="save-btn" style="width:100%; padding:20px; background:#1e3a8a; color:white; border:none; border-radius:15px; font-size:1.1rem; font-weight:bold; cursor:pointer; box-shadow:0 4px 12px rgba(30,58,138,0.3);">💾 変更を保存する</button>
       </div>`;
   }
   document.getElementById("detail-modal").style.display = "block";
@@ -403,6 +437,9 @@ function reCalc() {
 function showPage(p) {
   document.getElementById('page-list').style.display = (p==='list')?'block':'none';
   document.getElementById('page-analysis').style.display = (p==='analysis')?'block':'none';
+  // 🌟 追加：一覧の時だけ検索窓を表示
+  const searchBar = document.getElementById('sticky-search-bar');
+  if(searchBar) searchBar.style.display = (p==='list')?'block':'none';
   document.getElementById('btn-list').classList.toggle('active', p==='list');
   document.getElementById('btn-analysis').classList.toggle('active', p==='analysis');
 }
@@ -422,7 +459,10 @@ async function autoZip(z) {
 
 async function saveEdit() {
   const d = {
-    type: "editData", id: selectedId,
+    type: "editData", 
+    id: selectedId,
+    // 🌟 ステータスの取得を追加（ここに記述します）
+    status: document.getElementById("edit-status").value,
     tel: document.getElementById("edit-tel").value,
     email: document.getElementById("edit-email").value,
     zip: document.getElementById("edit-zip").value,
@@ -437,9 +477,14 @@ async function saveEdit() {
     total: document.getElementById("edit-total").value,
     remarks: document.getElementById("edit-remarks").value
   };
+
   const response = await fetch(url, { method: "POST", body: JSON.stringify(d) });
   const res = await response.json();
-  if(res.result === "success") { alert("更新しました"); fetchData(); closeModal(); }
+  if (res.result === "success") { 
+    alert("更新しました"); 
+    fetchData(); 
+    closeModal(); 
+  }
 }
 
 async function handleCancelStatus(id) {
