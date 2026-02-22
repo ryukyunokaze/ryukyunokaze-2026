@@ -48,6 +48,11 @@ async function fetchData() {
       setVal("ana-g-a", ana.area_details.g_area.adult || 0);
       setVal("ana-g-c", ana.area_details.g_area.child || 0);
 
+      // 🌟 販売経路の反映（追加分）
+    　 setVal("ana-online", ana.sales_type.online || 0);
+ 　　  setVal("ana-direct", ana.sales_type.direct || 0);
+       setVal("ana-door", ana.sales_type.door || 0);
+
       // 男女別
       setVal("ana-male", ana.gender.male || 0);
       setVal("ana-female", ana.gender.female || 0);
