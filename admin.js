@@ -144,28 +144,26 @@ function openModal(id, mode) {
 
     body.innerHTML = `
       ${headerHtml}
-      <div style="font-size:0.85rem; line-height:1.6;">
-        <div style="display:flex; gap:8px; margin-bottom:15px;">
-          <button onclick="location.href='tel:${p.tel}'" style="flex:1; background:#10b981; color:white; padding:10px; border:none; border-radius:8px; font-weight:bold;">📞 電話</button>
-          <button onclick="location.href='📩" style="flex:1; background:#3b82f6; color:white; padding:10px; border:none; border-radius:8px; font-weight:bold;">✉️ メール</button>
+      <div style="font-size:0.85rem; line-height:1.4;">
+        
+        <div style="display:flex; gap:10px; margin-bottom:12px;">
+          <a href="tel:${p.tel}" style="flex:1; background:#10b981; color:white; padding:12px; border-radius:10px; text-decoration:none; text-align:center; font-weight:bold; font-size:0.9rem;">📞 電話</a>
+          <a href="mailto:${p.email}" style="flex:1; background:#3b82f6; color:white; padding:12px; border-radius:10px; text-decoration:none; text-align:center; font-weight:bold; font-size:0.9rem;">✉️ メール</a>
         </div>
-        <div style="background:#f1f5f9; padding:10px; border-radius:8px; margin-bottom:10px;">
-      <div style="margin-bottom:5px;">📝 申込: ${p.timestamp}</div>
-      <span>📅 申込: ${p.timestamp}</span>
-      <span style="font-weight:bold; color:#1e3a8a;">📦 受け取り: ${p.shipping || '未設定'}</span></div>
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-weight:bold; color: ${p.status === '未入金' ? '#e11d48' : '#10b981'};">
-          💰 入金: ${paidStatus}
-        </span>
-        <span style="font-weight:bold; color: ${sentStatus === '未' ? '#64748b' : '#1e3a8a'};">
-          🚚 発送: ${sentStatus}
-        </span>
-        <div style="border-top:1px solid #e2e8f0; padding-top:8px;">
-        <p style="margin:0; color:#475569;">📍 〒${p.zip||''} ${p.pref||''}${p.city||''}${p.rest||''}</p>
+
+        <div style="background:#f1f5f9; padding:12px; border-radius:12px; margin-bottom:12px; border:1px solid #e2e8f0;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #cbd5e1; padding-bottom:5px; font-weight:bold;">
+             <span style="color:#1e3a8a;">受取方法: ${p.shipping || '未設定'}</span>
+             <span style="color:#64748b; font-weight:normal; font-size:0.75rem;">${p.timestamp}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <span style="font-weight:bold; color: ${p.status === '未入金' ? '#e11d48' : '#10b981'};">💰 入金: ${paidStatus}</span>
+            <span style="font-weight:bold; color: ${sentStatus === '未' ? '#64748b' : '#1e3a8a'};">🚚 発送: ${sentStatus}</span>
+          </div>
+          <div style="color:#475569; padding-top:5px; border-top:1px dashed #cbd5e1; margin-top:5px;">
+            📍 〒${p.zip||''} ${p.pref||''}${p.city||''}${p.rest||''}
+          </div>
         </div>
-        <p style="margin:0; color:#475569;">📞 tel:${p.tel}</p></div>
-        <p style="margin:0; color:#475569;">📩 mailto:${p.email}'</p></div>
-      </div>
 
         ${qrHtml}
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:15px;">
