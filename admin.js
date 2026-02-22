@@ -172,8 +172,10 @@ function openModal(id, mode) {
           <button onclick="openModal('${p.id}', 'edit')" style="background:#f59e0b; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">✏️ 編集</button>
           <button onclick="printTicket('${p.id}')" style="background:#000; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">🎫 ぴあ風印刷</button>
         </div>
-        <button onclick="handleCancelStatus('${p.id}')" style="background:#fff; color:#e11d48; padding:10px; border-radius:10px; font-weight:bold; border:1.5px solid #e11d48; cursor:pointer; margin-top:5px;">🚫 この注文をキャンセルする</button>
-        </div>
+           <button type="button" onclick="handleCancelStatus('${p.id}')" 
+           style="width:100%; margin-top:15px; background:#fff; color:#e11d48; padding:12px; border-radius:10px; font-weight:bold; border:2px solid #e11d48; cursor:pointer;">
+           🚫 この注文をキャンセルする
+           </button>
       </div>
     `;
   } else {
@@ -229,10 +231,8 @@ function openModal(id, mode) {
         <p style="font-size:0.75rem; font-weight:bold; color:#334155; margin:0 0 10px;">📝 備考・連絡事項</p>
         <textarea id="edit-remarks" style="width:100%; height:150px; padding:12px; border-radius:8px; border:1px solid #cbd5e1; font-size:0.9rem; box-sizing:border-box; line-height:1.5;">${p.remarks||''}</textarea>
       </div>
-      
-      <div style="display:grid; grid-template-columns:1fr 2fr; gap:10px; margin-top:5px; padding-bottom:10px;">
-        <button onclick="handleCancelStatus('${p.id}')" style="background:#fff; color:#e11d48; padding:14px; border-radius:10px; font-weight:bold; border:2px solid #e11d48; cursor:pointer;">🚫 キャンセル</button>
-        <button onclick="saveEdit()" style="background:#1e3a8a; color:white; padding:14px; border-radius:10px; font-weight:bold; border:none; cursor:pointer; box-shadow: 0 4px 6px rgba(30,58,138,0.2);">💾 変更を保存</button>
+      <div style="margin-top:20px; padding-bottom:10px;">
+       <button type="button" onclick="saveEdit()" style="width:100%; background:#1e3a8a; color:white; padding:16px; border-radius:10px; font-weight:bold; border:none; cursor:pointer; box-shadow: 0 4px 6px rgba(30,58,138,0.2);">💾 変更を保存</button>
       </div>
     </div>`;
 }
@@ -392,29 +392,32 @@ function closeModal() { document.getElementById("detail-modal").style.display = 
 window.onload = fetchData;
 
 /**
- * 🌟 キャンセルを実行する関数（これを admin.js の末尾に必ず追加してください）
+ * 詳細画面の「キャンセル」ボタンから呼ばれる関数
  */
 async function handleCancelStatus(id) {
-  if(!confirm("この注文を『キャンセル』状態に変更しますか？")) return;
-  
+  // 🌟 ここでメッセージが出るはずです
+  const ok = window.confirm("この注文をキャンセル状態にしますか？");
+  if (!ok) return;
+
   try {
-    const response = await fetch(url, { 
-      method: "POST", 
-      body: JSON.stringify({ 
-        type: "updateStatus", 
-        id: id, 
-        status: "キャンセル" 
-      }) 
+    // サーバーへ送信
+    const response = await fetch(url, {
+      method: "POST",
+      body: JSON.stringify({
+        type: "updateStatus", // 🌟 updateStatus 関数を呼び出す
+        id: id,
+        status: "キャンセル"
+      })
     });
-    
+
     const res = await response.json();
-    if(res.result === "success") {
-      alert("キャンセル処理が完了しました");
-      fetchData(); // リストを再読み込み
+    if (res.result === "success") {
+      alert("キャンセル完了しました。");
+      fetchData(); // リストを更新
       closeModal(); // モーダルを閉じる
     }
   } catch (e) {
-    console.error("キャンセルエラー:", e);
+    console.error("Error:", e);
     alert("通信エラーが発生しました。");
   }
 }
