@@ -113,6 +113,8 @@ function openModal(id, mode) {
   const p = currentData.find(item => item.id === id);
   if (!p) return;
   const body = document.getElementById("modal-body");
+  const paidStatus = (p.status === "入金済み" || p.status === "完了" || p.status === "オキチケ") ? p.paid_at : "未";
+  const sentStatus = (p.status === "完了") ? p.sent_at : "未";
 
   const headerHtml = `
     <div style="padding:12px; background:#f8fafc; border-radius:10px; border-bottom:2px solid #e2e8f0; margin-bottom:15px;">
@@ -148,10 +150,15 @@ function openModal(id, mode) {
           <button onclick="location.href='mailto:${p.email}'" style="flex:1; background:#3b82f6; color:white; padding:10px; border:none; border-radius:8px; font-weight:bold;">✉️ メール</button>
         </div>
         <div style="background:#f1f5f9; padding:10px; border-radius:8px; margin-bottom:10px;">
-          <div>💰 入金: ${p.paid_at || '未'} / 🚚 発送: ${p.sent_at || '未'}</div>
-          <div>住所: 〒${p.zip||''} ${p.pref||''}${p.city||''}${p.rest||''}</div>
-          <div>ルート: ${p.salesType || '不明'}</div>
-        </div>
+      <div style="margin-bottom:5px;">📝 申込: ${p.timestamp}</div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-weight:bold; color: ${p.status === '未入金' ? '#e11d48' : '#10b981'};">
+          💰 入金: ${paidStatus}
+        </span>
+        <span style="font-weight:bold; color: ${sentStatus === '未' ? '#64748b' : '#1e3a8a'};">
+          🚚 発送: ${sentStatus}
+        </span>
+      </div>
         ${qrHtml}
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:15px;">
           <button onclick="handleStatusMail('${p.id}', 'PAYMENT')" style="background:#10b981; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">入金＆メール</button>
