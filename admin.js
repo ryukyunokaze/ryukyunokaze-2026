@@ -390,3 +390,31 @@ async function saveEdit() {
 
 function closeModal() { document.getElementById("detail-modal").style.display = "none"; }
 window.onload = fetchData;
+
+/**
+ * 🌟 キャンセルを実行する関数（これを admin.js の末尾に必ず追加してください）
+ */
+async function handleCancelStatus(id) {
+  if(!confirm("この注文を『キャンセル』状態に変更しますか？")) return;
+  
+  try {
+    const response = await fetch(url, { 
+      method: "POST", 
+      body: JSON.stringify({ 
+        type: "updateStatus", 
+        id: id, 
+        status: "キャンセル" 
+      }) 
+    });
+    
+    const res = await response.json();
+    if(res.result === "success") {
+      alert("キャンセル処理が完了しました");
+      fetchData(); // リストを再読み込み
+      closeModal(); // モーダルを閉じる
+    }
+  } catch (e) {
+    console.error("キャンセルエラー:", e);
+    alert("通信エラーが発生しました。");
+  }
+}
