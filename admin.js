@@ -28,39 +28,41 @@ async function fetchData() {
     setVal("stat-total-money", (Number(result.stats.total_money) || 0).toLocaleString());
     setVal("stat-paid-money", (Number(result.stats.paid_money) || 0).toLocaleString());
 
-    // 🌟 分析データ（地域・子供・性別・年代・エリア詳細）
+    // 🌟 分析データの反映
     const ana = result.analysis;
     if (ana) {
-      // 1. 地域集計
+      // 子供連れ（独立カード）
+      setVal("ana-child-orders", ana.with_child_count || 0);
+
+      // 地域
       setVal("ana-takasaki", ana.region.gunma_takasaki || 0);
       setVal("ana-gunma", ana.region.gunma_other || 0);
       setVal("ana-outside", ana.region.out_of_pref || 0);
 
-      // 2. 子供連れ件数
-      setVal("ana-child-orders", ana.with_child_count || 0);
-
-      // 3. エリア別内訳（大人・子供の内訳を反映）
+      // エリア別詳細（指示通りの内訳形式）
+      setVal("ana-s-total", (ana.area_details.s_area.adult + ana.area_details.s_area.child) + " 名");
       setVal("ana-s-a", ana.area_details.s_area.adult || 0);
       setVal("ana-s-c", ana.area_details.s_area.child || 0);
+      
+      setVal("ana-g-total", (ana.area_details.g_area.adult + ana.area_details.g_area.child) + " 名");
       setVal("ana-g-a", ana.area_details.g_area.adult || 0);
       setVal("ana-g-c", ana.area_details.g_area.child || 0);
 
-      // 4. 男女別集計（🌟追加）
+      // 男女別
       setVal("ana-male", ana.gender.male || 0);
       setVal("ana-female", ana.gender.female || 0);
       setVal("ana-gender-other", ana.gender.other || 0);
 
-      // 5. 年代別集計（🌟リスト形式で動的に生成）
+      // 年代別
       const ageContainer = document.getElementById("ana-age-list");
-      if (ageContainer && ana.age) {
-        ageContainer.innerHTML = ""; // 一旦クリア
-        // 年代の並び順を固定（プロの配慮）
-        const ageKeys = ["10代", "20代", "30代", "40代", "50代", "60代", "70代以上"];
-        ageKeys.forEach(key => {
-          const count = ana.age[key] || 0;
+      if (ageContainer) {
+        ageContainer.innerHTML = "";
+        const ageOrder = ["10代", "20代", "30代", "40代", "50代", "60代", "70代以上"];
+        ageOrder.forEach(age => {
+          const count = (ana.age && ana.age[age]) ? ana.age[age] : 0;
           const row = document.createElement("div");
           row.className = "ana-row";
-          row.innerHTML = `<span>${key}</span><strong>${count} 名</strong>`;
+          row.innerHTML = `<span>${age}</span><strong>${count} 名</strong>`;
           ageContainer.appendChild(row);
         });
       }
