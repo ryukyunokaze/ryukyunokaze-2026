@@ -187,12 +187,15 @@ function openModal(id, mode) {
            <div><label style="font-size:0.7rem;">一般子</label><input type="number" id="edit-gc" value="${p.g_c}" oninput="reCalc()" style="width:100%; padding:5px;"></div>
         </div>
         
-        <label style="font-size:0.7rem;">合計金額</label>
-        <input type="number" id="edit-total" value="${p.total}" style="padding:10px; font-weight:bold; color:#e11d48;">
+        <div style="display:flex; flex-direction:column; gap:10px; max-height:60vh; overflow-y:auto; padding:5px;">
+    <label style="font-size:0.7rem; color:#64748b;">合計金額（チケット枚数より自動計算・編集不可）</label>
+    <input type="number" id="edit-total" value="${p.total}" readonly 
+      style="padding:10px; font-weight:bold; color:#64748b; background:#f1f5f9; border:1px solid #cbd5e1; cursor:not-allowed;">
 
-        <textarea id="edit-remarks" placeholder="備考" style="height:80px; padding:10px;">${p.remarks||''}</textarea>
-        <button onclick="saveEdit()" style="background:#1e3a8a; color:white; padding:15px; border-radius:8px; font-weight:bold; border:none;">💾 保存</button>
-      </div>`;
+    <textarea id="edit-remarks" placeholder="備考" style="height:80px; padding:10px;">${p.remarks||''}</textarea>
+    <button onclick="saveEdit()" style="background:#1e3a8a; color:white; padding:15px; border-radius:8px; font-weight:bold; border:none;">💾 保存</button>
+  </div>`;
+
   }
   document.getElementById("detail-modal").style.display = "block";
 }
