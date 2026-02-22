@@ -178,63 +178,64 @@ function openModal(id, mode) {
     `;
   } else {
     // 編集モード
-    body.innerHTML = `
-  ${headerHtml}
-  <div style="display:flex; flex-direction:column; gap:12px; max-height:75vh; overflow-y:auto; padding:5px; scrollbar-width: thin;">
-    
-    <div style="background:#f0fdf4; padding:15px; border-radius:12px; border:1px solid #dcfce7;">
-      <p style="font-size:0.75rem; font-weight:bold; color:#166534; margin:0 0 10px;">👤 連絡先編集</p>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-        <div>
-          <label style="font-size:0.65rem;">電話番号</label>
-          <input type="text" id="edit-tel" value="${p.tel||''}" style="width:100%; padding:10px; border-radius:8px; border:1px solid #cbd5e1; box-sizing:border-box;">
+  body.innerHTML = `
+    ${headerHtml}
+    <div style="display:flex; flex-direction:column; gap:12px; max-height:75vh; overflow-y:auto; padding:5px; scrollbar-width: thin;">
+      
+      <div style="background:#f0fdf4; padding:15px; border-radius:12px; border:1px solid #dcfce7;">
+        <p style="font-size:0.75rem; font-weight:bold; color:#166534; margin:0 0 10px;">👤 連絡先編集</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div>
+            <label style="font-size:0.65rem;">電話番号</label>
+            <input type="text" id="edit-tel" value="${p.tel||''}" style="width:100%; padding:10px; border-radius:8px; border:1px solid #cbd5e1; box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-size:0.65rem;">メールアドレス</label>
+            <input type="text" id="edit-email" value="${p.email||''}" style="width:100%; padding:10px; border-radius:8px; border:1px solid #cbd5e1; box-sizing:border-box;">
+          </div>
         </div>
-        <div>
-          <label style="font-size:0.65rem;">メールアドレス</label>
-          <input type="text" id="edit-email" value="${p.email||''}" style="width:100%; padding:10px; border-radius:8px; border:1px solid #cbd5e1; box-sizing:border-box;">
+      </div>
+
+      <div style="background:#f1f5f9; padding:15px; border-radius:12px; border:1px solid #e2e8f0;">
+        <p style="font-size:0.75rem; font-weight:bold; color:#475569; margin:0 0 10px;">📍 お届け先情報</p>
+        <input type="text" id="edit-zip" value="${p.zip||''}" onblur="autoZip(this.value)" placeholder="郵便番号" style="width:100%; padding:10px; margin-bottom:8px; border-radius:8px; border:1px solid #cbd5e1; box-sizing:border-box;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+          <input type="text" id="edit-pref" value="${p.pref||''}" placeholder="都道府県" style="padding:10px; border-radius:8px; border:1px solid #cbd5e1; box-sizing:border-box;">
+          <input type="text" id="edit-city" value="${p.city||''}" placeholder="市区町村" style="padding:10px; border-radius:8px; border:1px solid #cbd5e1; box-sizing:border-box;">
+        </div>
+        <input type="text" id="edit-rest" value="${p.rest||''}" placeholder="番地・建物名" style="width:100%; padding:10px; border-radius:8px; border:1px solid #cbd5e1; box-sizing:border-box;">
+      </div>
+
+      <div style="background:#fff7ed; padding:15px; border-radius:12px; border:1px solid #ffedd5;">
+        <p style="font-size:0.75rem; font-weight:bold; color:#9a3412; margin:0 0 10px;">🎟️ 注文内容 & 受取方法</p>
+        <select id="edit-shipping" style="width:100%; padding:10px; margin-bottom:12px; border-radius:8px; border:1px solid #fed7aa; background:white;">
+          <option value="郵送" ${p.shipping === '郵送' ? 'selected' : ''}>郵送</option>
+          <option value="QRコード" ${p.shipping === 'QRコード' ? 'selected' : ''}>QRコード</option>
+          <option value="手渡し" ${p.shipping === '手渡し' ? 'selected' : ''}>手渡し</option>
+        </select>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div><label style="font-size:0.65rem;">S大人</label><input type="number" id="edit-sa" value="${p.s_a}" oninput="reCalc()" style="width:100%; padding:8px; border-radius:6px; border:1px solid #fed7aa;"></div>
+          <div><label style="font-size:0.65rem;">S子供</label><input type="number" id="edit-sc" value="${p.s_c}" oninput="reCalc()" style="width:100%; padding:8px; border-radius:6px; border:1px solid #fed7aa;"></div>
+          <div><label style="font-size:0.65rem;">一般大人</label><input type="number" id="edit-ga" value="${p.g_a}" oninput="reCalc()" style="width:100%; padding:8px; border-radius:6px; border:1px solid #fed7aa;"></div>
+          <div><label style="font-size:0.65rem;">一般子供</label><input type="number" id="edit-gc" value="${p.g_c}" oninput="reCalc()" style="width:100%; padding:8px; border-radius:6px; border:1px solid #fed7aa;"></div>
+         </div>
+        <div style="margin-top:10px; padding-top:10px; border-top:2px dashed #fed7aa; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:0.8rem; font-weight:bold;">合計金額</span>
+          <input type="number" id="edit-total" value="${p.total}" readonly style="width:100px; border:none; background:transparent; text-align:right; font-weight:bold; color:#e11d48; font-size:1.1rem; outline:none;">
         </div>
       </div>
-    </div>
 
-    <div style="background:#f1f5f9; padding:15px; border-radius:12px; border:1px solid #e2e8f0;">
-      <p style="font-size:0.75rem; font-weight:bold; color:#475569; margin:0 0 10px;">📍 お届け先情報</p>
-      <input type="text" id="edit-zip" value="${p.zip||''}" onblur="autoZip(this.value)" placeholder="郵便番号" style="width:100%; padding:10px; margin-bottom:8px; border-radius:8px; border:1px solid #cbd5e1; box-sizing:border-box;">
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
-        <input type="text" id="edit-pref" value="${p.pref||''}" placeholder="都道府県" style="padding:10px; border-radius:8px; border:1px solid #cbd5e1; box-sizing:border-box;">
-        <input type="text" id="edit-city" value="${p.city||''}" placeholder="市区町村" style="padding:10px; border-radius:8px; border:1px solid #cbd5e1; box-sizing:border-box;">
+      <div style="background:#fff; padding:15px; border-radius:12px; border:1px solid #cbd5e1;">
+        <p style="font-size:0.75rem; font-weight:bold; color:#334155; margin:0 0 10px;">📝 備考・連絡事項</p>
+        <textarea id="edit-remarks" style="width:100%; height:150px; padding:12px; border-radius:8px; border:1px solid #cbd5e1; font-size:0.9rem; box-sizing:border-box; line-height:1.5;">${p.remarks||''}</textarea>
       </div>
-      <input type="text" id="edit-rest" value="${p.rest||''}" placeholder="番地・建物名" style="width:100%; padding:10px; border-radius:8px; border:1px solid #cbd5e1; box-sizing:border-box;">
-    </div>
-
-    <div style="background:#fff7ed; padding:15px; border-radius:12px; border:1px solid #ffedd5;">
-      <p style="font-size:0.75rem; font-weight:bold; color:#9a3412; margin:0 0 10px;">🎟️ 注文内容 & 受取方法</p>
-      <select id="edit-shipping" style="width:100%; padding:10px; margin-bottom:12px; border-radius:8px; border:1px solid #fed7aa; background:white;">
-        <option value="郵送" ${p.shipping === '郵送' ? 'selected' : ''}>郵送</option>
-        <option value="QRコード" ${p.shipping === 'QRコード' ? 'selected' : ''}>QRコード</option>
-        <option value="手渡し" ${p.shipping === '手渡し' ? 'selected' : ''}>手渡し</option>
-      </select>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-        <div><label style="font-size:0.65rem;">S大人</label><input type="number" id="edit-sa" value="${p.s_a}" oninput="reCalc()" style="width:100%; padding:8px; border-radius:6px; border:1px solid #fed7aa;"></div>
-        <div><label style="font-size:0.65rem;">S子供</label><input type="number" id="edit-sc" value="${p.s_c}" oninput="reCalc()" style="width:100%; padding:8px; border-radius:6px; border:1px solid #fed7aa;"></div>
+      
+      <div style="display:grid; grid-template-columns:1fr 2fr; gap:10px; margin-top:5px; padding-bottom:10px;">
+        <button onclick="handleCancelStatus('${p.id}')" style="background:#fff; color:#e11d48; padding:14px; border-radius:10px; font-weight:bold; border:2px solid #e11d48; cursor:pointer;">🚫 キャンセル</button>
+        <button onclick="saveEdit()" style="background:#1e3a8a; color:white; padding:14px; border-radius:10px; font-weight:bold; border:none; cursor:pointer; box-shadow: 0 4px 6px rgba(30,58,138,0.2);">💾 変更を保存</button>
       </div>
-      <div style="margin-top:10px; padding-top:10px; border-top:2px dashed #fed7aa; display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-size:0.8rem; font-weight:bold;">合計金額</span>
-        <input type="number" id="edit-total" value="${p.total}" readonly style="width:100px; border:none; background:transparent; text-align:right; font-weight:bold; color:#e11d48; font-size:1.1rem; outline:none;">
-      </div>
-    </div>
-
-    <div style="background:#fff; padding:15px; border-radius:12px; border:1px solid #cbd5e1;">
-      <p style="font-size:0.75rem; font-weight:bold; color:#334155; margin:0 0 10px;">📝 備考・連絡事項（自由に長文入力可能）</p>
-      <textarea id="edit-remarks" style="width:100%; height:150px; padding:12px; border-radius:8px; border:1px solid #cbd5e1; font-size:0.9rem; box-sizing:border-box; line-height:1.5;">${p.remarks||''}</textarea>
-    </div>
-    
-    <div style="display:grid; grid-template-columns:1fr 2fr; gap:10px; margin-top:5px; padding-bottom:10px;">
-      <button onclick="handleCancelStatus('${p.id}')" style="background:#fff; color:#e11d48; padding:14px; border-radius:10px; font-weight:bold; border:2px solid #e11d48; cursor:pointer;">🚫 取消</button>
-      <button onclick="saveEdit()" style="background:#1e3a8a; color:white; padding:14px; border-radius:10px; font-weight:bold; border:none; cursor:pointer; box-shadow: 0 4px 6px rgba(30,58,138,0.2);">💾 変更を保存</button>
-    </div>
-  </div>`;
-
-  }
+    </div>`;
+}
   document.getElementById("detail-modal").style.display = "block";
 }
 
