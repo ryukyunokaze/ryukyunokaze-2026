@@ -454,10 +454,10 @@ async function handleStatusMail(id, action) {
 
   // 🌟 入金確認メールの設定
   if (action === 'PAYMENT') {
-    // スプレッドシートの「mail_pay_sub」と「mail_pay_body」という項目名を確認してください
+    // 修正前：mail pay sub -> 修正後：mail_pay_sub
     subject = replaceTags(masterPrices.mail_pay_sub) || "【入金確認】チケットのご案内";
-    bodyMain = replaceTags(masterPrices.mail_pay_body) || "ご入金ありがとうございます。チケットの準備が整いましたら改めてご連絡いたします。";
-  } 
+    bodyMain = replaceTags(masterPrices.mail_pay_body) || "ご入金ありがとうございます。";
+  }
   // 🌟 発送完了メールの設定
   else {
     const isQR = p.shipping && p.shipping.includes("QR");
