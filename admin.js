@@ -147,10 +147,12 @@ function openModal(id, mode) {
       <div style="font-size:0.85rem; line-height:1.6;">
         <div style="display:flex; gap:8px; margin-bottom:15px;">
           <button onclick="location.href='tel:${p.tel}'" style="flex:1; background:#10b981; color:white; padding:10px; border:none; border-radius:8px; font-weight:bold;">📞 電話</button>
-          <button onclick="location.href='mailto:${p.email}'" style="flex:1; background:#3b82f6; color:white; padding:10px; border:none; border-radius:8px; font-weight:bold;">✉️ メール</button>
+          <button onclick="location.href='📩" style="flex:1; background:#3b82f6; color:white; padding:10px; border:none; border-radius:8px; font-weight:bold;">✉️ メール</button>
         </div>
         <div style="background:#f1f5f9; padding:10px; border-radius:8px; margin-bottom:10px;">
       <div style="margin-bottom:5px;">📝 申込: ${p.timestamp}</div>
+      <span>📅 申込: ${p.timestamp}</span>
+      <span style="font-weight:bold; color:#1e3a8a;">📦 受け取り: ${p.shipping || '未設定'}</span></div>
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <span style="font-weight:bold; color: ${p.status === '未入金' ? '#e11d48' : '#10b981'};">
           💰 入金: ${paidStatus}
@@ -158,7 +160,13 @@ function openModal(id, mode) {
         <span style="font-weight:bold; color: ${sentStatus === '未' ? '#64748b' : '#1e3a8a'};">
           🚚 発送: ${sentStatus}
         </span>
+        <div style="border-top:1px solid #e2e8f0; padding-top:8px;">
+        <p style="margin:0; color:#475569;">📍 〒${p.zip||''} ${p.pref||''}${p.city||''}${p.rest||''}</p>
+        </div>
+        <p style="margin:0; color:#475569;">📞 tel:${p.tel}</p></div>
+        <p style="margin:0; color:#475569;">📩 mailto:${p.email}'</p></div>
       </div>
+
         ${qrHtml}
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:15px;">
           <button onclick="handleStatusMail('${p.id}', 'PAYMENT')" style="background:#10b981; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">入金＆メール</button>
@@ -199,6 +207,16 @@ function openModal(id, mode) {
         <input type="number" id="edit-total" value="${p.total}" readonly style="width:100px; border:none; background:transparent; text-align:right; font-weight:bold; color:#e11d48; font-size:1.1rem;">
       </div>
     </div>
+    <div style="background:#f1f5f9; padding:15px; border-radius:12px; border:1px solid #e2e8f0;">
+  <p style="font-size:0.75rem; font-weight:bold; color:#475569; margin:0 0 10px;">📦 郵送・受取設定</p>
+  
+  <label style="font-size:0.65rem; color:#475569;">発送方法（受け取り方法）</label>
+  <select id="edit-shipping" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #cbd5e1; background:white;">
+    <option value="配送" ${p.shipping === '郵送' ? 'selected' : ''}>郵送</option>
+    <option value="当日受取" ${p.shipping === '当日受取' ? 'selected' : ''}>当日受取</option>
+    <option value="手渡し" ${p.shipping === '手渡し' ? 'selected' : ''}>手渡し</option>
+  </select>
+  </div>
 
     <textarea id="edit-remarks" placeholder="備考・連絡事項" style="height:70px; padding:10px; border-radius:8px; border:1px solid #cbd5e1; font-size:0.85rem;">${p.remarks||''}</textarea>
     
@@ -341,11 +359,13 @@ async function saveEdit() {
     pref: document.getElementById("edit-pref").value, 
     city: document.getElementById("edit-city").value, 
     rest: document.getElementById("edit-rest").value, 
+    shipping: document.getElementById("edit-shipping").value, // 🌟 shippingとして保存
     s_a: document.getElementById("edit-sa").value, 
     s_c: document.getElementById("edit-sc").value, 
     g_a: document.getElementById("edit-ga").value, 
     g_c: document.getElementById("edit-gc").value, 
     total: document.getElementById("edit-total").value, 
+
     remarks: document.getElementById("edit-remarks").value
   };
   await fetch(url, { method: "POST", body: JSON.stringify(d) });
