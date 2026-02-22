@@ -429,21 +429,65 @@ function printTicket(id) {
 }
 
 /** 5. 補助関数群 */
+/** 5. 補助関数群：メール送信とステータス更新 */
 async function handleStatusMail(id, action) {
   const p = currentData.find(item => item.id === id);
+  if (!p) return;
+
   const status = (action === 'PAYMENT') ? "入金済み" : "完了";
   if(!confirm(status + " に更新してメールを起動しますか？")) return;
-  const replaceTags = (text) => text ? text.replace(/{event_title}/g, masterPrices.event_title || "").replace(/{name}/g, p.name || "") : "";
+
+  // 🌟 スプレッドシートからの設定項目を安全に取得
+  const eventTitle = masterPrices.event_title || "琉球の風 2026";
+  const name = p.name || "";
+  
+  // 🌟 タグの置換処理（{name} や {event_title} を実際の値に変える）
+  const replaceTags = (text) => {
+    if (!text) return "";
+    return text.replace(/{event_title}/g, eventTitle)
+               .replace(/{name}/g, name);
+  };
+
   const signature = "\n\n" + (masterPrices.mail_signature || "");
-  let subject, bodyMain;
-  if (action === 'PAYMENT') { subject = replaceTags(masterPrices.mail_pay_sub); bodyMain = replaceTags(masterPrices.mail_pay_body); }
-  else { const isQR = p.shipping.includes("QR"); subject = replaceTags(isQR ? masterPrices.mail_sent_sub_qr : masterPrices.mail_sent_sub_post); bodyMain = replaceTags(isQR ? masterPrices.mail_sent_body_qr : masterPrices.mail_sent_body_post); }
+  let subject = "";
+  let bodyMain = "";
+
+  // 🌟 入金確認メールの設定
+  if (action === 'PAYMENT') {
+    // スプレッドシートの「mail_pay_sub」と「mail_pay_body」という項目名を確認してください
+    subject = replaceTags(masterPrices.mail_pay_sub) || "【入金確認】チケットのご案内";
+    bodyMain = replaceTags(masterPrices.mail_pay_body) || "ご入金ありがとうございます。チケットの準備が整いましたら改めてご連絡いたします。";
+  } 
+  // 🌟 発送完了メールの設定
+  else {
+    const isQR = p.shipping && p.shipping.includes("QR");
+    if (isQR) {
+      subject = replaceTags(masterPrices.mail_sent_sub_qr);
+      bodyMain = replaceTags(masterPrices.mail_sent_body_qr);
+    } else {
+      subject = replaceTags(masterPrices.mail_sent_sub_post);
+      bodyMain = replaceTags(masterPrices.mail_sent_body_post);
+    }
+  }
+
   const mySiteUrl = window.location.origin + window.location.pathname.replace("admin.html", "");
-  const qrUrl = p.shipping.includes("QR") ? `\n\n▼チケット表示URL\n${mySiteUrl}qr.html?id=${p.id}` : "";
-  const fullBody = `${p.name} 様\n\n${bodyMain}${qrUrl}${signature}`;
+  const qrUrl = (p.shipping && p.shipping.includes("QR")) ? `\n\n▼チケット表示URL\n${mySiteUrl}qr.html?id=${p.id}` : "";
+  
+  // メールの組み立て
+  const fullBody = `${name} 様\n\n${bodyMain}${qrUrl}${signature}`;
+
+  // 🌟 メーラー起動
   window.location.href = `mailto:${p.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fullBody)}`;
-  await fetch(url, { method: "POST", body: JSON.stringify({ type: "updateStatus", id: id, status: status }) });
-  fetchData(); closeModal();
+
+  // 🌟 ステータス更新（サーバーへ送信）
+  try {
+    await fetch(url, { method: "POST", body: JSON.stringify({ type: "updateStatus", id: id, status: status }) });
+    fetchData(); 
+    closeModal();
+  } catch (e) {
+    console.error("ステータス更新エラー:", e);
+    alert("ステータスの更新に失敗しました（メールは送信されます）");
+  }
 }
 
 function reCalc() {
