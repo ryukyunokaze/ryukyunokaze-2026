@@ -120,14 +120,31 @@ function openModal(id, mode) {
     <div style="padding:12px; background:#f8fafc; border-radius:10px; border-bottom:2px solid #e2e8f0; margin-bottom:15px;">
       <div style="font-size:0.7rem; color:#94a3b8;">${p.id}</div>
       <div style="font-size:1.1rem; font-weight:bold;">${p.name} 様</div>
-      <div style="font-size:0.8rem; color:#64748b;">${p.gender || '性別不明'} / ${p.age || '年代不明'}</div>
+      <div style="display:inline-block; background:${currentStatusColor}; color:white; font-size:0.75rem; padding:4px 12px; border-radius:6px; font-weight:bold;">
+        ステータス：${p.status || '未設定'}
+      </div>
     </div>
   `;
+  // ステータスごとの色設定（文字もバッジもこの色を使います）
+  const statusColors = {
+    "未入金": "#e11d48", // 赤
+    "入金済み": "#10b981", // 緑
+    "完了": "#1e3a8a", // 紺
+    "キャンセル": "#64748b", // グレー
+    "オキチケ": "#f59e0b" // オレンジ
+    };
+  const currentStatusColor = statusColors[p.status] || "#64748b";
 
   if (mode === 'view') {
     const totalCount = Number(p.s_a) + Number(p.s_c) + Number(p.g_a) + Number(p.g_c);
-    let qrHtml = "";
 
+    let ticketDetailHtml = "";
+    if (Number(p.s_a) > 0) ticketDetailHtml += `<div>Sエリア大人: ${p.s_a}枚</div>`;
+    if (Number(p.s_c) > 0) ticketDetailHtml += `<div>Sエリア子供: ${p.s_c}枚</div>`;
+    if (Number(p.g_a) > 0) ticketDetailHtml += `<div>一般エリア大人: ${p.g_a}枚</div>`;
+    if (Number(p.g_c) > 0) ticketDetailHtml += `<div>一般エリア子供: ${p.g_c}枚</div>`;
+
+    let qrHtml = "";
     if (p.status !== "未入金") {
       qrHtml += `<div style="background:#fffbeb; border:1px solid #fcd34d; padding:10px; border-radius:12px; margin-bottom:15px;">
                   <div style="font-size:0.75rem; font-weight:bold; color:#b45309; margin-bottom:10px; text-align:center;">入場用QR（${totalCount}個）</div>
