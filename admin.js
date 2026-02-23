@@ -1,4 +1,4 @@
-const url = "https://script.google.com/macros/s/AKfycbzQzVpK70xJZcr34bQVsskN7-vP9Jy_sgX_WYzuK5oO3K6KNJfpm77smWSClJEfP1nWZA/exec"; 
+const url = "https://script.google.com/macros/s/AKfycbztnrb9di5cdMmJ8tj2uezPt1DrDNylHClreNxQ44ZZ41FVPjYlL6RHtOUs13Njlly-5A/exec"; 
 let currentData = [];
 let selectedId = "";
 let masterPrices = {}; 
@@ -429,7 +429,6 @@ function printTicket(id) {
 }
 
 /** 5. 補助関数群 */
-/** 5. 補助関数群：メール送信とステータス更新 */
 async function handleStatusMail(id, action) {
   const p = currentData.find(item => item.id === id);
   if (!p) return;
@@ -437,47 +436,70 @@ async function handleStatusMail(id, action) {
   const status = (action === 'PAYMENT') ? "入金済み" : "完了";
   if(!confirm(status + " に更新してメールを起動しますか？")) return;
 
-  // 🌟 スプレッドシートからの設定項目を安全に取得
-  const eventTitle = masterPrices.event_title || "琉球の風 2026";
-  const name = p.name || "";
+  // 🌟 名称のズレを吸収する関数
+  const getVal = (key) => {
+    if (!masterPrices) return "";
+    const normalizedKey = key.toLowerCase().replace(/_/g, '');
+    const foundKey = Object.keys(masterPrices).find(k => 
+      k.toLowerCase().replace(/_/g, '').replace(/\s+/g, '') === normalizedKey
+    );
+    return foundKey ? masterPrices[foundKey] : "";
+  };
   
-  // 🌟 タグの置換処理（{name} や {event_title} を実際の値に変える）
+  const eventTitle = getVal("event_title") || "琉球の風 2026";
+  const name = p.name || "";
+  const signature = "\n\n" + getVal("mail_signature");
+
   const replaceTags = (text) => {
     if (!text) return "";
-    return text.replace(/{event_title}/g, eventTitle)
-               .replace(/{name}/g, name);
+    return String(text).replace(/{event_title}/g, eventTitle).replace(/{name}/g, name);
   };
 
-  const signature = "\n\n" + (masterPrices.mail_signature || "");
   let subject = "";
   let bodyMain = "";
+  let qrUrlSection = ""; // 🌟 QRコードURL用の変数
 
-  // 🌟 入金確認メールの設定
+  // 🌟 1. 入金確認メール（PAYMENT）の場合
   if (action === 'PAYMENT') {
-    // 修正前：mail pay sub -> 修正後：mail_pay_sub
-    subject = replaceTags(masterPrices.mail_pay_sub) || "【入金確認】チケットのご案内";
-    bodyMain = replaceTags(masterPrices.mail_pay_body) || "ご入金ありがとうございます。";
-  }
-  // 🌟 発送完了メールの設定
+    subject = replaceTags(getVal("mail_pay_sub")) || "【入金確認】チケットのご案内";
+    bodyMain = replaceTags(getVal("mail_pay_body")) || "ご入金ありがとうございました。";
+    // 入金確認時はまだQRコードを送らないため、qrUrlSection は空のまま
+  } 
+  
+  // 🌟 2. 発送完了メール（COMPLETE）の場合
   else {
     const isQR = p.shipping && p.shipping.includes("QR");
+    const mySiteUrl = window.location.origin + window.location.pathname.replace("admin.html", "");
+
     if (isQR) {
-      subject = replaceTags(masterPrices.mail_sent_sub_qr);
-      bodyMain = replaceTags(masterPrices.mail_sent_body_qr);
+      // 🌟 合計枚数を計算
+      const totalTickets = (Number(p.s_a)||0) + (Number(p.s_c)||0) + (Number(p.g_a)||0) + (Number(p.g_c)||0);
+      
+      subject = replaceTags(getVal("mail_sent_sub_qr")) || "【発送完了】QRチケットのご案内";
+      
+      // 本文に枚数情報を添える
+      bodyMain = replaceTags(getVal("mail_sent_body_qr")) || "チケットを発行いたしました。";
+      
+      // 🌟 URLを生成（IDを送れば、qr.html側で枚数分表示するようにします）
+      qrUrlSection = `\n\n▼チケット表示URL（当日こちらをご提示ください）\n` +
+                     `※合計 ${totalTickets} 枚分のQRコードが表示されます。\n` +
+                     `${mySiteUrl}qr.html?id=${p.id}`;
     } else {
-      subject = replaceTags(masterPrices.mail_sent_sub_post);
-      bodyMain = replaceTags(masterPrices.mail_sent_body_post);
+      // 郵送の場合（QRを含まない）
+      subject = replaceTags(getVal("mail_sent_sub_post")) || "【発送完了】チケット郵送のご案内";
+      bodyMain = replaceTags(getVal("mail_sent_body_post")) || "本日、チケットを郵送いたしました。";
+      qrUrlSection = ""; // 郵送なのでURLは含めない
     }
   }
 
-  const mySiteUrl = window.location.origin + window.location.pathname.replace("admin.html", "");
-  const qrUrl = (p.shipping && p.shipping.includes("QR")) ? `\n\n▼チケット表示URL\n${mySiteUrl}qr.html?id=${p.id}` : "";
-  
   // メールの組み立て
-  const fullBody = `${name} 様\n\n${bodyMain}${qrUrl}${signature}`;
+  const fullBody = `${name} 様\n\n${bodyMain}${qrUrlSection}${signature}`;
 
   // 🌟 メーラー起動
-  window.location.href = `mailto:${p.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fullBody)}`;
+  const mailtoUrl = `mailto:${p.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fullBody)}`;
+  const a = document.createElement('a');
+  a.href = mailtoUrl;
+  a.click();
 
   // 🌟 ステータス更新（サーバーへ送信）
   try {
@@ -485,10 +507,14 @@ async function handleStatusMail(id, action) {
     fetchData(); 
     closeModal();
   } catch (e) {
-    console.error("ステータス更新エラー:", e);
-    alert("ステータスの更新に失敗しました（メールは送信されます）");
+    console.error("更新エラー:", e);
   }
 }
+
+
+
+
+
 
 function reCalc() {
   const sa = parseInt(document.getElementById('edit-sa').value) || 0;
