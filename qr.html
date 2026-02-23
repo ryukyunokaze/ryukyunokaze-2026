@@ -60,11 +60,12 @@
         msgEl.style.display = 'none';
         const qrList = document.getElementById('qr-list');
 
-        // 枚数の計算（プロパティ名はスプレッドシートの1行目と一致させる必要があります）
-        const s_a = Number(order.s_a) || 0;
-        const s_c = Number(order.s_c) || 0;
-        const g_a = Number(order.g_a) || 0;
-        const g_c = Number(order.g_c) || 0;
+        // 🌟 スプレッドシートの見出し(image_b9f67d.jpg)に合わせて日本語で取得します
+        const s_a = Number(order["S大人"]) || 0;
+        const s_c = Number(order["S子供"]) || 0;
+        const g_a = Number(order["一般大人"]) || 0;
+        const g_c = Number(order["一般子供"]) || 0;
+        
         const total = s_a + s_c + g_a + g_c;
 
         if (total === 0) {
