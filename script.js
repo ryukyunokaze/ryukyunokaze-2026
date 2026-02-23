@@ -147,7 +147,7 @@ async function submitOrder() {
   }
 
   const data = {
-    type: "addOnlineOrder", // 🌟 修正：GAS側の条件分岐と一致させました
+    type: "addOrder", // 🌟 修正：GAS側の条件分岐と一致させました
     name: document.getElementById("name").value,
     tel: document.getElementById("tel").value,
     email: document.getElementById("email").value,
