@@ -170,7 +170,6 @@ async function submitOrder() {
   try {
     const response = await fetch(url, {
       method: "POST",
-      mode: "no-cors", // 🌟 セキュリティの壁を無視してデータを送りつけるモード
       headers: { "Content-Type": "text/plain" },
       body: JSON.stringify(data)
     });
