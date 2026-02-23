@@ -1,24 +1,18 @@
 // =========================================
 // 1. 基本設定
 // =========================================
-// 🌟 修正：最新のデプロイURLに貼り替えてください
+// 🌟 GASの最新デプロイURLに書き換えてください
 const url = "https://script.google.com/macros/s/AKfycbwRARc7UT_Pkhrih9qKajrxS8TWUbZ_k5lTQjWaxtRLFoX8L6GkWunLE8vSJrWfWxPmcQ/exec"; 
 
 let masterPrices = {};
 
+// ページ読み込み時に設定を取得
 async function loadConfig() {
   try {
     const response = await fetch(`${url}?type=getConfig`);
     masterPrices = await response.json();
     
-    // 振込先案内を表示
-    const bankArea = document.getElementById("bank-info-content");
-    if(bankArea) {
-      bankArea.innerText = masterPrices.bank_info || "管理画面で設定してください。";
-    }
-    
-    // 🌟 単価表示をスプレッドシートの値に更新
-    // 万が一取得失敗した時のためにデフォルト値を設定しています
+    // 単価表示を画面に反映
     const saPrice = Number(masterPrices.s_a_price) || 3500;
     const gaPrice = Number(masterPrices.g_a_price) || 1500;
 
@@ -29,49 +23,46 @@ async function loadConfig() {
       document.getElementById("price-ga-display").innerText = gaPrice.toLocaleString() + "円";
     }
     
-    console.log("最新の設定を反映しました", masterPrices);
-    
-    // 🌟 金額表示が変わった後に一度計算を走らせる
+    // 振込先案内を完了画面にセット
+    const bankArea = document.getElementById("bank-info-content");
+    if(bankArea) bankArea.innerText = masterPrices.bank_info || "お振込先は別途ご案内します。";
+
+    console.log("設定読み込み完了", masterPrices);
     calc(); 
   } catch (e) {
-    console.error("設定読み込みエラー:", e);
+    console.error("設定取得失敗:", e);
   }
 }
 
 window.addEventListener('load', loadConfig);
 
 // =========================================
-// 2. 枚数計算ロジック
+// 2. 枚数計算ロジック（単価連動）
 // =========================================
 function calc() {
-  const saCount = Number(document.getElementById("s_a").value) || 0;
-  const scCount = Number(document.getElementById("s_c").value) || 0;
-  const gaCount = Number(document.getElementById("g_a").value) || 0;
-  const gcCount = Number(document.getElementById("g_c").value) || 0;
+  const sa = Number(document.getElementById("s_a").value) || 0;
+  const sc = Number(document.getElementById("s_c").value) || 0;
+  const ga = Number(document.getElementById("g_a").value) || 0;
+  const gc = Number(document.getElementById("g_c").value) || 0;
 
-  // 🌟 masterPrices から取得。なければデフォルト。
-  const saPrice = Number(masterPrices.s_a_price) || 3500;
-  const scPrice = Number(masterPrices.s_c_price) || 0;
-  const gaPrice = Number(masterPrices.g_a_price) || 1500;
-  const gcPrice = Number(masterPrices.g_c_price) || 0;
+  const saP = Number(masterPrices.s_a_price) || 3500;
+  const scP = Number(masterPrices.s_c_price) || 0;
+  const gaP = Number(masterPrices.g_a_price) || 1500;
+  const gcP = Number(masterPrices.g_c_price) || 0;
 
-  // 当日加算金の判定
   const now = new Date();
   const perfDate = masterPrices.event_date ? new Date(masterPrices.event_date) : new Date("2026-10-18");
-  const addPrice = (now >= perfDate) ? (Number(masterPrices.door_ticket_fee) || 500) : 0; 
+  const doorFee = (now >= perfDate) ? (Number(masterPrices.door_ticket_fee) || 500) : 0;
 
-  // 合計計算
-  const total = (saCount * (saPrice + addPrice)) + 
-                (scCount * (scPrice + addPrice)) + // 小学生以下も加算する場合
-                (gaCount * (gaPrice + addPrice)) + 
-                (gcCount * (gcPrice + addPrice));
+  const total = (sa * (saP + doorFee)) + (sc * (scP + doorFee)) + 
+                (ga * (gaP + doorFee)) + (gc * (gcP + doorFee));
 
   const display = document.getElementById("totalDisplay");
   if (display) display.innerText = total.toLocaleString();
 }
 
 // =========================================
-// 3. 画面遷移
+// 3. 画面遷移ロジック（ここを消すと形が崩れます）
 // =========================================
 function goToStep2() {
   const sa = Number(document.getElementById("s_a").value) || 0;
@@ -105,6 +96,7 @@ function confirmOrder() {
     return;
   }
 
+  // 確認画面への反映
   document.getElementById("conf-name").innerText = name;
   document.getElementById("conf-gender").innerText = gender;
   document.getElementById("conf-age").innerText = age;
@@ -120,8 +112,7 @@ function confirmOrder() {
   document.getElementById("conf-shipping").innerText = document.getElementById("shipping").value;
   document.getElementById("conf-remarks").innerText = document.getElementById("remarks").value || "特になし";
 
-
-  // 🌟 枚数詳細を復活させる
+  // 枚数詳細の作成
   const sa = Number(document.getElementById("s_a").value) || 0;
   const sc = Number(document.getElementById("s_c").value) || 0;
   const ga = Number(document.getElementById("g_a").value) || 0;
@@ -137,7 +128,6 @@ function confirmOrder() {
   if (ticketDisplay) ticketDisplay.innerHTML = ticketHtml;
 
   document.getElementById("conf-total").innerText = document.getElementById("totalDisplay").innerText;
-  
 
   document.getElementById("step2").style.display = "none";
   document.getElementById("step3").style.display = "block";
@@ -150,17 +140,15 @@ function goToStep2Back() {
 }
 
 // =========================================
-// 5. 注文確定（GASへ送信）
+// 4. 注文確定（GASへ送信）
 // =========================================
 async function submitOrder() {
   const btn = document.querySelector(".submit-btn-final");
-  if (btn) {
-    btn.disabled = true;
-    btn.innerText = "送信中...";
-  }
+  btn.disabled = true;
+  btn.innerText = "送信中...";
 
   const data = {
-    type: "addOrder", // 🌟 GAS側の data.type === "addOrder" と一致
+    type: "addOrder",
     name: document.getElementById("name").value,
     tel: document.getElementById("tel").value,
     email: document.getElementById("email").value,
@@ -175,34 +163,30 @@ async function submitOrder() {
     total: document.getElementById("totalDisplay").innerText.replace(/,/g, ''),
     shipping: document.getElementById("shipping").value,
     remarks: document.getElementById("remarks").value,
-    gender: document.getElementById("gender").value,
-    age: document.getElementById("age").value,
+    gender: document.querySelector('select[name="gender"]').value,
+    age: document.querySelector('select[name="age"]').value,
     salesType: "オンライン予約"
   };
 
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      // mode: "no-cors" は削除します 🌟
-      // 代わりに headers を指定して、GAS側が正しく受け取れるようにします
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: JSON.stringify(data)
+    // 🌟 mode: "no-cors" を消し、レスポンスを正しく受け取る
+    const res = await fetch(url, { 
+      method: "POST", 
+      body: JSON.stringify(data) 
     });
-    
-    // GAS側で createJsonResponse を使っているため、正常に応答を受け取れます
-    const result = await response.json(); 
+    const result = await res.json();
 
     if (result.result === "success") {
       document.getElementById("step3").style.display = "none";
       document.getElementById("step4").style.display = "block";
       window.scrollTo(0, 0);
-    } else {
-      throw new Error();
+    } else { 
+      throw new Error(); 
     }
   } catch (e) {
     console.error("送信エラー:", e);
     alert("エラーが発生しました。時間を置いて再度お試しください。");
+    btn.disabled = false;
+    btn.innerText = "🚀 注文を確定する";
   }
 }
