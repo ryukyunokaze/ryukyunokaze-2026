@@ -90,26 +90,39 @@
         const result = await res.json();
 
         if (result.status === "success") {
-          beep(880, 150); // 成功：高い音（ピィッ！）
+          beep(880, 150); // 成功音
           statusDiv.innerText = "✅ 入場OK";
           statusDiv.className = "status-msg success";
           resultDiv.style.display = "block";
-          // 🌟 IDとエリア情報を表示
-           document.getElementById("res-id").innerText = "ID: " + result.id;
-          // 🌟 ここでエリア情報を大きく表示
-            const areaHtml = `<div style="font-size: 2em; color: #e53e3e; margin-bottom: 10px;">${result.areaInfo}</div>`;
+          
+          document.getElementById("res-id").innerText = "ID: " + result.id;
+          const areaHtml = `<div style="font-size: 2em; color: #e53e3e; margin-bottom: 10px;">${result.areaInfo}</div>`;
           document.getElementById("res-ticket").innerHTML = areaHtml + result.ticket;
-  
+
+          // 🌟 3秒後に自動でスキャンを再開する
+          setTimeout(() => {
+            resetScanner();
+          }, 3000); // 3000ミリ秒 = 3秒（確認時間を考慮して設定）
+
         } else {
-          beep(200, 400); // 失敗：低い音（ブブー）
+          beep(200, 400); // 失敗音
           statusDiv.innerText = "❌ " + result.message;
           statusDiv.className = "status-msg error";
           resultDiv.style.display = "none";
+          
+          // 🌟 エラーの時も5秒後に自動復帰させる
+          setTimeout(() => {
+            resetScanner();
+          }, 5000);
         }
       } catch (error) {
         beep(200, 400);
         statusDiv.innerText = "❌ 通信失敗";
         statusDiv.className = "status-msg error";
+        
+        setTimeout(() => {
+          resetScanner();
+        }, 5000);
       }
     }
 
