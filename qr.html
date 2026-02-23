@@ -10,93 +10,80 @@
     .qr-card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 20px; }
     h1 { font-size: 1.2rem; margin-bottom: 10px; color: #1e3a8a; }
     .ticket-label { font-size: 0.8rem; font-weight: bold; background: #1e3a8a; color: white; padding: 4px 12px; border-radius: 50px; display: inline-block; margin-bottom: 10px; }
-    .qr-image { margin: 10px 0; border: 4px solid #fff; width: 200px; height: 200px; }
-    .info { font-size: 0.85rem; margin-top: 10px; text-align: left; background: #f8fafc; padding: 12px; border-radius: 10px; }
+    .qr-image { margin: 10px 0; border: 4px solid #fff; width: 220px; height: 220px; }
+    .info { font-size: 0.85rem; margin-top: 10px; text-align: left; background: #f8fafc; padding: 12px; border-radius: 10px; line-height: 1.5; }
     .warning { font-size: 0.8rem; color: #ef4444; margin: 20px 0; font-weight: bold; }
-    #status-msg { padding: 50px; font-weight: bold; color: #64748b; }
+    #status-msg { padding: 40px; font-weight: bold; color: #64748b; background: white; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>琉球の風 2026<br>入場用QRコード</h1>
-    
     <div id="status-msg">チケット情報を読み込み中...</div>
     <div id="qr-list"></div>
-
     <p class="warning">※当日、受付にてこの画面をご提示ください。</p>
   </div>
 
   <script>
-    // 🌟 重要：admin.jsの1行目にあるURLと「完全に同じもの」をここに貼ってください
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzAn0H2IZggXHjnkrSAaupj9I1mezeY9KLbxlsXY7P4Uoxkg6yR_Kt2v2hg2C7zYJ5bZg/exec";
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const orderId = urlParams.get('id');
+    const orderId = new URLSearchParams(window.location.search).get('id');
 
     async function loadTickets() {
       const msgEl = document.getElementById('status-msg');
-      
       if (!orderId) {
-        msgEl.innerHTML = '<span style="color:red;">エラー: URLにID（?id=...）がありません</span>';
+        msgEl.innerHTML = '<span style="color:red;">エラー: IDが不明です</span>';
         return;
       }
 
       try {
-        // 🌟 通信テスト
-        const fetchUrl = `${GAS_URL}?type=getOrder&id=${orderId}`;
-        console.log("アクセス中:", fetchUrl);
-        
-        const response = await fetch(fetchUrl);
+        const response = await fetch(`${GAS_URL}?type=getOrder&id=${orderId}`);
         const order = await response.json();
         
-        console.log("取得データ:", order);
-
         if (!order || order.error) {
-          msgEl.innerHTML = `<span style="color:red;">エラー: 注文が見つかりません (ID: ${orderId})</span>`;
+          msgEl.innerHTML = `エラー: 注文データが見つかりません (ID: ${orderId})`;
           return;
         }
 
-        // 🌟 読み込み成功：表示処理
-        msgEl.style.display = 'none';
-        const qrList = document.getElementById('qr-list');
+        // 🌟 どんな名前（S大人 / s_a / Ｓ大人）で入っていても見つけ出す魔法の処理
+        const findVal = (names) => {
+          const key = Object.keys(order).find(k => names.includes(k.trim()));
+          return key ? Number(order[key]) || 0 : 0;
+        };
 
-        // 🌟 スプレッドシートの見出し(image_b9f67d.jpg)に合わせて日本語で取得します
-        const s_a = Number(order["S大人"]) || 0;
-        const s_c = Number(order["S子供"]) || 0;
-        const g_a = Number(order["一般大人"]) || 0;
-        const g_c = Number(order["一般子供"]) || 0;
+        const s_a = findVal(["S大人", "s_a", "Ｓ大人"]);
+        const s_c = findVal(["S子供", "s_c", "Ｓ子供"]);
+        const g_a = findVal(["一般大人", "g_a", "一般大人"]);
+        const g_c = findVal(["一般子供", "g_c", "一般子供"]);
         
         const total = s_a + s_c + g_a + g_c;
 
         if (total === 0) {
-          msgEl.style.display = 'block';
-          msgEl.innerText = "有効なチケット枚数が0枚です。";
+          msgEl.innerHTML = `チケット枚数が0枚です。<br><small style="font-size:10px; color:#ccc;">(取得データ: ${JSON.stringify(order)})</small>`;
           return;
         }
 
+        msgEl.style.display = 'none';
+        const qrList = document.getElementById('qr-list');
+
         for (let i = 1; i <= total; i++) {
-          const branchId = `${order.id}-${i}`;
+          const branchId = `${orderId}-${i}`;
           const card = document.createElement('div');
           card.className = 'qr-card';
           card.innerHTML = `
             <div class="ticket-label">チケット ${i} / ${total}</div>
-            <div>
-              <img class="qr-image" src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${branchId}" alt="QR">
-            </div>
+            <div><img class="qr-image" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${branchId}"></div>
             <div class="info">
-              <strong>お名前:</strong> ${order.name} 様<br>
+              <strong>お名前:</strong> ${order["名前"] || order["name"] || "お客様"} 様<br>
               <strong>受付番号:</strong> ${branchId}
             </div>
           `;
           qrList.appendChild(card);
         }
-
       } catch (e) {
-        console.error("読み込みエラー:", e);
-        msgEl.innerHTML = `<span style="color:red;">通信エラーが発生しました。<br>理由: ${e.message}</span>`;
+        msgEl.innerHTML = `通信エラーが発生しました。<br><small>${e.message}</small>`;
       }
     }
-
     loadTickets();
   </script>
 </body>
