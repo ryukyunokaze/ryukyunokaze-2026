@@ -6,7 +6,6 @@ const url = "https://script.google.com/macros/s/AKfycbwRARc7UT_Pkhrih9qKajrxS8TW
 
 let masterPrices = {};
 
-// 🌟 ページ読み込み時に設定を取得
 async function loadConfig() {
   try {
     const response = await fetch(`${url}?type=getConfig`);
@@ -15,14 +14,25 @@ async function loadConfig() {
     // 振込先案内を表示
     const bankArea = document.getElementById("bank-info-content");
     if(bankArea) {
-      bankArea.innerText = masterPrices.bank_info || "管理画面の『単価設定』で振込先を入力してください。";
+      bankArea.innerText = masterPrices.bank_info || "管理画面で設定してください。";
     }
     
-    // 単価表示の更新
-    if(document.getElementById("price-sa-display")) document.getElementById("price-sa-display").innerText = (masterPrices.s_a_price || 3500).toLocaleString() + "円";
-    if(document.getElementById("price-ga-display")) document.getElementById("price-ga-display").innerText = (masterPrices.g_a_price || 1500).toLocaleString() + "円";
+    // 🌟 単価表示をスプレッドシートの値に更新
+    // 万が一取得失敗した時のためにデフォルト値を設定しています
+    const saPrice = Number(masterPrices.s_a_price) || 3500;
+    const gaPrice = Number(masterPrices.g_a_price) || 1500;
+
+    if(document.getElementById("price-sa-display")) {
+      document.getElementById("price-sa-display").innerText = saPrice.toLocaleString() + "円";
+    }
+    if(document.getElementById("price-ga-display")) {
+      document.getElementById("price-ga-display").innerText = gaPrice.toLocaleString() + "円";
+    }
     
-    console.log("設定を読み込みました", masterPrices);
+    console.log("最新の設定を反映しました", masterPrices);
+    
+    // 🌟 金額表示が変わった後に一度計算を走らせる
+    calc(); 
   } catch (e) {
     console.error("設定読み込みエラー:", e);
   }
@@ -39,19 +49,22 @@ function calc() {
   const gaCount = Number(document.getElementById("g_a").value) || 0;
   const gcCount = Number(document.getElementById("g_c").value) || 0;
 
-  const saPrice = masterPrices.s_a_price || 3500;
-  const scPrice = masterPrices.s_c_price || 0;
-  const gaPrice = masterPrices.g_a_price || 1500;
-  const gcPrice = masterPrices.g_c_price || 0;
+  // 🌟 masterPrices から取得。なければデフォルト。
+  const saPrice = Number(masterPrices.s_a_price) || 3500;
+  const scPrice = Number(masterPrices.s_c_price) || 0;
+  const gaPrice = Number(masterPrices.g_a_price) || 1500;
+  const gcPrice = Number(masterPrices.g_c_price) || 0;
 
+  // 当日加算金の判定
   const now = new Date();
-  const perfDate = masterPrices.event_date ? new Date(masterPrices.event_date) : new Date("2026-06-01");
-  const addPrice = (now >= perfDate) ? (masterPrices.door_ticket_fee || 500) : 0; 
+  const perfDate = masterPrices.event_date ? new Date(masterPrices.event_date) : new Date("2026-10-18");
+  const addPrice = (now >= perfDate) ? (Number(masterPrices.door_ticket_fee) || 500) : 0; 
 
+  // 合計計算
   const total = (saCount * (saPrice + addPrice)) + 
-                (scCount * scPrice) + 
+                (scCount * (scPrice + addPrice)) + // 小学生以下も加算する場合
                 (gaCount * (gaPrice + addPrice)) + 
-                (gcCount * gcPrice);
+                (gcCount * (gcPrice + addPrice));
 
   const display = document.getElementById("totalDisplay");
   if (display) display.innerText = total.toLocaleString();
