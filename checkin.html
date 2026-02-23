@@ -94,8 +94,12 @@
           statusDiv.innerText = "✅ 入場OK";
           statusDiv.className = "status-msg success";
           resultDiv.style.display = "block";
-          document.getElementById("res-id").innerText = "ID: " + result.id;
-          document.getElementById("res-ticket").innerText = result.ticket;
+          // 🌟 IDとエリア情報を表示
+           document.getElementById("res-id").innerText = "ID: " + result.id;
+          // 🌟 ここでエリア情報を大きく表示
+            const areaHtml = `<div style="font-size: 2em; color: #e53e3e; margin-bottom: 10px;">${result.areaInfo}</div>`;
+          document.getElementById("res-ticket").innerHTML = areaHtml + result.ticket;
+  
         } else {
           beep(200, 400); // 失敗：低い音（ブブー）
           statusDiv.innerText = "❌ " + result.message;
