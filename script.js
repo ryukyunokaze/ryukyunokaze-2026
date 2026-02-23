@@ -147,7 +147,7 @@ async function submitOrder() {
   }
 
   const data = {
-    type: "addOrder", // 🌟 修正：GAS側の条件分岐と一致させました
+    type: "addOrder", // 🌟 GAS側の data.type === "addOrder" と一致
     name: document.getElementById("name").value,
     tel: document.getElementById("tel").value,
     email: document.getElementById("email").value,
@@ -162,28 +162,31 @@ async function submitOrder() {
     total: document.getElementById("totalDisplay").innerText.replace(/,/g, ''),
     shipping: document.getElementById("shipping").value,
     remarks: document.getElementById("remarks").value,
-    gender: document.querySelector('select[name="gender"]').value,
-    age: document.querySelector('select[name="age"]').value,
+    gender: document.getElementById("gender").value,
+    age: document.getElementById("age").value,
     salesType: "オンライン予約"
   };
 
   try {
+    // 🌟 mode: "no-cors" は絶対に消してください
     const response = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "text/plain" },
       body: JSON.stringify(data)
     });
-    const result = await response.json();
+    
+    const text = await response.text();
+    const result = JSON.parse(text);
 
     if (result.result === "success") {
       document.getElementById("step3").style.display = "none";
       document.getElementById("step4").style.display = "block";
       window.scrollTo(0, 0);
     } else {
-      throw new Error();
+      throw new Error(result.message);
     }
   } catch (e) {
-    alert("エラーが発生しました。");
+    console.error("送信エラー:", e);
+    alert("エラーが発生しました。時間を置いて再度お試しください。");
     if (btn) {
       btn.disabled = false;
       btn.innerText = "🚀 注文を確定する";
