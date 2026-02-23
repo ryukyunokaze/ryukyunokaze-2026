@@ -476,14 +476,17 @@ async function handleStatusMail(id, action) {
       const totalTickets = (Number(p.s_a)||0) + (Number(p.s_c)||0) + (Number(p.g_a)||0) + (Number(p.g_c)||0);
       
       subject = replaceTags(getVal("mail_sent_sub_qr")) || "【発送完了】QRチケットのご案内";
-      
-      // 本文に枚数情報を添える
       bodyMain = replaceTags(getVal("mail_sent_body_qr")) || "チケットを発行いたしました。";
       
-      // 🌟 URLを生成（IDを送れば、qr.html側で枚数分表示するようにします）
-      qrUrlSection = `\n\n▼チケット表示URL（当日こちらをご提示ください）\n` +
-                     `※合計 ${totalTickets} 枚分のQRコードが表示されます。\n` +
-                     `${mySiteUrl}qr.html?id=${p.id}`;
+      // 🌟 URLの前後を空行で囲み、リンクとして認識されやすくする
+      // mySiteUrl の末尾にスラッシュがない場合に備えて調整
+      const baseUrl = mySiteUrl.endsWith('/') ? mySiteUrl : mySiteUrl + '/';
+      
+      qrUrlSection = `\n\n------------------------------------\n` +
+                     `▼入場用QRチケット（合計 ${totalTickets} 枚分）\n` +
+                     `当日、受付にて以下のURLを開いてご提示ください。\n\n` +
+                     `${baseUrl}qr.html?id=${p.id}\n` +
+                     `------------------------------------`;
     } else {
       // 郵送の場合（QRを含まない）
       subject = replaceTags(getVal("mail_sent_sub_post")) || "【発送完了】チケット郵送のご案内";
