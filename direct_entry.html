@@ -30,10 +30,10 @@
     </div>
 
     <div class="grid">
-      <div><label>S大人</label><input type="number" id="sa" value="0" min="0" oninput="calc()"></div>
-      <div><label>S子供</label><input type="number" id="sc" value="0" min="0" oninput="calc()"></div>
-      <div><label>般大人</label><input type="number" id="ga" value="0" min="0" oninput="calc()"></div>
-      <div><label>般子供</label><input type="number" id="gc" value="0" min="0" oninput="calc()"></div>
+      <div><label>Sエリア大人</label><input type="number" id="sa" value="0" min="0" oninput="calc()"></div>
+      <div><label>Sエリア子供</label><input type="number" id="sc" value="0" min="0" oninput="calc()"></div>
+      <div><label>一般大人</label><input type="number" id="ga" value="0" min="0" oninput="calc()"></div>
+      <div><label>一般子供</label><input type="number" id="gc" value="0" min="0" oninput="calc()"></div>
     </div>
 
     <div id="status-area">
@@ -56,36 +56,57 @@
   </div>
 
   <script>
-    const url = "https://script.google.com/macros/s/AKfycbyyC7jrlWyKxmUj40OM5CUyubWgWE8dC8DUvBd-QNU9TST2QoJh06WAJJ2NIfmAhPVlXA/exec";
-    const PERFORMANCE_DATE = new Date("2026-06-01T00:00:00");
+    const url = "https://script.google.com/macros/s/AKfycbzAn0H2IZggXHjnkrSAaupj9I1mezeY9KLbxlsXY7P4Uoxkg6yR_Kt2v2hg2C7zYJ5bZg/exec";
+   // 🌟 PERFORMANCE_DATE を変数にする（最初は仮の値）
+  let PERFORMANCE_DATE = new Date("2099-12-31"); 
 
-    // 起動時に当日か事前かを判定して見た目を変える
-    function init() {
-      const isDayPrice = new Date() >= PERFORMANCE_DATE;
-      if (isDayPrice) {
-        document.getElementById("title-text").innerText = "🎫 当日券 販売フォーム";
-        document.getElementById("day-price-info").style.display = "block";
-        document.getElementById("name-area").classList.add("hidden");
-        document.getElementById("status-area").classList.add("hidden");
-      } else {
-        document.getElementById("title-text").innerText = "🎫 事前手元販売 登録";
+  async function init() {
+    try {
+      const response = await fetch(`${url}?type=getConfig`);
+      MASTER_PRICES = await response.json();
+      
+      // 🌟 スプレッドシートの B1 (event_date) を PERFORMANCE_DATE に反映
+      if (MASTER_PRICES["event_date"]) {
+        PERFORMANCE_DATE = new Date(MASTER_PRICES["event_date"]);
       }
-      calc();
+    } catch (e) {
+      console.error("設定取得失敗:", e);
     }
+
+    // 🌟 判定処理（スプレッドシートの日付と比較）
+    const isDayPrice = new Date() >= PERFORMANCE_DATE;
+    
+    if (isDayPrice) {
+      document.getElementById("title-text").innerText = "🎫 当日券 販売フォーム";
+      document.getElementById("day-price-info").style.display = "block";
+      document.getElementById("name-area").classList.add("hidden");
+      document.getElementById("status-area").classList.add("hidden");
+    } else {
+      document.getElementById("title-text").innerText = "🎫 事前手元販売 登録";
+    }
+    calc();
+  }
 
     function calc() {
-      const sa = Number(document.getElementById("sa").value) || 0;
-      const sc = Number(document.getElementById("sc").value) || 0;
-      const ga = Number(document.getElementById("ga").value) || 0;
-      const gc = Number(document.getElementById("gc").value) || 0;
+  const sa = Number(document.getElementById("sa").value) || 0;
+  const sc = Number(document.getElementById("sc").value) || 0;
+  const ga = Number(document.getElementById("ga").value) || 0;
+  const gc = Number(document.getElementById("gc").value) || 0;
 
-      const isDayPrice = new Date() >= PERFORMANCE_DATE;
-      const add = isDayPrice ? 500 : 0;
+  const isDayPrice = new Date() >= PERFORMANCE_DATE;
+  
+  // 🌟 Mail.gsの読み込み形式(image_d4db40.jpg)に合わせ、A列の項目名で取得
+  const add = isDayPrice ? (Number(MASTER_PRICES["door_ticket_fee"]) || 0) : 0;
+  
+  const priceSa = (Number(MASTER_PRICES["s_a_price"]) || 0) + (sa > 0 ? add : 0);
+  const priceSc = (Number(MASTER_PRICES["s_c_price"]) || 0) + (sc > 0 ? add : 0);
+  const priceGa = (Number(MASTER_PRICES["g_a_price"]) || 0) + (ga > 0 ? add : 0);
+  const priceGc = (Number(MASTER_PRICES["g_c_price"]) || 0) + (gc > 0 ? add : 0);
 
-      const total = (sa * (3500 + add)) + (sc* 0) + (ga * (2000 + add)) + (gc * 0);
-      document.getElementById("total-price").innerText = total.toLocaleString();
-    }
-
+  const total = (sa * priceSa) + (sc * priceSc) + (ga * priceGa) + (gc * priceGc);
+  
+  document.getElementById("total-price").innerText = total.toLocaleString();
+}
     async function sendData() {
       const isDayPrice = new Date() >= PERFORMANCE_DATE;
       
