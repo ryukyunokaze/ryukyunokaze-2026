@@ -2,7 +2,7 @@
 // 1. 基本設定
 // =========================================
 // 🌟 修正：最新のデプロイURLに貼り替えてください
-const url = "https://script.google.com/macros/s/AKfycbzAn0H2IZggXHjnkrSAaupj9I1mezeY9KLbxlsXY7P4Uoxkg6yR_Kt2v2hg2C7zYJ5bZg/exec"; 
+const url = "https://script.google.com/macros/s/AKfycbwRARc7UT_Pkhrih9qKajrxS8TWUbZ_k5lTQjWaxtRLFoX8L6GkWunLE8vSJrWfWxPmcQ/exec"; 
 
 let masterPrices = {};
 
@@ -168,28 +168,28 @@ async function submitOrder() {
   };
 
   try {
-    // 🌟 mode: "no-cors" は絶対に消してください
     const response = await fetch(url, {
       method: "POST",
+      // mode: "no-cors" は削除します 🌟
+      // 代わりに headers を指定して、GAS側が正しく受け取れるようにします
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
       body: JSON.stringify(data)
     });
     
-    const text = await response.text();
-    const result = JSON.parse(text);
+    // GAS側で createJsonResponse を使っているため、正常に応答を受け取れます
+    const result = await response.json(); 
 
     if (result.result === "success") {
       document.getElementById("step3").style.display = "none";
       document.getElementById("step4").style.display = "block";
       window.scrollTo(0, 0);
     } else {
-      throw new Error(result.message);
+      throw new Error();
     }
   } catch (e) {
     console.error("送信エラー:", e);
     alert("エラーが発生しました。時間を置いて再度お試しください。");
-    if (btn) {
-      btn.disabled = false;
-      btn.innerText = "🚀 注文を確定する";
-    }
   }
 }
