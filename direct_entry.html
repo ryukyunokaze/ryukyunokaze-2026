@@ -108,42 +108,48 @@
   document.getElementById("total-price").innerText = total.toLocaleString();
 }
     async function sendData() {
-      const isDayPrice = new Date() >= PERFORMANCE_DATE;
-      
-      // 当日販売なら「当日販売」、事前なら入力された名前
-      let name = isDayPrice ? "当日販売" : document.getElementById("cust-name").value;
-      if(!name) return alert("お名前を入力してください");
+  // 🌟【重要】ここで画面のタイトルが「当日券」になっているかどうかで最終判定する
+  // これが一番確実で、表示とデータの食い違いを防げます
+  const isDoorTicketMode = document.getElementById("title-text").innerText.includes("当日券");
 
-      if(!confirm(name + " として登録しますか？")) return;
+  let name = isDoorTicketMode ? "当日販売" : document.getElementById("cust-name").value;
+  if(!name) return alert("お名前を入力してください");
 
-      const btn = document.getElementById("submit-btn");
-      btn.disabled = true;
-      btn.innerText = "登録中...";
+  if(!confirm(name + " として登録しますか？")) return;
 
-      const payload = {
-        type: "addDirectSale",
-        name: name,
-        s_a: document.getElementById("sa").value,
-        s_c: document.getElementById("sc").value,
-        g_a: document.getElementById("ga").value,
-        g_c: document.getElementById("gc").value,
-        total: document.getElementById("total-price").innerText.replace(/,/g, ''),
-        shipping: "手渡し",
-        salesType: isDayPrice ? "当日販売" : "直接販売", // P列用
-        remarks: document.getElementById("remarks-input").value, // W列用
-        status: isDayPrice ? "完了" : document.getElementById("status-select").value
-      };
+  const btn = document.getElementById("submit-btn");
+  btn.disabled = true;
+  btn.innerText = "登録中...";
 
-      try {
-        await fetch(url, { method: "POST", body: JSON.stringify(payload) });
-        alert("登録完了！");
-        location.reload();
-      } catch (e) {
-        alert("エラーが発生しました。");
-        btn.disabled = false;
-        btn.innerText = "登録する";
-      }
-    }
+  // 🌟 送信するデータの中身
+  const payload = {
+    type: "addDirectSale",
+    name: name,
+    s_a: document.getElementById("sa").value,
+    s_c: document.getElementById("sc").value,
+    g_a: document.getElementById("ga").value,
+    g_c: document.getElementById("gc").value,
+    total: document.getElementById("total-price").innerText.replace(/,/g, ''),
+    shipping: "手渡し",
+    
+    // 🌟 ここ！ 画面が当日券なら「当日販売」、そうでなければ「直接販売」
+    salesType: isDoorTicketMode ? "当日販売" : "直接販売", 
+    
+    remarks: document.getElementById("remarks-input").value,
+    status: isDoorTicketMode ? "完了" : document.getElementById("status-select").value
+  };
+
+  try {
+    const res = await fetch(url, { method: "POST", body: JSON.stringify(payload) });
+    const result = await res.json();
+    alert("登録完了！");
+    location.reload();
+  } catch (e) {
+    alert("エラーが発生しました。");
+    btn.disabled = false;
+    btn.innerText = "登録する";
+  }
+}
 
     window.onload = init;
   </script>
