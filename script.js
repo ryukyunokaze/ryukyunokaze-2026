@@ -144,7 +144,12 @@ async function submitOrder() {
     const result = await res.json();
     if(result.result === "success") {
       // 🌟 追加：現在の合計金額を完了画面のデカ文字部分にもコピーする
-      document.getElementById("finalTotalDisplay").innerText = document.getElementById("totalDisplay").innerText;
+      // 🌟 Step1で計算した合計金額を、完了画面のデカ文字部分にコピー
+  　　　const currentTotal = document.getElementById("totalDisplay").innerText;
+  　　　const finalTotalEl = document.getElementById("finalTotalDisplay");
+  　　　if (finalTotalEl) {
+    　　finalTotalEl.innerText = currentTotal;
+  　　　}
       document.getElementById("step3").style.display = "none";
       document.getElementById("step4").style.display = "block";
     }
