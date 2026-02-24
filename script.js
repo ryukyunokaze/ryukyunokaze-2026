@@ -1,5 +1,5 @@
 // 🌟 GASのURLをセットしてください
-const url = "https://script.google.com/macros/s/AKfycbwT5YeJy1vc6RIhBk8YWE8_pJCA6PMFtPIAjiY09yfGV6yBIE3PSDlrB1ezIZ98ZXfn5g/exec"; 
+const url = "https://script.google.com/macros/s/AKfycby3EZFpAqv2ituAvvXW6xoyaw4Q8UI0Yk3Mp2iD1A4WVGPcgtllX7i-XNzoeZimkHJ7NQ/exec"; 
 let masterPrices = {};
 
 // ページ読み込み時の設定取得
