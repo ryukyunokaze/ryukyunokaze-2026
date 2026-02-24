@@ -3,16 +3,26 @@ const url = "https://script.google.com/macros/s/AKfycbxhfCJidSnbDO9osjCl7DqOni9S
 let masterPrices = {};
 
 // ページ読み込み時の設定取得
+// script.js 内の該当箇所
 async function loadConfig() {
   try {
     const res = await fetch(`${url}?type=getConfig`);
-    masterPrices = await res.json();
+    const masterPrices = await res.json();
+    
+    // スプレッドシートの「bank_info」を完了画面に反映
+    const bankEl = document.getElementById("bank-info-content");
+    if (bankEl && masterPrices.bank_info) {
+      bankEl.innerText = masterPrices.bank_info;
+    }
+    
+    // 単価の反映（既存の処理）
     document.getElementById("price-sa-display").innerText = (masterPrices.s_a_price || 3500).toLocaleString() + "円";
     document.getElementById("price-ga-display").innerText = (masterPrices.g_a_price || 1500).toLocaleString() + "円";
-    const bank = document.getElementById("bank-info-content");
-    if(bank) bank.innerText = masterPrices.bank_info || "";
-    calc();
-  } catch (e) { console.error("設定取得エラー:", e); }
+    
+    calc(); 
+  } catch (e) {
+    console.error("設定読み込みエラー:", e);
+  }
 }
 
 // 計算処理
