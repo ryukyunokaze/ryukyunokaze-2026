@@ -143,6 +143,8 @@ async function submitOrder() {
     const res = await fetch(url, { method: "POST", body: JSON.stringify(data) });
     const result = await res.json();
     if(result.result === "success") {
+      // 🌟 追加：現在の合計金額を完了画面のデカ文字部分にもコピーする
+      document.getElementById("finalTotalDisplay").innerText = document.getElementById("totalDisplay").innerText;
       document.getElementById("step3").style.display = "none";
       document.getElementById("step4").style.display = "block";
     }
