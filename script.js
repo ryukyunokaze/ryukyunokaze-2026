@@ -41,16 +41,39 @@ function goToStep1Back() {
 }
 
 function confirmOrder() {
+  // 入力値の取得
   const name = document.getElementById("name").value;
+  const tel = document.getElementById("tel").value;
+  const email = document.getElementById("email").value;
   const gender = document.querySelector('select[name="gender"]').value;
   const age = document.querySelector('select[name="age"]').value;
-  if(!name || !gender || !age) return alert("必須項目を入力してください");
 
-  document.getElementById("conf-name").innerText = name;
-  document.getElementById("conf-address").innerText = `〒${document.getElementById("zip").value} ${document.getElementById("pref").value}${document.getElementById("city").value}${document.getElementById("rest").value}`;
-  document.getElementById("conf-shipping").innerText = document.getElementById("shipping").value;
-  document.getElementById("conf-total").innerText = document.getElementById("totalDisplay").innerText + " 円";
+  // 🌟 必須チェック
+  if (!name || !tel || !email || !gender || !age) {
+    alert("必須項目（名前・性別・年代・電話・メール）をすべて入力してください。");
+    return;
+  }
 
+  // 🌟 確認画面（Step3）へのデータ代入（IDエラーを防ぐ）
+  const setVal = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.innerText = val;
+  };
+
+  setVal("conf-name", name);
+  setVal("conf-gender", gender);
+  setVal("conf-age", age);
+  setVal("conf-tel", tel);
+  setVal("conf-email", email);
+  
+  const address = `〒${document.getElementById("zip").value} ${document.getElementById("pref").value}${document.getElementById("city").value}${document.getElementById("rest").value}`;
+  setVal("conf-address", address);
+  
+  setVal("conf-shipping", document.getElementById("shipping").value);
+  setVal("conf-remarks", document.getElementById("remarks").value || "特になし");
+  setVal("conf-total", document.getElementById("totalDisplay").innerText + " 円");
+
+  // 枚数詳細の作成
   let details = "";
   const sa = document.getElementById("s_a").value;
   const sc = document.getElementById("s_c").value;
@@ -60,8 +83,11 @@ function confirmOrder() {
   if(sc > 0) details += `Sエリア 子供：${sc}名<br>`;
   if(ga > 0) details += `一般エリア 大人：${ga}枚<br>`;
   if(gc > 0) details += `一般エリア 子供：${gc}名<br>`;
-  document.getElementById("conf-ticket-details").innerHTML = details;
+  
+  const detailsEl = document.getElementById("conf-ticket-details");
+  if(detailsEl) detailsEl.innerHTML = details;
 
+  // 🌟 画面切り替え（ここが動かない原因をすべて潰しました）
   document.getElementById("step2").style.display = "none";
   document.getElementById("step3").style.display = "block";
   window.scrollTo(0,0);
