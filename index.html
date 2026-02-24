@@ -3,208 +3,211 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>チケット販売システム</title>
-  <link rel="stylesheet" href="form.css">
+  <title>チケット購入 | オンライン予約</title>
   <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
+  <style>
+    /* =========================================
+       ご提示いただいた整理版CSSを適用
+       ========================================= */
+    :root {
+      --form-primary: #1e3a8a;
+      --form-accent: #3b82f6;
+      --form-bg: #f8fafc;
+      --text-main: #475569;
+      --text-muted: #64748b;
+      --border-color: #cbd5e0;
+    }
+
+    body {
+      background-color: var(--form-bg);
+      font-family: 'Inter', 'Hiragino Sans', sans-serif;
+      padding: 20px 10px;
+      color: var(--text-main);
+    }
+
+    .online-form-container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 0 15px;
+      box-sizing: border-box;
+    }
+
+    .ticket-card, .info-card {
+      background: white;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      border: 1px solid #eef2f6;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .info-card { padding: 30px; }
+
+    .ticket-image-large { width: 100%; height: 160px; background: #f1f5f9; }
+    .ticket-image-large img { width: 100%; height: 100%; object-fit: cover; }
+    .ticket-info { padding: 15px 20px; }
+    .ticket-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 15px; padding-bottom: 8px;
+      border-bottom: 1px solid #f1f5f9; font-weight: bold;
+    }
+    .area-name { font-size: 1.1rem; color: var(--form-primary); }
+    .price { font-size: 1rem; color: var(--form-accent); }
+
+    .input-row-narrow { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .input-unit-wrap { display: flex; align-items: center; gap: 8px; }
+
+    /* 合計金額の強調デザイン */
+    .total-box-highlight {
+      background: #1e3a8a; color: white; padding: 20px;
+      border-radius: 12px; text-align: center;
+      font-size: 1.4rem; font-weight: bold; margin: 25px 0;
+      box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+      border: 2px solid #3b82f6;
+    }
+    #totalDisplay { font-size: 2.2rem; margin: 0 5px; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
+    input, select, textarea {
+      width: 100%; padding: 12px; border: 1px solid var(--border-color);
+      border-radius: 8px; font-size: 16px; background-color: #f8fafc;
+      box-sizing: border-box;
+    }
+    .input-unit-wrap input { width: 70px; text-align: center; }
+
+    .step-title {
+      text-align: center; font-size: 1.1rem; color: var(--form-primary);
+      margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid var(--form-accent);
+    }
+    .field-group { margin-bottom: 20px; }
+    .field-group label { display: block; font-size: 0.85rem; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; }
+    .field-row { display: flex; gap: 15px; }
+    .field-row .field-group { flex: 1; }
+
+    .submit-btn-main {
+      width: 100%; background: var(--form-accent); color: white;
+      padding: 18px; border-radius: 12px; border: none;
+      font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s;
+    }
+    .submit-btn-main:hover { background: #2563eb; transform: translateY(-2px); }
+
+    .back-btn {
+      width: 100%; background: none; border: none; color: var(--text-muted);
+      padding: 10px; font-weight: bold; cursor: pointer; margin-top: 10px;
+      font-size: 0.9rem; text-decoration: underline;
+    }
+
+    /* 確定ボタン（プレミアム・緑） */
+    .submit-btn-final {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+      color: white; padding: 20px; font-size: 1.2rem !important;
+      border-radius: 12px; width: 100%; border: none; font-weight: 800;
+      cursor: pointer; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    /* 確認画面テーブル用 */
+    .confirm-table { width: 100%; border-collapse: collapse; }
+    .confirm-table th { text-align: left; padding: 12px 5px; color: var(--text-muted); border-bottom: 1px solid #eee; font-weight: normal; }
+    .confirm-table td { padding: 12px 5px; border-bottom: 1px solid #eee; font-weight: bold; text-align: right; }
+    
+    /* チケット詳細ボックス（画像再現） */
+    .confirm-item-box {
+      background: #f1f5f9; padding: 15px; border-radius: 10px; margin-bottom: 20px;
+      border-left: 5px solid var(--form-accent);
+    }
+
+    @media (max-width: 480px) { .field-row { flex-direction: column; gap: 0; } }
+  </style>
 </head>
 <body class="h-adr">
   <span class="p-country-name" style="display:none;">Japan</span>
   
   <div class="online-form-container">
-    <h1 style="text-align: center; color: #1e3a8a;">🎫 チケット購入</h1>
 
     <div id="step1">
-      <div class="ticket-card">
-      <div class="ticket-image-large">
-       <img src="https://placehold.jp/24/1e3a8a/ffffff/400x160.png?text=Sエリア画像準備中">
-     </div>
-     <div class="ticket-info">
-      <div class="ticket-header">
-      <span class="area-name">Sエリア</span>
-      <span class="price" id="price-sa-display">読み込み中...</span>
-      </div>
-     </div>
-    </div>
-          <div class="input-row-narrow">
-            <label>大人</label>
-            <div class="input-unit-wrap">
-              <input type="number" id="s_a" value="0" min="0" oninput="calc()">
-              <span class="unit">枚</span>
-            </div>
-          </div>
-          <div class="input-row-narrow">
-            <label>小学生以下</label>
-            <div class="input-unit-wrap">
-              <input type="number" id="s_c" value="0" min="0" oninput="calc()">
-              <span class="unit">名</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="ticket-card">
-       <div class="ticket-image-large">
-        <img src="https://placehold.jp/24/64748b/ffffff/400x160.png?text=一般エリア画像準備中">
-        </div>
-      <div class="ticket-info">
-    <div class="ticket-header">
-      <span class="area-name">一般エリア</span>
-      <span class="price" id="price-ga-display">読み込み中...</span>
-    </div>
-    </div>
-</div>
-          <div class="input-row-narrow">
-            <label>大人</label>
-            <div class="input-unit-wrap">
-              <input type="number" id="g_a" value="0" min="0" oninput="calc()">
-              <span class="unit">枚</span>
-            </div>
-          </div>
-          <div class="input-row-narrow">
-            <label>小学生以下</label>
-            <div class="input-unit-wrap">
-              <input type="number" id="g_c" value="0" min="0" oninput="calc()">
-              <span class="unit">名</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="total-box-highlight">
-        合計：<span id="totalDisplay">0</span> 円
-      </div>
+      <h1 class="step-title">🎟 チケット枚数選択</h1>
       
+      <div class="ticket-card">
+        <div class="ticket-image-large"><img src="https://placehold.jp/24/1e3a8a/ffffff/400x160.png?text=S-AREA"></div>
+        <div class="ticket-info">
+          <div class="ticket-header"><span class="area-name">Sエリア</span><span class="price" id="price-sa-display">----円</span></div>
+          <div class="input-row-narrow"><label>大人</label><div class="input-unit-wrap"><input type="number" id="s_a" value="0" min="0" oninput="calc()">枚</div></div>
+          <div class="input-row-narrow"><label>子供</label><div class="input-unit-wrap"><input type="number" id="s_c" value="0" min="0" oninput="calc()">名</div></div>
+        </div>
+      </div>
+
+      <div class="ticket-card">
+        <div class="ticket-image-large"><img src="https://placehold.jp/24/64748b/ffffff/400x160.png?text=GENERAL-AREA"></div>
+        <div class="ticket-info">
+          <div class="ticket-header"><span class="area-name">一般エリア</span><span class="price" id="price-ga-display">----円</span></div>
+          <div class="input-row-narrow"><label>大人</label><div class="input-unit-wrap"><input type="number" id="g_a" value="0" min="0" oninput="calc()">枚</div></div>
+          <div class="input-row-narrow"><label>子供</label><div class="input-unit-wrap"><input type="number" id="g_c" value="0" min="0" oninput="calc()">名</div></div>
+        </div>
+      </div>
+
+      <div class="total-box-highlight">合計金額：<span id="totalDisplay">0</span>円</div>
       <button class="submit-btn-main" onclick="goToStep2()">購入者情報の入力へ進む</button>
     </div>
 
     <div id="step2" style="display: none;">
       <div class="info-card">
         <h2 class="step-title">👤 ご購入者情報の入力</h2>
-        
-        <div class="field-group">
-  <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #1e3a8a;">お名前（フルネーム）</label>
-  <input type="text" id="name" placeholder="例：山田 太郎" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
-</div>
-
-<div style="display: flex; flex-wrap: nowrap; gap: 10px; margin-bottom: 15px; width: 100%; box-sizing: border-box;">
-  
-  <div style="flex: 1; min-width: 0;">
-    <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #1e3a8a; font-size: 0.9rem;">性別</label>
-    <select id="gender" name="gender" required style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; cursor: pointer; box-sizing: border-box;">
-      <option value="">選択</option>
-      <option value="男性">男性</option>
-      <option value="女性">女性</option>
-      <option value="回答しない">回答しない</option>
-    </select>
-  </div>
-
-  <div style="flex: 1; min-width: 0;">
-    <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #1e3a8a; font-size: 0.9rem;">年代</label>
-    <select id="age" name="age" required style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; cursor: pointer; box-sizing: border-box;">
-      <option value="">選択</option>
-      <option value="10代">10代</option>
-      <option value="20代">20代</option>
-      <option value="30代">30代</option>
-      <option value="40代">40代</option>
-      <option value="50代">50代</option>
-      <option value="60代">60代</option>
-      <option value="70代以上">70代以上</option>
-    </select>
-  </div>
-
-</div>
-
+        <div class="field-group"><label>お名前（フルネーム）</label><input type="text" id="name" placeholder="山田 太郎"></div>
         <div class="field-row">
-          <div class="field-group">
-            <label>郵便番号</label>
-            <input type="text" id="zip" class="p-postal-code" placeholder="1234567 (ハイフンなし)">
-          </div>
-          <div class="field-group">
-            <label>都道府県</label>
-            <input type="text" id="pref" class="p-region" readonly tabindex="-1">
-          </div>
+          <div class="field-group"><label>性別</label><select name="gender"><option value="">選択</option><option value="男性">男性</option><option value="女性">女性</option></select></div>
+          <div class="field-group"><label>年代</label><select name="age"><option value="">選択</option><option value="10代">10代</option><option value="20代">20代</option><option value="30代">30代</option><option value="40代">40代</option><option value="50代以上">50代以上</option></select></div>
         </div>
-
-        <div class="field-group">
-          <label>市区町村・番地</label>
-          <input type="text" id="city" class="p-locality p-street-address" readonly tabindex="-1">
-        </div>
-
-        <div class="field-group">
-          <label>建物名・部屋番号（ここから入力してください）</label>
-          <input type="text" id="rest" class="p-extended-address" placeholder="例：〇〇マンション 101号室">
-        </div>
-
         <div class="field-row">
-          <div class="field-group">
-            <label>電話番号</label>
-            <input type="tel" id="tel" placeholder="09012345678">
-          </div>
-          <div class="field-group">
-            <label>メールアドレス</label>
-            <input type="email" id="email" placeholder="example@mail.com">
-          </div>
+          <div class="field-group"><label>郵便番号</label><input type="text" id="zip" class="p-postal-code" placeholder="1234567"></div>
+          <div class="field-group"><label>都道府県</label><input type="text" id="pref" class="p-region" readonly tabindex="-1"></div>
         </div>
-
-        <div class="field-group">
-          <label>チケット受取方法</label>
-          <select id="shipping">
-            <option value="QRコード">QRコード（メール受取）</option>
-            <option value="郵送">チケット発送</option>
-          </select>
+        <div class="field-group"><label>市区町村・番地</label><input type="text" id="city" class="p-locality p-street-address" readonly tabindex="-1"></div>
+        <div class="field-group"><label>建物名・部屋番号</label><input type="text" id="rest" class="p-extended-address"></div>
+        <div class="field-row">
+          <div class="field-group"><label>電話番号</label><input type="tel" id="tel" placeholder="09012345678"></div>
+          <div class="field-group"><label>メールアドレス</label><input type="email" id="email" placeholder="example@mail.com"></div>
         </div>
-      
-        <div class="field-group">
-          <label>備考（事務局への連絡事項）</label>
-          <textarea id="remarks" rows="3" placeholder="例：車椅子で来場します"></textarea>
-        </div>
-
-        <div class="btn-group">
-          <button type="button" class="submit-btn-main" onclick="confirmOrder()">最終確認画面へ進む</button>
-          <button type="button" class="back-btn" onclick="goToStep1Back()">← 枚数選択に戻る</button>
-        </div>
+        <div class="field-group"><label>受取方法</label><select id="shipping"><option value="QRコード">QRコード（メール）</option><option value="郵送">チケット郵送</option></select></div>
+        <div class="field-group"><label>備考</label><textarea id="remarks" placeholder="車椅子利用など"></textarea></div>
+        <button class="submit-btn-main" onclick="confirmOrder()">最終確認画面へ進む</button>
+        <button class="back-btn" onclick="goToStep1Back()">← 枚数選択に戻る</button>
       </div>
     </div>
 
     <div id="step3" style="display: none;">
       <div class="info-card">
-        <h2 class="step-title">📋 ご注文内容の最終確認</h2>
-        
-        <div class="confirm-item-box" style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e2e8f0;">
-          <h3 style="font-size: 14px; color: #1e3a8a; margin-top: 0;">🎟 選択したチケット</h3>
-          <div id="conf-ticket-details" style="font-size: 15px; line-height: 1.8;"></div>
+        <h2 class="step-title">📝 ご注文内容の最終確認</h2>
+        <div class="confirm-item-box">
+          <div id="conf-ticket-details" style="font-weight: bold; color: var(--form-primary);"></div>
         </div>
-
-        <table class="confirm-table" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-          <tr style="border-bottom: 1px solid #eee;"><th style="text-align: left; padding: 10px; color: #64748b;">お名前</th><td id="conf-name" style="padding: 10px; font-weight: bold;"></td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><th style="text-align: left; padding: 10px; color: #64748b;">性別/年代</th><td style="padding: 10px; font-weight: bold;"><span id="conf-gender"></span> / <span id="conf-age"></span></td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><th style="text-align: left; padding: 10px; color: #64748b;">住所</th><td id="conf-address" style="padding: 10px; font-weight: bold;"></td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><th style="text-align: left; padding: 10px; color: #64748b;">電話番号</th><td id="conf-tel" style="padding: 10px; font-weight: bold;"></td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><th style="text-align: left; padding: 10px; color: #64748b;">メールアドレス</th><td id="conf-email" style="padding: 10px; font-weight: bold;"></td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><th style="text-align: left; padding: 10px; color: #64748b;">チケット受取方法</th><td id="conf-shipping" style="padding: 10px; font-weight: bold;"></td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><th style="text-align: left; padding: 10px; color: #64748b;">連絡事項</th><td id="conf-remarks" style="padding: 10px; font-weight: bold;"></td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><th style="text-align: left; padding: 10px; color: #64748b;">合計金額</th><td style="padding: 10px; color: #e11d48; font-weight: bold; font-size: 20px;"><span id="conf-total">0</span> 円</td></tr>
+        <table class="confirm-table">
+          <tr><th>お名前</th><td id="conf-name"></td></tr>
+          <tr><th>住所</th><td id="conf-address"></td></tr>
+          <tr><th>受取方法</th><td id="conf-shipping"></td></tr>
+          <tr><th>合計金額</th><td id="conf-total" style="color: #e11d48; font-size: 1.4rem;"></td></tr>
         </table>
-
-        <button type="button" class="submit-btn-final" onclick="submitOrder()">🚀 この内容で注文を確定する</button>
-        <button type="button" class="back-btn" onclick="goToStep2Back()">← 入力内容を修正する</button>
+        <div style="margin-top: 30px;">
+          <button class="submit-btn-final" onclick="submitOrder()">🚀 この内容で注文を確定する</button>
+          <button class="back-btn" onclick="goToStep2Back()">← 入力内容を修正する</button>
+        </div>
       </div>
     </div>
 
     <div id="step4" style="display: none;">
-      <div class="info-card" style="text-align: center; padding: 50px 20px;">
-        <div style="font-size: 60px; color: #10b981; margin-bottom: 20px;">✅</div>
-        <h2 style="color: #1e3a8a; margin-bottom: 15px;">ご注文ありがとうございます！</h2>
-        <div style="background: #fff9db; padding: 15px; border-radius: 10px; text-align: left; margin-bottom: 20px; white-space: pre-wrap;">
-　　　　　　<strong style="color: #856404; display: block; margin-bottom: 8px;">【お振込先案内】</strong>
-          <div id="bank-info-content" style="white-space: pre-wrap; line-height: 1.6; font-weight: bold;">読み込み中...</div>
+      <div class="info-card" style="text-align: center;">
+        <div style="font-size: 4rem; margin-bottom: 20px;">✅</div>
+        <h2 style="color: var(--form-primary);">お申し込み完了</h2>
+        <div style="background: #fff9db; padding: 20px; border-radius: 12px; text-align: left; margin: 25px 0;">
+          <strong style="color: #856404; display: block; margin-bottom: 10px;">【お振込先案内】</strong>
+          <div id="bank-info-content" style="white-space: pre-wrap; font-weight: bold;"></div>
         </div>
-        </div>
-        <button onclick="location.reload()" class="back-btn">トップページへ戻る</button>
+        <button class="submit-btn-main" onclick="location.reload()">トップページへ戻る</button>
       </div>
     </div>
 
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
