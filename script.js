@@ -4,20 +4,28 @@ let masterPrices = {};
 
 // ページ読み込み時の設定取得
 // script.js 内の該当箇所
+// script.js 内の該当箇所を修正
 async function loadConfig() {
   try {
     const res = await fetch(`${url}?type=getConfig`);
     const masterPrices = await res.json();
     
-    // スプレッドシートの「bank_info」を完了画面に反映
+    // 🌟 修正ポイント：masterPrices.mail_bank_info を読み込むように変更
     const bankEl = document.getElementById("bank-info-content");
-    if (bankEl && masterPrices.bank_info) {
+    if (bankEl && masterPrices.mail_bank_info) {
+      bankEl.innerText = masterPrices.mail_bank_info;
+    } else if (bankEl && masterPrices.bank_info) {
+      // 念のため、どちらの名前でも動くようにしておきます
       bankEl.innerText = masterPrices.bank_info;
     }
     
-    // 単価の反映（既存の処理）
-    document.getElementById("price-sa-display").innerText = (masterPrices.s_a_price || 3500).toLocaleString() + "円";
-    document.getElementById("price-ga-display").innerText = (masterPrices.g_a_price || 1500).toLocaleString() + "円";
+    // 単価の反映（ここもスプレッドシートの項目名と一致しているか確認してください）
+    if (document.getElementById("price-sa-display")) {
+      document.getElementById("price-sa-display").innerText = (masterPrices.s_a_price || 3500).toLocaleString() + "円";
+    }
+    if (document.getElementById("price-ga-display")) {
+      document.getElementById("price-ga-display").innerText = (masterPrices.g_a_price || 1500).toLocaleString() + "円";
+    }
     
     calc(); 
   } catch (e) {
