@@ -68,13 +68,27 @@
 
         for (let i = 1; i <= total; i++) {
           const branchId = `${orderId}-${i}`;
+          // 🌟 ここから：現在のチケット(i枚目)がどの券種か判定する
+          let ticketType = "不明な券種";
+          if (i <= s_a) {
+            ticketType = "【Sエリア】 大人";
+          } else if (i <= s_a + s_c) {
+            ticketType = "【Sエリア】 子供";
+          } else if (i <= s_a + s_c + g_a) {
+            ticketType = "【一般エリア】 大人";
+          } else {
+            ticketType = "【一般エリア】 子供";
+          }
+          // 🌟 ここまで判定ロジック
           const card = document.createElement('div');
           card.className = 'qr-card';
           card.innerHTML = `
             <div class="ticket-label">チケット ${i} / ${total}</div>
             <div><img class="qr-image" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${branchId}"></div>
             <div class="info">
-              <strong>お名前:</strong> ${order["名前"] || order["name"] || "お客様"} 様<br>
+              <div style="font-size: 1.4em; font-weight: bold; color: #d32f2f; margin-bottom: 8px;">
+                ${ticketType}
+              </div>
               <strong>受付番号:</strong> ${branchId}
             </div>
           `;
