@@ -188,61 +188,65 @@
     visibility: visible !important;
   }
 }
-/* --- スマホ編集画面の改善設定 --- */
+/* --- スマホ編集画面の改善（完全版） --- */
 @media screen and (max-width: 480px) {
-  /* 1. 閉じるボタン（×）を巨大化して白く目立たせる */
+  /* 1. 閉じるボタン（×）を巨大化・最前面へ */
   .close-button, .close { 
     position: absolute !important;
-    top: 10px !important;
-    right: 15px !important;
-    font-size: 40px !important; /* ×を大きく */
-    color: #ffffff !important;  /* 白にする */
-    background: rgba(0,0,0,0.5) !important; /* 黒い半透明の丸背景 */
-    width: 50px !important;
-    height: 50px !important;
+    top: 5px !important;
+    right: 5px !important;
+    font-size: 40px !important;
+    color: #ffffff !important;
+    background: rgba(0,0,0,0.6) !important; /* 少し濃いめにして見やすく */
+    width: 55px !important;
+    height: 55px !important;
     border-radius: 50% !important;
     display: flex !important;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
+    z-index: 99999 !important; /* 絶対に一番上にくるように */
     cursor: pointer;
-    text-shadow: none !important;
     opacity: 1 !important;
   }
 
-  /* 2. ヘッダーの文字が重ならないように調整 */
-  .modal-header h2 {
-    font-size: 18px !important;
-    padding-right: 50px !important; /* ×ボタンと被らないように右に隙間 */
+  /* 2. 入力項目の「横並び」を完全に解除して縦に並べる */
+  .modal-body div, 
+  .modal-body form div,
+  .flex-row {
+    display: flex !important;
+    flex-direction: column !important; /* 強制的に縦並び */
+    width: 100% !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* 3. メール、市町村、チケットなど全てを幅100%に */
+  .modal-body label,
+  .modal-body input, 
+  .modal-body select, 
+  .modal-body textarea {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    box-sizing: border-box !important; /* はみ出し防止の魔法 */
+    font-size: 16px !important;
     margin: 5px 0 !important;
   }
 
-  /* 3. 入力項目（電話・メールなど）を縦に並べて崩れを直す */
-  .modal-body div {
-    display: flex !important;
-    flex-direction: column !important; /* 縦並びにする */
-    margin-bottom: 15px !important;
-  }
-
-  .modal-body label {
-    margin-bottom: 5px !important;
-    font-weight: bold;
-  }
-
-  .modal-body input, .modal-body select, .modal-body textarea {
-    width: 100% !important; /* 横幅いっぱいにする */
-    font-size: 16px !important; /* 入力時にズームされないサイズ */
-    padding: 10px !important;
-    box-sizing: border-box !important;
-  }
-
-  /* 4. モーダル自体が画面からはみ出さないようにする */
+  /* 4. モーダル本体のサイズ調整 */
   .modal-content {
-    width: 95% !important;
-    margin: 10px auto !important;
+    width: 98% !important;
+    margin: 5px auto !important;
     padding: 15px !important;
-    max-height: 90vh !important;
-    overflow-y: auto !important; /* 縦スクロールできるようにする */
+    max-height: 95vh !important;
+    overflow-y: auto !important;
+    border-radius: 10px !important;
+  }
+
+  /* 5. ヘッダーが×ボタンと重ならないように */
+  .modal-header h2 {
+    font-size: 18px !important;
+    padding-right: 60px !important;
   }
 }
 
