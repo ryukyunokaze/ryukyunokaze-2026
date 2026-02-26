@@ -1,4 +1,4 @@
-const url = "https://script.google.com/macros/s/AKfycbzAn0H2IZggXHjnkrSAaupj9I1mezeY9KLbxlsXY7P4Uoxkg6yR_Kt2v2hg2C7zYJ5bZg/exec"; 
+const url = "https://script.google.com/macros/s/AKfycbznb1pfd74mU8lH-oVrKbJNg935KAPPtIjmGwMsuB3Zv5PoZwbRuH3rJcgj_ZhEDCy1PQ/exec"; 
              
 let currentData = [];
 let selectedId = "";
