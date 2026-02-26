@@ -68,6 +68,7 @@
 
     /* --- 🌟 編集画面：見やすさ・操作性 究極アップデート --- */
 .modal-content {
+
   background: #ffffff !important;
   color: #0f172a !important; /* 文字をより深く濃い色に */
   padding: 0 !important;
@@ -187,6 +188,64 @@
     visibility: visible !important;
   }
 }
+/* --- スマホ編集画面の改善設定 --- */
+@media screen and (max-width: 480px) {
+  /* 1. 閉じるボタン（×）を巨大化して白く目立たせる */
+  .close-button, .close { 
+    position: absolute !important;
+    top: 10px !important;
+    right: 15px !important;
+    font-size: 40px !important; /* ×を大きく */
+    color: #ffffff !important;  /* 白にする */
+    background: rgba(0,0,0,0.5) !important; /* 黒い半透明の丸背景 */
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    cursor: pointer;
+    text-shadow: none !important;
+    opacity: 1 !important;
+  }
+
+  /* 2. ヘッダーの文字が重ならないように調整 */
+  .modal-header h2 {
+    font-size: 18px !important;
+    padding-right: 50px !important; /* ×ボタンと被らないように右に隙間 */
+    margin: 5px 0 !important;
+  }
+
+  /* 3. 入力項目（電話・メールなど）を縦に並べて崩れを直す */
+  .modal-body div {
+    display: flex !important;
+    flex-direction: column !important; /* 縦並びにする */
+    margin-bottom: 15px !important;
+  }
+
+  .modal-body label {
+    margin-bottom: 5px !important;
+    font-weight: bold;
+  }
+
+  .modal-body input, .modal-body select, .modal-body textarea {
+    width: 100% !important; /* 横幅いっぱいにする */
+    font-size: 16px !important; /* 入力時にズームされないサイズ */
+    padding: 10px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 4. モーダル自体が画面からはみ出さないようにする */
+  .modal-content {
+    width: 95% !important;
+    margin: 10px auto !important;
+    padding: 15px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important; /* 縦スクロールできるようにする */
+  }
+}
+
   </style>
 </head>
 <body style="display:none;" id="admin-body">
