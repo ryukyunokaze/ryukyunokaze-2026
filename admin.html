@@ -188,89 +188,78 @@
     visibility: visible !important;
   }
 }
-/* --- 🌟 スマホ編集画面：最終・絶対強制版 🌟 --- */
+/* --- 📱 スマホ編集画面：視認性・余白 究極改善版 --- */
 @media screen and (max-width: 480px) {
-  /* 1. ×ボタンを最前面に固定（これは維持） */
-  #detail-modal .close-btn, 
-  #detail-modal .close,
-  .close-btn { 
-    position: fixed !important;
-    top: 15px !important;
-    right: 15px !important;
-    font-size: 36px !important;
-    color: #ffffff !important;
-    background: #000000 !important;
-    width: 50px !important;
-    height: 50px !important;
-    border-radius: 50% !important;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    z-index: 99999 !important;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-
-  /* 2. 【絶対命令】全ての横並び(flex)を強制解除 */
-  /* jsで生成される全てのdiv要素に対して縦並びを強制します */
-  #modal-body div, 
-  #modal-body form, 
-  .modal-content div,
-  .ticket-edit-grid,
-  .flex-row {
-    display: block !important; /* flexを解除して縦並びに */
-    flex-direction: column !important;
-    width: 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 0 10px 0 !important;
-    padding: 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  /* 3. 【絶対命令】入力枠（メール・市町村・チケット）を画面内に強制収容 */
-  #modal-body input, 
-  #modal-body select, 
-  #modal-body textarea,
-  .modal-content input,
-  .modal-content select,
-  .ticket-box {
-    display: block !important;
-    width: 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
-    height: 48px !important; /* 押しやすい高さに固定 */
-    box-sizing: border-box !important; /* 🌟枠線を幅に含める。これがないと絶対はみ出します */
-    margin: 5px 0 15px 0 !important;
-    font-size: 16px !important;
-    padding: 10px !important;
-  }
-
-  /* 4. モーダル本体が画面を突き抜けないように調整 */
+  
+  /* 1. 全体の余白：画面の端とコンテンツの間に「ゆとり」を作る */
   .modal-content {
-    width: 96% !important;
-    margin: 5px auto !important;
-    max-height: 90vh !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    padding: 15px !important;
+    width: 92% !important; /* 画面幅に対して少し小さくして外側に余白を */
+    margin: 15px auto !important;
+    padding: 20px !important; /* 内側の余白を増やして窮屈さを解消 */
+    border-radius: 16px !important;
     box-sizing: border-box !important;
   }
 
-  /* ラベルを見やすく */
-  #modal-body label, .modal-content label {
-    display: block !important;
-    margin-top: 15px !important;
-    font-size: 14px !important;
-    font-weight: bold !important;
-    color: #1e3a8a !important;
+  /* 2. セクション間の区切りをハッキリさせ、間隔を空ける */
+  .modal-section {
+    margin-bottom: 25px !important;
+    padding-bottom: 10px !important;
+    border-bottom: 1px solid #e2e8f0 !important;
   }
 
-  /* 5. グリッド(2カラム)を破壊 */
-  .ticket-edit-grid {
-    grid-template-columns: 1fr !important; /* 1列にする */
+  /* 3. 「金額」の二行表示を解決：フォントサイズと並びを調整 */
+  .modal-content .total-amount-display,
+  #modal-total-amount {
+    display: flex !important;
+    align-items: baseline !important;
+    justify-content: center !important;
+    font-size: 28px !important; /* 数字を大きく */
+    font-weight: 800 !important;
+    color: #1e3a8a !important;
+    white-space: nowrap !important; /* 🌟 絶対に改行させない */
+    gap: 4px !important;
+    margin: 15px 0 !important;
+  }
+
+  /* 「円」だけ少し小さくして、一行に収まりやすくする */
+  .modal-content .total-amount-display::after,
+  #modal-total-amount::after {
+    content: "円" !important;
+    font-size: 16px !important;
+    font-weight: bold !important;
+  }
+
+  /* 4. 入力ラベルを見やすく：文字間隔と上下のゆとり */
+  .modal-content label {
     display: block !important;
+    font-size: 14px !important;
+    color: #475569 !important;
+    margin-bottom: 8px !important;
+    margin-top: 15px !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  /* 5. 入力枠：枠線を少し薄くして、内側に十分な余白を */
+  .modal-content input, 
+  .modal-content select {
+    width: 100% !important;
+    height: 50px !important;
+    padding: 12px 15px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 10px !important;
+    background-color: #f8fafc !important; /* ほんのりグレーで高級感を */
+    font-size: 16px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 6. チケット枚数エリア：枠の中に余白を持たせる */
+  .modal-content .ticket-box {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 15px !important;
+    margin-bottom: 12px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
   }
 }
   </style>
