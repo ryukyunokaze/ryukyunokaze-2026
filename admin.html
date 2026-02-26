@@ -188,81 +188,81 @@
     visibility: visible !important;
   }
 }
-/* --- スマホ編集画面の改善（完全版） --- */
-/* --- 🌟 スマホ編集画面・最終改善版 🌟 --- */
+/* --- 🌟 スマホ編集画面：はみ出し完全撲滅設定 🌟 --- */
 @media screen and (max-width: 480px) {
-  /* 1. 閉じるボタン（×）を画面最前面に固定し、視認性を最大化 */
+  /* 1. 閉じるボタン（×）の設定 - これは今のまま維持 */
   #detail-modal .close-btn, 
   #detail-modal .close { 
-    position: fixed !important; /* absoluteからfixedに変更し、スクロールしても追従 */
+    position: fixed !important;
     top: 15px !important;
     right: 15px !important;
     font-size: 36px !important;
     color: #ffffff !important;
-    background: #000000 !important; /* 確実に目立つ黒背景 */
+    background: #000000 !important;
     width: 50px !important;
     height: 50px !important;
     border-radius: 50% !important;
     display: flex !important;
     align-items: center;
     justify-content: center;
-    z-index: 10000 !important; /* モーダルコンテンツより上に */
-    cursor: pointer;
+    z-index: 10000 !important;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
-    line-height: 1 !important;
   }
 
-  /* 2. 入力項目の「はみ出し」を徹底防止（すべて縦並び） */
-  .modal-content {
-    width: 96% !important;
-    margin: 10px auto !important;
-    padding: 10px !important;
-    max-height: 92vh !important;
-    overflow-y: auto !important;
-  }
-
-  /* すべてのflexレイアウトを強制解除 */
-  .modal-body div, 
-  .modal-body form,
-  .ticket-edit-grid,
-  .flex-row,
-  [style*="display: flex"] {
-    display: block !important; /* 横並びを禁止 */
+  /* 2. 【重要】横並びを完全に破壊して縦にする */
+  /* ticket-edit-grid や flex-row など、はみ出しの原因をすべて解除 */
+  .modal-content .ticket-edit-grid,
+  .modal-content .flex-row,
+  .modal-content div[style*="display: flex"],
+  .modal-content .modal-section > div {
+    display: block !important; /* flexを解除 */
     width: 100% !important;
-    margin-bottom: 15px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
-  /* 3. メール・市町村・チケット枚数などの入力欄を画面幅いっぱいに */
-  .modal-body label,
-  .modal-body input, 
-  .modal-body select, 
-  .modal-body textarea {
+  /* 3. 【重要】入力枠（メール・市町村・チケット）を画面内に閉じ込める */
+  .modal-content input, 
+  .modal-content select, 
+  .modal-content textarea,
+  .modal-content .ticket-box {
+    display: block !important;
+    width: 100% !important; /* 親要素の幅に合わせる */
+    max-width: 100% !important; /* 100%を超えない */
+    min-width: 100% !important;
+    height: 50px !important; /* 押しやすい高さ */
+    margin: 8px 0 15px 0 !important; /* 前後の余白 */
+    padding: 12px !important;
+    box-sizing: border-box !important; /* 🌟枠線を幅に含める（これがないとはみ出す） */
+    font-size: 16px !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+
+  /* 備考欄などは高さを自動に */
+  .modal-content textarea {
+    height: 100px !important;
+  }
+
+  /* 4. モーダル本体の余白調整 */
+  .modal-content {
+    width: 95% !important;
+    margin: 5px auto !important;
+    padding: 15px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  /* ラベルの調整 */
+  .modal-content label {
     display: block !important;
     width: 100% !important;
-    max-width: 100% !important;
-    min-width: 100% !important;
-    box-sizing: border-box !important; /* パディングを含めた幅計算 */
-    font-size: 16px !important; /* 入力時にズームされないサイズ */
-    margin: 8px 0 !important;
-    padding: 12px !important;
-    height: auto !important; /* 固定高さを解除 */
-  }
-
-  /* チケット枚数のボックス内の余白調整 */
-  .ticket-box {
-    margin-bottom: 10px !important;
-  }
-
-  /* 保存ボタンのコンテナ調整 */
-  .save-btn-container {
-    position: sticky;
-    bottom: -10px;
-    width: 100%;
-    box-sizing: border-box;
-    padding: 15px 0;
+    margin-top: 15px !important;
+    font-weight: bold !important;
   }
 }
-
   </style>
 </head>
 <body style="display:none;" id="admin-body">
