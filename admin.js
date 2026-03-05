@@ -392,7 +392,7 @@ function openModal(id, mode) {
 }
 
 
-/** 4. チケット印刷（個別）- 背景画像＆A4 4枚配置 決定版 */
+/** 4. チケット印刷（個別）- 2026年最新安定版 */
 async function printTicket(id) {
   const p = currentData.find(item => String(item.id) === String(id));
   if (!p) return alert("データが見つかりません");
@@ -400,11 +400,12 @@ async function printTicket(id) {
   const btn = event.currentTarget;
   const originalText = btn.innerText;
   btn.innerText = "生成中...";
+  btn.disabled = true;
 
-  // 🌟 1. 画像URLの設定（背景画像はここにURLを入れてください）
   const logoUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026/logo.png"; 
-  const bgImageUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026/logo.png"; // テスト用にロゴを指定していますが、背景画像URLに変更可
+  const bgImageUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026/logo.png"; // 背景画像（適宜変更してください）
 
+  let ticketsHtml = "";
   let ticketList = [];
   if (Number(p.s_a) > 0) for(let i=0; i < Number(p.s_a); i++) ticketList.push("Sエリア (大人)");
   if (Number(p.s_c) > 0) for(let i=0; i < Number(p.s_c); i++) ticketList.push("Sエリア (子供)");
@@ -418,72 +419,58 @@ async function printTicket(id) {
   try {
     const logoData = await toDataURL(logoUrl);
     const bgData = await toDataURL(bgImageUrl);
-    let ticketsHtml = "";
 
     for (let i = 0; i < ticketList.length; i++) {
       const type = ticketList[i];
       const branchId = `${p.id}-${i + 1}`;
       const qrData = await toDataURL(`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${branchId}`);
       
+      // 🌟 CSSの .print-ticket-box に完全に一致させる
       ticketsHtml += `
-        <div class="ticket-unit" style="
-          display:flex; 
-          border:1.5mm solid #000; 
-          margin-bottom:8mm; 
-          height:65mm; 
-          width:100%; 
-          position:relative;
-          background-image: url('${bgData}');
-          background-size: cover;
-          background-position: center;
-          page-break-inside:avoid; 
-          font-family:sans-serif; 
-          box-sizing:border-box; 
-          color:#000;
-          overflow: hidden;
-        ">
-          <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.7); z-index:1;"></div>
-
-          <div style="flex:3; padding:25px; border-right:1.2mm dashed #000; text-align:left; position:relative; z-index:2; display:flex; flex-direction:column; justify-content:center;">
-            <div>
-              <img src="${logoData}" style="width:65px; float:left; margin-right:15px;">
-              <p style="font-size:12px; margin:0; color:#444; letter-spacing:1px;">RYUKYU NO KAZE 2026</p>
-              <h1 style="font-size:28px; margin:5px 0; color:#1e3a8a; font-weight:900;">琉球の風 2026</h1>
+        <div class="print-ticket-box" style="background-image: url('${bgData}');">
+          <div class="print-ticket-bg-overlay"></div>
+          <div class="print-ticket-left">
+            <div class="print-ticket-header">
+              <img src="${logoData}" class="p-logo-img">
+              <div class="p-header-texts">
+                <p class="p-event-sub">RYUKYU NO KAZE 2026</p>
+                <h1 class="p-event-title">琉球の風 2026</h1>
+              </div>
             </div>
-            <div style="margin-top:20px;">
-              <div style="font-size:12px; color:#666; font-weight:bold;">SERIAL: ${branchId}</div>
-              <div style="font-size:26px; font-weight:900; margin-top:5px; color:#000;">【 ${type} 】</div>
+            <div class="print-ticket-body">
+              <div class="p-serial">SERIAL: ${branchId}</div>
+              <div class="p-type-label">【 ${type} 】</div>
             </div>
           </div>
-
-          <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:15px; position:relative; z-index:2; background:rgba(255,255,255,0.5);">
-            <img src="${qrData}" style="width:130px; height:130px; background:#fff; padding:8px; border:1px solid #ddd; border-radius:5px;">
-            <div style="font-size:11px; font-weight:bold; margin-top:10px;">${type}</div>
+          <div class="print-ticket-right">
+            <div class="p-qr-container">
+              <img src="${qrData}" class="p-qr-img">
+            </div>
+            <div class="p-type-sub">${type}</div>
           </div>
         </div>`;
     }
 
-    const pWin = window.open('', '_blank');
-    if (!pWin) return alert("ポップアップを許可してください");
+    let printArea = document.getElementById("print-temporary-area");
+    if (!printArea) {
+      printArea = document.createElement("div");
+      printArea.id = "print-temporary-area";
+      document.body.appendChild(printArea);
+    }
+    printArea.innerHTML = ticketsHtml;
 
-    // 🌟 エラーの起きていた document.write 部分を完全修正
-    pWin.document.write('<html><head><title>Ticket Print</title><style>' +
-      '@page { size: A4; margin: 10mm; } ' +
-      'body { margin: 0; padding: 0; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
-      '</style></head><body>' + ticketsHtml +
-      '<script>' +
-      'window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };' +
-      '</script></body></html>');
-    pWin.document.close();
+    setTimeout(() => {
+      window.print();
+      setTimeout(() => { printArea.innerHTML = ""; }, 2000);
+    }, 1000); 
 
-  } catch (e) {
-    console.error(e);
-    alert("生成エラーが発生しました。");
+  } catch (err) {
+    alert("画像の読み込みに失敗しました。");
   } finally {
     btn.innerText = originalText;
+    btn.disabled = false;
   }
 }
-
 /** 5. 補助関数群 */
 async function handleStatusMail(id, action) {
   const p = currentData.find(item => item.id === id);

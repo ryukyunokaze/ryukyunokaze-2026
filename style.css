@@ -257,85 +257,76 @@ header h1 {
 }
 
 /* =========================================
-   5. 🌟 印刷用・モーダル設定（PC・スマホ共通決定版）
+   5. 🌟 印刷用・特大チケット設定（2026決定版）
    ========================================= */
-.print-only { display: none; }
-
-/* 🌟 通常時のモーダル設定 */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 9999 !important;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  overflow-y: auto;
-}
-
-.modal-content {
-  background-color: #fff;
-  margin: 2% auto;
-  padding: 25px;
-  border-radius: 15px;
-  width: 90%;
-  max-width: 600px;
-  position: relative;
-}
-
-/* 🌟 チケット印刷用の一時エリア（通常は隠す） */
 #print-temporary-area { display: none; }
 
-/* 🌟 印刷実行時の命令（ここが重要！） */
 @media print {
-  /* 管理画面そのものを印刷しようとした時の白紙を防ぐ最低限の設定 */
-  .no-print, .fixed-header, .admin-menu, .modal { display: none !important; }
-  body { background: white !important; overflow: visible !important; }
-}
+  /* 1. 管理画面のUIを強制排除 */
+  html, body { height: auto !important; overflow: visible !important; }
+  .admin-container, .fixed-header, .table-scroll-area, .modal, header, .nav-btn, .admin-menu, .dashboard-grid {
+    display: none !important;
+  }
 
-  /* 2. チケットエリアだけを強制的に出現させる */
+  /* 2. 印刷土台の表示 */
   #print-temporary-area {
     display: block !important;
     position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
+    top: 0 !important; left: 0 !important;
     width: 100% !important;
     background: white !important;
   }
 
-  /* 3. チケットの枠組みとレイアウト */
+  /* 3. 特大チケットの枠組み（A4 4枚サイズ） */
   .print-ticket-box {
     display: flex !important;
-    flex-direction: row !important; /* 横並びを強制 */
+    position: relative !important;
     width: 100% !important;
-    height: 140px !important;
+    height: 68mm !important; /* 🌟 A4を4等分する特大サイズ */
     border: 1.5mm solid #000 !important;
-    margin-bottom: 10mm !important;
+    margin-bottom: 5mm !important;
     page-break-inside: avoid !important;
     box-sizing: border-box !important;
+    background-size: cover !important;
+    background-position: center !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    overflow: hidden !important;
   }
 
-  /* 内部の構成 */
+  /* 背景を薄くするレイヤー */
+  .print-ticket-bg-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.6) !important;
+    z-index: 1;
+  }
+
   .print-ticket-left {
     flex: 3 !important;
-    padding: 15px !important;
-    border-right: 1mm dashed #000 !important;
-    text-align: left !important;
+    padding: 25px !important;
+    border-right: 1.2mm dashed #000 !important;
+    z-index: 2;
+    display: flex; flex-direction: column; justify-content: center;
   }
 
   .print-ticket-right {
     flex: 1 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.3) !important;
   }
 
-  /* 画像（ロゴ・QR）の表示を保証 */
-  img {
-    max-width: 100%;
-    height: auto;
-  }
-
-
+  /* 文字サイズの拡大 */
+  .p-logo-img { width: 60px; float: left; margin-right: 15px; }
+  .p-event-sub { font-size: 12px; margin: 0; color: #444; font-weight: bold; }
+  .p-event-title { font-size: 32px; margin: 5px 0; color: #1e3a8a !important; font-weight: 900; }
+  .p-serial { font-size: 13px; color: #555; font-weight: bold; margin-top: 15px; }
+  .p-type-label { font-size: 30px; font-weight: 900; margin-top: 5px; color: #000 !important; }
+  
+  .p-qr-container { background: white !important; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+  .p-qr-img { width: 130px; height: 130px; display: block; }
+  .p-type-sub { font-size: 11px; font-weight: bold; margin-top: 8px; }
+}
 /* --- 編集フォームのモダンデザイン --- */
 .edit-form-modern {
   display: flex;
