@@ -187,7 +187,38 @@ header h1 {
 /* =========================================
    4. モーダル（詳細・編集）
    ========================================= */
-/* --- 詳細画面（モーダル）の装飾 --- */
+/* ===== モーダルの土台（これが無いと見えないことがある） ===== */
+#detail-modal{
+  position: fixed;
+  inset: 0;
+  display: none;              /* openModalで block に変わる */
+  background: rgba(0,0,0,.45);
+  z-index: 999999;            /* いちばん上に出す */
+}
+
+/* modal-bodyを画面中央のカードとして表示 */
+#modal-body{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 640px);
+  max-height: 88vh;
+  overflow: auto;             /* 中身が長くてもスクロール */
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+}
+
+/* スマホでも見やすく */
+@media (max-width: 480px){
+  #modal-body{
+    width: 94vw;
+    max-height: 90vh;
+  }
+}
+
+   /* --- 詳細画面（モーダル）の装飾 --- */
 .contact-button-row {
   display: flex;
   gap: 10px;
@@ -228,6 +259,8 @@ header h1 {
 .ticket-line { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #cbd5e0; }
 .final-total { text-align: right; margin-top: 10px; font-weight: bold; font-size: 18px; color: #e53e3e; }
 
+
+
 /* 🌟 QRコードを横並びにする設定 */
 .qr-flex-container {
   display: flex;
@@ -255,6 +288,8 @@ header h1 {
 @media (max-width: 480px) {
   .qr-item { width: calc(50% - 15px); }
 }
+
+
 
 /* =========================================
    5. 🌟 印刷用・特大チケット設定（2026決定版）
