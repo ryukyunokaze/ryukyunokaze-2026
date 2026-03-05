@@ -425,6 +425,39 @@ function printTicket(id) {
       </div>`;
   });
 
+  /** 4. チケット印刷（個別） */
+function printTicket(id) {
+  const p = currentData.find(item => item.id === id);
+  const logoUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026/logo.png"; 
+
+  let ticketsHtml = ""; // ここにチケットのHTMLを溜めていきます
+  let ticketList = [];
+  if (p.s_a > 0) for(let i=0; i < Number(p.s_a); i++) ticketList.push("Sエリア (大人)");
+  if (p.s_c > 0) for(let i=0; i < Number(p.s_c); i++) ticketList.push("Sエリア (子供)");
+  if (p.g_a > 0) for(let i=0; i < Number(p.g_a); i++) ticketList.push("一般エリア (大人)");
+  if (p.g_c > 0) for(let i=0; i < Number(p.g_c); i++) ticketList.push("一般エリア (子供)");
+
+  ticketList.forEach((type, index) => {
+    const branchId = `${p.id}-${index + 1}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${branchId}`;
+    ticketsHtml += `
+      <div class="ticket-page-wrapper" style="display: flex; border: 1.5mm solid #000; margin-bottom: 20px; page-break-inside: avoid; background: #fff;">
+        <div style="flex: 3; padding: 15px; border-right: 1.5mm dashed #000; text-align: left;">
+          <img src="${logoUrl}" style="width: 50px; float: left; margin-right: 12px;">
+          <p style="font-size: 0.65rem; margin: 0; color: #666;">RYUKYU NO KAZE 2026</p>
+          <h1 style="font-size: 1.3rem; font-weight: bold; color: #1e3a8a; margin: 0;">琉球 service 2026</h1>
+          <div style="margin-top: 15px;">
+            <div style="font-size: 0.6rem; color: #999;">SERIAL: ${branchId}</div>
+            <div style="margin-top: 10px; font-size: 1.1rem; font-weight: bold; color: #1e3a8a;">【 ${type} 】</div>
+          </div>
+        </div>
+        <div style="flex: 1; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <img src="${qrUrl}" style="width: 85px; height: 85px;">
+          <div style="font-size: 0.55rem; font-weight: bold; margin-top: 5px;">${type}</div>
+        </div>
+      </div>`;
+  });
+
   // 🌟 1. 別ウィンドウを開く
   const printWin = window.open('', '_blank');
   
