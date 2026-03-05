@@ -457,9 +457,17 @@ async function printTicket(id) {
     }
     printArea.innerHTML = ticketsHtml;
 
+    
+
     // 🌟 既にデータ化されているので、待ち時間0で印刷実行可能！
     window.print();
     printArea.innerHTML = "";
+    // 🌟 修正：少しだけ待って、スマホに「描画」の隙を与える
+    setTimeout(() => {
+      window.print();
+      // プレビューを閉じたら中身を消す
+      setTimeout(() => { printArea.innerHTML = ""; }, 1000);
+    }, 3000); // 0.3秒の溜め
 
   } catch (err) {
     alert("画像の読み込みに失敗しました。電波の良い所で再度お試しください。");

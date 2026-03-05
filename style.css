@@ -257,11 +257,11 @@ header h1 {
 }
 
 /* =========================================
-   5. 🌟 印刷用設定（チケット・リスト・モーダル共通）
+   5. 🌟 印刷用・モーダル設定（スマホ対応・決定版）
    ========================================= */
 .print-only { display: none; }
 
-/* 🌟 通常時のモーダル設定（印刷時以外） */
+/* 🌟 通常時のモーダル設定（画面表示用） */
 .modal {
   display: none;
   position: fixed;
@@ -285,63 +285,50 @@ header h1 {
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-/* 🌟 印刷実行時の命令 */
+/* 🌟 チケット印刷用の一時エリア（通常は隠す） */
+#print-temporary-area { display: none; }
+
+/* 🌟 印刷実行時の最強命令 */
 @media print {
-  /* 1. 不要なものを一掃 */
-  .fixed-header, .no-print, .opt-btn, header, .nav-btn, .admin-menu, .dashboard-grid, .text-right { 
-    display: none !important; 
+  /* 1. 画面上のすべてを「不可視」にする（レイアウトは維持して真っ白にする） */
+  body * {
+    visibility: hidden !important;
   }
 
-  /* 2. 背景スクロール制限を解除（これがないとスマホでバグる） */
-  html, body, .admin-container, .table-scroll-area { 
-    display: block !important; 
-    overflow: visible !important; 
-    height: auto !important;
-    background: white !important;
-    padding: 0 !important;
-    margin: 0 !important;
+  /* 2. チケット印刷エリアとその中身だけを「可視」にする */
+  #print-temporary-area, #print-temporary-area * {
+    visibility: visible !important;
   }
 
-  /* 3. モーダルを印刷用紙にフィットさせる */
-  .modal {
-    position: absolute !important;
+  /* 3. チケットエリアを画面の最上部に強制配置 */
+  #print-temporary-area {
     display: block !important;
-    background: white !important;
+    position: absolute !important;
     top: 0 !important;
-  }
-  .modal-content {
-    box-shadow: none !important;
+    left: 0 !important;
+    width: 100% !important;
     margin: 0 !important;
-    width: 100% !important;
-    max-width: none !important;
+    padding: 0 !important;
   }
 
-  /* 4. チケットのレイアウト（途中で切れないように設定） */
-  .ticket-page-wrapper {
+  /* 4. チケットのデザイン（横並びと枠線） */
+  .print-ticket-box {
     display: flex !important;
-    border: 1px solid #000 !important;
-    margin-bottom: 20px !important;
+    border: 1.5mm solid #000 !important;
+    margin-bottom: 15mm !important;
     page-break-inside: avoid !important;
-    width: 100% !important;
+    height: 130px !important;
+    background: white !important;
+    box-sizing: border-box !important;
+    visibility: visible !important;
   }
-
-  /* 5. 一覧表（オキチケ等）の印刷設定 */
-  table { width: 100% !important; border-collapse: collapse !important; }
-  th, td { border: 1px solid #000 !important; padding: 6px !important; font-size: 10px !important; color: #000 !important; }
-  .print-only { display: table-cell !important; width: 30px; }
-  .status-badge { border: 1px solid #000; background: none !important; color: #000 !important; }
-}
-
-/* 🌟 QRコードの並び（詳細画面用） */
-.qr-flex-container {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 10px;
-  justify-content: center;
-}
-.qr-item {
-  width: 100px;
-  text-align: center;
+  .print-ticket-left { flex: 3; padding: 15px; border-right: 1mm dashed #000 !important; visibility: visible !important; }
+  .print-ticket-right { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; visibility: visible !important; }
+  
+  /* 内部パーツの強制表示 */
+  .p-logo { width: 45px; float: left; margin-right: 12px; visibility: visible !important; }
+  .p-event-title { font-size: 18px; margin: 0; font-weight: bold; color: #1e3a8a !important; visibility: visible !important; }
+  .p-qr-img { width: 80px; height: 80px; visibility: visible !important; }
 }
 
 /* --- 編集フォームのモダンデザイン --- */
@@ -457,38 +444,3 @@ header h1 {
   box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
-/* --- チケット印刷用設定 --- */
-#print-temporary-area { display: none; }
-
-@media print {
-  /* 管理画面全体を消す */
-  body > *:not(#print-temporary-area) {
-    display: none !important;
-  }
-  /* 印刷エリアだけを出す */
-  #print-temporary-area {
-    display: block !important;
-    position: absolute;
-    top: 0; left: 0; width: 100%;
-    background: white;
-  }
-  /* チケットのレイアウト */
-  .print-ticket-box {
-    display: flex !important;
-    border: 1.5mm solid #000 !important;
-    margin-bottom: 15mm;
-    page-break-inside: avoid;
-    height: 130px;
-    box-sizing: border-box;
-    text-align: left;
-  }
-  .print-ticket-left { flex: 3; padding: 15px; border-right: 1mm dashed #000 !important; }
-  .print-ticket-right { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  .p-logo { width: 45px; float: left; margin-right: 12px; }
-  .p-event-sub { font-size: 10px; margin: 0; color: #666; }
-  .p-event-title { font-size: 18px; margin: 0; font-weight: bold; color: #1e3a8a; }
-  .p-serial { font-size: 9px; color: #999; }
-  .p-type-label { font-size: 16px; font-weight: bold; margin-top: 10px; }
-  .p-qr-img { width: 80px; height: 80px; }
-  .p-type-sub { font-size: 8px; font-weight: bold; }
-}
