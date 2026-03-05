@@ -391,82 +391,68 @@ function openModal(id, mode) {
   document.getElementById("detail-modal").style.display = "block";
 }
 
+
 /** 4. チケット印刷（個別） */
 function printTicket(id) {
   const p = currentData.find(item => item.id === id);
-  const printArea = document.getElementById("print-content");
-  printArea.innerHTML = ""; 
   const logoUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026/logo.png"; 
 
-  let tickets = [];
-  for(let i=0; i < Number(p.s_a); i++) tickets.push({ type: "Sエリア (大人)", key: "s_a_price" });
-  for(let i=0; i < Number(p.s_c); i++) tickets.push({ type: "Sエリア (子供)", key: "s_c_price" });
-  for(let i=0; i < Number(p.g_a); i++) tickets.push({ type: "一般エリア (大人)", key: "g_a_price" });
-  for(let i=0; i < Number(p.g_c); i++) tickets.push({ type: "一般エリア (子供)", key: "g_c_price" });
+  let ticketsHtml = ""; // ここにチケットのHTMLを溜めていきます
+  let ticketList = [];
+  if (p.s_a > 0) for(let i=0; i < Number(p.s_a); i++) ticketList.push("Sエリア (大人)");
+  if (p.s_c > 0) for(let i=0; i < Number(p.s_c); i++) ticketList.push("Sエリア (子供)");
+  if (p.g_a > 0) for(let i=0; i < Number(p.g_a); i++) ticketList.push("一般エリア (大人)");
+  if (p.g_c > 0) for(let i=0; i < Number(p.g_c); i++) ticketList.push("一般エリア (子供)");
 
-  tickets.forEach((t, index) => {
+  ticketList.forEach((type, index) => {
     const branchId = `${p.id}-${index + 1}`;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${branchId}`;
-    const ticketDiv = document.createElement("div");
-    ticketDiv.className = "ticket-page-wrapper";
-    ticketDiv.innerHTML = `
-      <div style="flex: 3; padding: 15px; border-right: 1.5mm dashed #000; text-align: left;">
-        <img src="${logoUrl}" style="width: 50px; float: left; margin-right: 12px;">
-        <p style="font-size: 0.65rem; margin: 0; color: #666;">RYUKYU NO KAZE 2026</p>
-        <h1 style="font-size: 1.3rem; font-weight: bold; color: #1e3a8a; margin: 0;">琉球の風 2026</h1>
-        <div style="margin-top: 15px;">
-          <div style="font-size: 0.6rem; color: #999;">SERIAL: ${branchId}</div>
-          <div style="margin-top: 15px;"></div>
-          <div style="margin-top: 10px; font-size: 1.1rem; font-weight: bold; color: #1e3a8a;">【 ${t.type} 】</div>
+    ticketsHtml += `
+      <div class="ticket-page-wrapper" style="display: flex; border: 1.5mm solid #000; margin-bottom: 20px; page-break-inside: avoid; background: #fff;">
+        <div style="flex: 3; padding: 15px; border-right: 1.5mm dashed #000; text-align: left;">
+          <img src="${logoUrl}" style="width: 50px; float: left; margin-right: 12px;">
+          <p style="font-size: 0.65rem; margin: 0; color: #666;">RYUKYU NO KAZE 2026</p>
+          <h1 style="font-size: 1.3rem; font-weight: bold; color: #1e3a8a; margin: 0;">琉球 service 2026</h1>
+          <div style="margin-top: 15px;">
+            <div style="font-size: 0.6rem; color: #999;">SERIAL: ${branchId}</div>
+            <div style="margin-top: 10px; font-size: 1.1rem; font-weight: bold; color: #1e3a8a;">【 ${type} 】</div>
+          </div>
         </div>
-      </div>
-      <div style="flex: 1; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <img src="${qrUrl}" style="width: 85px; height: 85px;">
-        <div style="font-size: 0.55rem; font-weight: bold; margin-top: 5px;">${t.type}</div>
+        <div style="flex: 1; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <img src="${qrUrl}" style="width: 85px; height: 85px;">
+          <div style="font-size: 0.55rem; font-weight: bold; margin-top: 5px;">${type}</div>
+        </div>
       </div>`;
-    printArea.appendChild(ticketDiv);
   });
-  const printWindow = window.open('', '_blank');
+
+  // 🌟 1. 別ウィンドウを開く
+  const printWin = window.open('', '_blank');
   
-  // 管理画面で使っているCSSがあればここに追加（なければ基本スタイルのみでOK）
-  printWindow.document.write(`
+  // 🌟 2. 内容を書き込む（ここで自動印刷の命令も入れる）
+  printWin.document.write(`
     <html>
       <head>
-        <title>チケット印刷 - ${p.id}</title>
+        <title>Ticket Print</title>
         <style>
-          body { margin: 0; padding: 0; background: #fff; }
-          /* チケットのレイアウトを整える設定 */
-          .ticket-page-wrapper { 
-            display: flex; 
-            width: 100%; 
-            max-width: 600px; 
-            margin: 10px auto; 
-            border: 2px solid #000; 
-            page-break-inside: avoid; /* 印刷時に途中で切れないように */
-            background: #fff;
-          }
-          @media print {
-            body { width: 100%; }
-            .ticket-page-wrapper { margin-bottom: 20px; border: 1px solid #000; }
-          }
+          body { margin: 0; padding: 20px; background: #fff; }
+          @media print { body { padding: 0; } }
         </style>
       </head>
       <body>
-        ${printArea.innerHTML}
+        ${ticketsHtml}
         <script>
-          // 全ての画像（QRコード）が読み込まれてから印刷を実行
+          // 全ての画像（ロゴやQR）が読み込み終わったら自動で印刷画面を出す
           window.onload = function() {
             window.print();
-            // 印刷が終わったら自動でこの窓を閉じる（スマホで邪魔にならないように）
-            setTimeout(function() { window.close(); }, 500);
+            // 印刷画面が閉じられたら、この一時ウィンドウも勝手に閉じる
+            window.onafterprint = function() { window.close(); };
           };
         </script>
       </body>
     </html>
   `);
-  printWindow.document.close();
+  printWin.document.close();
 }
-
 /** 5. 補助関数群 */
 async function handleStatusMail(id, action) {
   const p = currentData.find(item => item.id === id);
