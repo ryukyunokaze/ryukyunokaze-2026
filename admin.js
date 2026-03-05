@@ -392,10 +392,7 @@ function openModal(id, mode) {
 }
 
 
-/**
- * 4. チケット印刷（個別）
- * スマホでの「準備中...」フリーズを回避し、確実に印刷画面を出す決定版
- */
+/** 4. チケット印刷（個別）- スマホ・PC完全対応版 */
 function printTicket(id) {
   const p = currentData.find(item => item.id === id);
   if (!p) return;
@@ -414,54 +411,38 @@ function printTicket(id) {
     const branchId = `${p.id}-${index + 1}`;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${branchId}`;
     ticketsHtml += `
-      <div class="ticket-print-item" style="display: flex; border: 1.5mm solid #000; margin-bottom: 20px; page-break-inside: avoid; background: #fff; text-align: left;">
-        <div style="flex: 3; padding: 15px; border-right: 1.5mm dashed #000;">
-          <img src="${logoUrl}" style="width: 45px; float: left; margin-right: 12px;">
-          <p style="font-size: 0.65rem; margin: 0; color: #666;">RYUKYU NO KAZE 2026</p>
-          <h1 style="font-size: 1.2rem; font-weight: bold; color: #1e3a8a; margin: 0;">琉球の風 2026</h1>
-          <div style="margin-top: 15px;">
-            <div style="font-size: 0.6rem; color: #999;">SERIAL: ${branchId}</div>
-            <div style="margin-top: 8px; font-size: 1.0rem; font-weight: bold; color: #1e3a8a;">【 ${type} 】</div>
+      <div class="print-ticket-box">
+        <div class="print-ticket-left">
+          <img src="${logoUrl}" class="p-logo">
+          <p class="p-event-sub">RYUKYU NO KAZE 2026</p>
+          <h1 class="p-event-title">琉球の風 2026</h1>
+          <div class="p-info">
+            <span class="p-serial">SERIAL: ${branchId}</span>
+            <div class="p-type-label">【 ${type} 】</div>
           </div>
         </div>
-        <div style="flex: 1; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-          <img src="${qrUrl}" style="width: 80px; height: 80px;">
-          <div style="font-size: 0.55rem; font-weight: bold; margin-top: 5px;">${type}</div>
+        <div class="print-ticket-right">
+          <img src="${qrUrl}" class="p-qr-img">
+          <div class="p-type-sub">${type}</div>
         </div>
       </div>`;
   });
 
-  // 2. スマホで確実に動く「一時ウィンドウ」方式
-  const printWin = window.open('', '_blank');
-  if (!printWin) {
-    alert("ポップアップがブロックされました。ブラウザの設定で許可してください。");
-    return;
+  // 2. 印刷専用の「一時的な場所」を作成
+  let printArea = document.getElementById("print-temporary-area");
+  if (!printArea) {
+    printArea = document.createElement("div");
+    printArea.id = "print-temporary-area";
+    document.body.appendChild(printArea);
   }
+  printArea.innerHTML = ticketsHtml;
 
-  printWin.document.write(`
-    <html>
-      <head>
-        <title>Print - ${p.id}</title>
-        <style>
-          body { margin: 0; padding: 20px; background: #fff; text-align: center; font-family: sans-serif; }
-          @media print { body { padding: 0; } }
-        </style>
-      </head>
-      <body>
-        ${ticketsHtml}
-        <script>
-          // 画像の読み込み完了を待つが、最大1.5秒で強制的に印刷ダイアログを出す
-          function triggerPrint() {
-            window.print();
-            window.onafterprint = function() { window.close(); };
-          }
-          window.onload = triggerPrint;
-          setTimeout(() => { if (document.readyState !== 'complete') triggerPrint(); }, 1500);
-        </script>
-      </body>
-    </html>
-  `);
-  printWin.document.close();
+  // 3. 印刷実行（0.8秒待ってから。画像読み込み時間を確保）
+  setTimeout(() => {
+    window.print();
+    // 印刷が終わったらお掃除
+    setTimeout(() => { printArea.innerHTML = ""; }, 1000);
+  }, 800);
 }
 /** 5. 補助関数群 */
 async function handleStatusMail(id, action) {

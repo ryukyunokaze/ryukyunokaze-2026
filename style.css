@@ -456,3 +456,39 @@ header h1 {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
+
+/* --- チケット印刷用設定 --- */
+#print-temporary-area { display: none; }
+
+@media print {
+  /* 管理画面全体を消す */
+  body > *:not(#print-temporary-area) {
+    display: none !important;
+  }
+  /* 印刷エリアだけを出す */
+  #print-temporary-area {
+    display: block !important;
+    position: absolute;
+    top: 0; left: 0; width: 100%;
+    background: white;
+  }
+  /* チケットのレイアウト */
+  .print-ticket-box {
+    display: flex !important;
+    border: 1.5mm solid #000 !important;
+    margin-bottom: 15mm;
+    page-break-inside: avoid;
+    height: 130px;
+    box-sizing: border-box;
+    text-align: left;
+  }
+  .print-ticket-left { flex: 3; padding: 15px; border-right: 1mm dashed #000 !important; }
+  .print-ticket-right { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .p-logo { width: 45px; float: left; margin-right: 12px; }
+  .p-event-sub { font-size: 10px; margin: 0; color: #666; }
+  .p-event-title { font-size: 18px; margin: 0; font-weight: bold; color: #1e3a8a; }
+  .p-serial { font-size: 9px; color: #999; }
+  .p-type-label { font-size: 16px; font-weight: bold; margin-top: 10px; }
+  .p-qr-img { width: 80px; height: 80px; }
+  .p-type-sub { font-size: 8px; font-weight: bold; }
+}
