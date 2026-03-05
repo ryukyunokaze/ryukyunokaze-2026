@@ -392,94 +392,71 @@ function openModal(id, mode) {
 }
 
 
-/** 4. チケット印刷（個別） */
+/**
+ * 4. チケット印刷（個別）
+ * スマホでの「準備中...」フリーズを回避し、確実に印刷画面を出す決定版
+ */
 function printTicket(id) {
   const p = currentData.find(item => item.id === id);
+  if (!p) return;
+
   const logoUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026/logo.png"; 
 
-  let ticketsHtml = ""; // ここにチケットのHTMLを溜めていきます
+  // 1. チケットデータの組み立て
+  let ticketsHtml = "";
   let ticketList = [];
-  if (p.s_a > 0) for(let i=0; i < Number(p.s_a); i++) ticketList.push("Sエリア (大人)");
-  if (p.s_c > 0) for(let i=0; i < Number(p.s_c); i++) ticketList.push("Sエリア (子供)");
-  if (p.g_a > 0) for(let i=0; i < Number(p.g_a); i++) ticketList.push("一般エリア (大人)");
-  if (p.g_c > 0) for(let i=0; i < Number(p.g_c); i++) ticketList.push("一般エリア (子供)");
+  if (Number(p.s_a) > 0) for(let i=0; i < Number(p.s_a); i++) ticketList.push("Sエリア (大人)");
+  if (Number(p.s_c) > 0) for(let i=0; i < Number(p.s_c) ; i++) ticketList.push("Sエリア (子供)");
+  if (Number(p.g_a) > 0) for(let i=0; i < Number(p.g_a) ; i++) ticketList.push("一般エリア (大人)");
+  if (Number(p.g_c) > 0) for(let i=0; i < Number(p.g_c) ; i++) ticketList.push("一般エリア (子供)");
 
   ticketList.forEach((type, index) => {
     const branchId = `${p.id}-${index + 1}`;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${branchId}`;
     ticketsHtml += `
-      <div class="ticket-page-wrapper" style="display: flex; border: 1.5mm solid #000; margin-bottom: 20px; page-break-inside: avoid; background: #fff;">
-        <div style="flex: 3; padding: 15px; border-right: 1.5mm dashed #000; text-align: left;">
-          <img src="${logoUrl}" style="width: 50px; float: left; margin-right: 12px;">
+      <div class="ticket-print-item" style="display: flex; border: 1.5mm solid #000; margin-bottom: 20px; page-break-inside: avoid; background: #fff; text-align: left;">
+        <div style="flex: 3; padding: 15px; border-right: 1.5mm dashed #000;">
+          <img src="${logoUrl}" style="width: 45px; float: left; margin-right: 12px;">
           <p style="font-size: 0.65rem; margin: 0; color: #666;">RYUKYU NO KAZE 2026</p>
-          <h1 style="font-size: 1.3rem; font-weight: bold; color: #1e3a8a; margin: 0;">琉球 service 2026</h1>
+          <h1 style="font-size: 1.2rem; font-weight: bold; color: #1e3a8a; margin: 0;">琉球の風 2026</h1>
           <div style="margin-top: 15px;">
             <div style="font-size: 0.6rem; color: #999;">SERIAL: ${branchId}</div>
-            <div style="margin-top: 10px; font-size: 1.1rem; font-weight: bold; color: #1e3a8a;">【 ${type} 】</div>
+            <div style="margin-top: 8px; font-size: 1.0rem; font-weight: bold; color: #1e3a8a;">【 ${type} 】</div>
           </div>
         </div>
         <div style="flex: 1; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-          <img src="${qrUrl}" style="width: 85px; height: 85px;">
+          <img src="${qrUrl}" style="width: 80px; height: 80px;">
           <div style="font-size: 0.55rem; font-weight: bold; margin-top: 5px;">${type}</div>
         </div>
       </div>`;
   });
 
-  /** 4. チケット印刷（個別） */
-function printTicket(id) {
-  const p = currentData.find(item => item.id === id);
-  const logoUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026/logo.png"; 
-
-  let ticketsHtml = ""; // ここにチケットのHTMLを溜めていきます
-  let ticketList = [];
-  if (p.s_a > 0) for(let i=0; i < Number(p.s_a); i++) ticketList.push("Sエリア (大人)");
-  if (p.s_c > 0) for(let i=0; i < Number(p.s_c); i++) ticketList.push("Sエリア (子供)");
-  if (p.g_a > 0) for(let i=0; i < Number(p.g_a); i++) ticketList.push("一般エリア (大人)");
-  if (p.g_c > 0) for(let i=0; i < Number(p.g_c); i++) ticketList.push("一般エリア (子供)");
-
-  ticketList.forEach((type, index) => {
-    const branchId = `${p.id}-${index + 1}`;
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${branchId}`;
-    ticketsHtml += `
-      <div class="ticket-page-wrapper" style="display: flex; border: 1.5mm solid #000; margin-bottom: 20px; page-break-inside: avoid; background: #fff;">
-        <div style="flex: 3; padding: 15px; border-right: 1.5mm dashed #000; text-align: left;">
-          <img src="${logoUrl}" style="width: 50px; float: left; margin-right: 12px;">
-          <p style="font-size: 0.65rem; margin: 0; color: #666;">RYUKYU NO KAZE 2026</p>
-          <h1 style="font-size: 1.3rem; font-weight: bold; color: #1e3a8a; margin: 0;">琉球 service 2026</h1>
-          <div style="margin-top: 15px;">
-            <div style="font-size: 0.6rem; color: #999;">SERIAL: ${branchId}</div>
-            <div style="margin-top: 10px; font-size: 1.1rem; font-weight: bold; color: #1e3a8a;">【 ${type} 】</div>
-          </div>
-        </div>
-        <div style="flex: 1; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-          <img src="${qrUrl}" style="width: 85px; height: 85px;">
-          <div style="font-size: 0.55rem; font-weight: bold; margin-top: 5px;">${type}</div>
-        </div>
-      </div>`;
-  });
-
-  // 🌟 1. 別ウィンドウを開く
+  // 2. スマホで確実に動く「一時ウィンドウ」方式
   const printWin = window.open('', '_blank');
-  
-  // 🌟 2. 内容を書き込む（ここで自動印刷の命令も入れる）
+  if (!printWin) {
+    alert("ポップアップがブロックされました。ブラウザの設定で許可してください。");
+    return;
+  }
+
   printWin.document.write(`
     <html>
       <head>
-        <title>Ticket Print</title>
+        <title>Print - ${p.id}</title>
         <style>
-          body { margin: 0; padding: 20px; background: #fff; }
+          body { margin: 0; padding: 20px; background: #fff; text-align: center; font-family: sans-serif; }
           @media print { body { padding: 0; } }
         </style>
       </head>
       <body>
         ${ticketsHtml}
         <script>
-          // 全ての画像（ロゴやQR）が読み込み終わったら自動で印刷画面を出す
-          window.onload = function() {
+          // 画像の読み込み完了を待つが、最大1.5秒で強制的に印刷ダイアログを出す
+          function triggerPrint() {
             window.print();
-            // 印刷画面が閉じられたら、この一時ウィンドウも勝手に閉じる
             window.onafterprint = function() { window.close(); };
-          };
+          }
+          window.onload = triggerPrint;
+          setTimeout(() => { if (document.readyState !== 'complete') triggerPrint(); }, 1500);
         </script>
       </body>
     </html>
