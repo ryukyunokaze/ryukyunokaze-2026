@@ -261,7 +261,42 @@
     border-radius: 12px !important;
     box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
   }
+
+  /* ===== モーダルを必ず最前面に表示（最終上書き） ===== */
+#detail-modal.modal{
+  position: fixed !important;
+  inset: 0 !important;
+  display: none; /* JSがblockにする */
+  background: rgba(0,0,0,.45) !important;
+  z-index: 999999 !important;
 }
+
+#detail-modal .modal-content{
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: min(92vw, 560px) !important;
+  max-height: 88vh !important;
+  overflow: auto !important;
+  background: #fff !important;
+  border-radius: 16px !important;
+}
+
+.close-btn{
+  position: absolute;
+  right: 14px;
+  top: 10px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #64748b;
+  z-index: 2;
+}
+.close-btn:hover{ color:#0f172a; 
+}
+}
+
   </style>
 </head>
 <body style="display:none;" id="admin-body">
