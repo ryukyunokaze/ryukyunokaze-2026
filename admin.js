@@ -392,15 +392,17 @@ function openModal(id, mode) {
 }
 
 
-/** 4. チケット印刷（個別）- 最終解決版（DataURL方式） */
+/** 4. チケット印刷（個別）- 2026年最新安定版 */
 async function printTicket(id) {
-  const p = currentData.find(item => item.id === id);
-  if (!p) return;
+  const p = currentData.find(item => String(item.id) === String(id));
+  if (!p) {
+    alert("エラー: 注文データが見つかりません。一覧を再読み込みしてください。");
+    return;
+  }
 
-  // 🌟 ユーザーへの通知（処理中であることを示す）
-  const btn = event.target;
+  const btn = event.currentTarget; // ボタン要素を確実に取得
   const originalText = btn.innerText;
-  btn.innerText = "準備中...";
+  btn.innerText = "生成中...";
   btn.disabled = true;
 
   const logoUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026/logo.png"; 
@@ -412,43 +414,38 @@ async function printTicket(id) {
   if (Number(p.g_a) > 0) for(let i=0; i < Number(p.g_a); i++) ticketList.push("一般エリア (大人)");
   if (Number(p.g_c) > 0) for(let i=0; i < Number(p.g_c); i++) ticketList.push("一般エリア (子供)");
 
-  // 🌟 外部APIから画像を先に取得して、データ形式(Base64)に変換する関数
-  const toDataURL = url => fetch(url).then(response => response.blob())
-    .then(blob => new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    }));
+  // 🌟 画像をデータ形式に変換する関数（真っ白回避の核心）
+  const toDataURL = url => fetch(url).then(r => r.blob()).then(b => new Promise((res) => {
+    const f = new FileReader(); f.onloadend = () => res(f.result); f.readAsDataURL(b);
+  }));
 
   try {
+    // ロゴを先に読み込む
+    const logoData = await toDataURL(logoUrl);
+
     for (let i = 0; i < ticketList.length; i++) {
       const type = ticketList[i];
       const branchId = `${p.id}-${i + 1}`;
-      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${branchId}`;
+      // QRコードも先に読み込む
+      const qrData = await toDataURL(`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${branchId}`);
       
-      // ここで画像をデータに変換（通信待機をここで終わらせる）
-      const qrDataUrl = await toDataURL(qrApiUrl);
-
       ticketsHtml += `
-        <div class="print-ticket-box" style="display:flex; border:1.5mm solid #000; margin-bottom:20px; page-break-inside:avoid; background:#fff; height:120px;">
-          <div style="flex:3; padding:10px; border-right:1mm dashed #000; text-align:left;">
-            <img src="${logoUrl}" style="width:40px; float:left; margin-right:10px;">
+        <div class="print-ticket-box">
+          <div class="print-ticket-left">
+            <img src="${logoData}" style="width:45px; float:left; margin-right:12px;">
             <p style="font-size:10px; margin:0; color:#666;">RYUKYU NO KAZE 2026</p>
-            <h1 style="font-size:18px; margin:0; font-weight:bold; color:#1e3a8a;">琉球の風 2026</h1>
-            <div style="margin-top:10px;">
-              <span style="font-size:9px; color:#999;">SERIAL: ${branchId}</span>
-              <div style="font-size:16px; font-weight:bold; margin-top:5px;">【 ${type} 】</div>
-            </div>
+            <h1 style="font-size:20px; margin:5px 0; color:#1e3a8a;">琉球の風 2026</h1>
+            <div style="font-size:11px; color:#999;">SERIAL: ${branchId}</div>
+            <div style="font-size:18px; font-weight:bold; margin-top:10px;">【 ${type} 】</div>
           </div>
-          <div style="flex:1; text-align:center; padding:10px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-            <img src="${qrDataUrl}" style="width:80px; height:80px;">
-            <div style="font-size:8px; font-weight:bold;">${type}</div>
+          <div class="print-ticket-right">
+            <img src="${qrData}" style="width:90px; height:90px;">
+            <div style="font-size:9px; font-weight:bold; margin-top:5px;">${type}</div>
           </div>
         </div>`;
     }
 
-    // 一時エリアに流し込む
+    // 🌟 一時エリアに流し込む
     let printArea = document.getElementById("print-temporary-area");
     if (!printArea) {
       printArea = document.createElement("div");
@@ -457,18 +454,13 @@ async function printTicket(id) {
     }
     printArea.innerHTML = ticketsHtml;
 
-    
-
-    // 🌟 既にデータ化されているので、待ち時間0で印刷実行可能！
-    window.print();
-    printArea.innerHTML = "";
-    // 🌟 修正：前の window.print() は消して、ここだけにします
+    // 🌟 重要：ブラウザが描画を完了するまで少し待ってから印刷画面を出す
     setTimeout(() => {
       window.print();
-      // プレビューが閉じた後にお掃除（少し長めに待つのがコツ）
+      // 🌟 重要：印刷ダイアログを閉じた後にお掃除する
       setTimeout(() => { printArea.innerHTML = ""; }, 2000);
-    }, 3000); // 3秒待ってから印刷画面を出す
-    
+    }, 1000); 
+
   } catch (err) {
     alert("画像の読み込みに失敗しました。電波の良い所で再度お試しください。");
     console.error(err);
