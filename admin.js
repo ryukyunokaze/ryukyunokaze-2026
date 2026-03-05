@@ -104,7 +104,11 @@ function renderList(data) {
     const item = document.createElement("div");
     item.className = "order-item";
     item.setAttribute("data-id", row.id); // 🌟 IDを確実に拾うための目印
-    item.onclick = () => openModal(row.id, 'view');
+    item.onclick = function() {
+      console.log("clicked,id");
+      openModal(row.id, 'view');
+    } 
+
     item.innerHTML = `
       <div>
         <div style="font-size:0.65rem; color:#94a3b8;">${row.id}</div>
