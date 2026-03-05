@@ -442,7 +442,7 @@ function printTicket(id) {
     window.print();
     // 印刷が終わったらお掃除
     setTimeout(() => { printArea.innerHTML = ""; }, 1000);
-  }, 800);
+  }, 3000);
 }
 /** 5. 補助関数群 */
 async function handleStatusMail(id, action) {
