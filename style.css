@@ -257,72 +257,26 @@ header h1 {
 }
 
 /* =========================================
-   5. 🌟 印刷用リスト設定（オキチケ用）
+   5. 🌟 印刷用設定（チケット・リスト・モーダル共通）
    ========================================= */
 .print-only { display: none; }
 
-@media print {
-  /* 印刷時に隠すもの */
-  .fixed-header, .no-print, .opt-btn, .modal, .text-right { 
-    display: none !important; 
-  }
-  
-  /* 印刷時にスクロールを解除 */
-  body, .admin-container, .table-scroll-area { 
-    display: block !important; 
-    overflow: visible !important; 
-    height: auto !important;
-    background: white !important;
-    padding: 0 !important;
-  }
-  @media print {
-  /* 合計金額の列（左から6番目）の幅を指定 */
-  table th:nth-child(6), 
-  table td:nth-child(6) {
-    width: 100px !important; /* 幅を広げる */
-    text-align: right !important; /* 右寄せにする */
-    white-space: nowrap !important; /* 絶対に改行させない */
-    padding-right: 10px !important;
-  }
-}
-  /* チェック欄を表示 */
-  .print-only { 
-    display: table-cell !important; 
-    width: 40px; 
-    border: 1px solid #000 !important; 
-  }
-  
-  table { width: 100%; border-collapse: collapse; }
-  th, td { 
-    border: 1px solid #000 !important; 
-    padding: 8px !important; 
-    font-size: 11px; 
-    color: #000 !important; 
-  }
-  
-  /* バッジの色を消して黒枠にする */
-  .status-badge { 
-    border: 1px solid #000; 
-    background: none !important; 
-    color: #000 !important; 
-  }
-}
-
+/* 🌟 通常時のモーダル設定（印刷時以外） */
 .modal {
   display: none;
   position: fixed;
-  z-index: 9999 !important; /* 🌟 確実に一番上に持ってくる */
+  z-index: 9999 !important;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7); /* 少し暗くして目立たせる */
-  overflow-y: auto; /* 長いときはスクロール可能に */
+  background-color: rgba(0, 0, 0, 0.7);
+  overflow-y: auto;
 }
 
 .modal-content {
   background-color: #fff;
-  margin: 2% auto; /* 🌟 少し上に寄せる */
+  margin: 2% auto;
   padding: 25px;
   border-radius: 15px;
   width: 90%;
@@ -331,7 +285,54 @@ header h1 {
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-/* QRコードの横並びを強制 */
+/* 🌟 印刷実行時の命令 */
+@media print {
+  /* 1. 不要なものを一掃 */
+  .fixed-header, .no-print, .opt-btn, header, .nav-btn, .admin-menu, .dashboard-grid, .text-right { 
+    display: none !important; 
+  }
+
+  /* 2. 背景スクロール制限を解除（これがないとスマホでバグる） */
+  html, body, .admin-container, .table-scroll-area { 
+    display: block !important; 
+    overflow: visible !important; 
+    height: auto !important;
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* 3. モーダルを印刷用紙にフィットさせる */
+  .modal {
+    position: absolute !important;
+    display: block !important;
+    background: white !important;
+    top: 0 !important;
+  }
+  .modal-content {
+    box-shadow: none !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  /* 4. チケットのレイアウト（途中で切れないように設定） */
+  .ticket-page-wrapper {
+    display: flex !important;
+    border: 1px solid #000 !important;
+    margin-bottom: 20px !important;
+    page-break-inside: avoid !important;
+    width: 100% !important;
+  }
+
+  /* 5. 一覧表（オキチケ等）の印刷設定 */
+  table { width: 100% !important; border-collapse: collapse !important; }
+  th, td { border: 1px solid #000 !important; padding: 6px !important; font-size: 10px !important; color: #000 !important; }
+  .print-only { display: table-cell !important; width: 30px; }
+  .status-badge { border: 1px solid #000; background: none !important; color: #000 !important; }
+}
+
+/* 🌟 QRコードの並び（詳細画面用） */
 .qr-flex-container {
   display: flex !important;
   flex-wrap: wrap !important;

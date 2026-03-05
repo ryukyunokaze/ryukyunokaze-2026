@@ -426,7 +426,45 @@ function printTicket(id) {
       </div>`;
     printArea.appendChild(ticketDiv);
   });
-  window.print();
+  const printWindow = window.open('', '_blank');
+  
+  // 管理画面で使っているCSSがあればここに追加（なければ基本スタイルのみでOK）
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>チケット印刷 - ${p.id}</title>
+        <style>
+          body { margin: 0; padding: 0; background: #fff; }
+          /* チケットのレイアウトを整える設定 */
+          .ticket-page-wrapper { 
+            display: flex; 
+            width: 100%; 
+            max-width: 600px; 
+            margin: 10px auto; 
+            border: 2px solid #000; 
+            page-break-inside: avoid; /* 印刷時に途中で切れないように */
+            background: #fff;
+          }
+          @media print {
+            body { width: 100%; }
+            .ticket-page-wrapper { margin-bottom: 20px; border: 1px solid #000; }
+          }
+        </style>
+      </head>
+      <body>
+        ${printArea.innerHTML}
+        <script>
+          // 全ての画像（QRコード）が読み込まれてから印刷を実行
+          window.onload = function() {
+            window.print();
+            // 印刷が終わったら自動でこの窓を閉じる（スマホで邪魔にならないように）
+            setTimeout(function() { window.close(); }, 500);
+          };
+        </script>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
 }
 
 /** 5. 補助関数群 */
@@ -456,7 +494,7 @@ async function handleStatusMail(id, action) {
 
     const rawDate = getVal("event_date");
     const formattedDate = (rawDate && !isNaN(new Date(rawDate))) 
-      ? new Date(rawDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })
+      ? new Date(rawDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric',weekday: 'short' })
       : rawDate;
 
     return String(text).replace(/{event_title}/g, eventTitle).replace(/{name}/g, name).replace(/{event_date}/g, formattedDate)  // 🌟 追加：開催日
