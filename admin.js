@@ -392,57 +392,82 @@ function openModal(id, mode) {
 }
 
 
-/** 4. チケット印刷（個別）- スマホ・PC完全対応版 */
-function printTicket(id) {
+/** 4. チケット印刷（個別）- 最終解決版（DataURL方式） */
+async function printTicket(id) {
   const p = currentData.find(item => item.id === id);
   if (!p) return;
 
+  // 🌟 ユーザーへの通知（処理中であることを示す）
+  const btn = event.target;
+  const originalText = btn.innerText;
+  btn.innerText = "準備中...";
+  btn.disabled = true;
+
   const logoUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026/logo.png"; 
 
-  // 1. チケットデータの組み立て
   let ticketsHtml = "";
   let ticketList = [];
   if (Number(p.s_a) > 0) for(let i=0; i < Number(p.s_a); i++) ticketList.push("Sエリア (大人)");
-  if (Number(p.s_c) > 0) for(let i=0; i < Number(p.s_c) ; i++) ticketList.push("Sエリア (子供)");
-  if (Number(p.g_a) > 0) for(let i=0; i < Number(p.g_a) ; i++) ticketList.push("一般エリア (大人)");
-  if (Number(p.g_c) > 0) for(let i=0; i < Number(p.g_c) ; i++) ticketList.push("一般エリア (子供)");
+  if (Number(p.s_c) > 0) for(let i=0; i < Number(p.s_c); i++) ticketList.push("Sエリア (子供)");
+  if (Number(p.g_a) > 0) for(let i=0; i < Number(p.g_a); i++) ticketList.push("一般エリア (大人)");
+  if (Number(p.g_c) > 0) for(let i=0; i < Number(p.g_c); i++) ticketList.push("一般エリア (子供)");
 
-  ticketList.forEach((type, index) => {
-    const branchId = `${p.id}-${index + 1}`;
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${branchId}`;
-    ticketsHtml += `
-      <div class="print-ticket-box">
-        <div class="print-ticket-left">
-          <img src="${logoUrl}" class="p-logo">
-          <p class="p-event-sub">RYUKYU NO KAZE 2026</p>
-          <h1 class="p-event-title">琉球の風 2026</h1>
-          <div class="p-info">
-            <span class="p-serial">SERIAL: ${branchId}</span>
-            <div class="p-type-label">【 ${type} 】</div>
+  // 🌟 外部APIから画像を先に取得して、データ形式(Base64)に変換する関数
+  const toDataURL = url => fetch(url).then(response => response.blob())
+    .then(blob => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    }));
+
+  try {
+    for (let i = 0; i < ticketList.length; i++) {
+      const type = ticketList[i];
+      const branchId = `${p.id}-${i + 1}`;
+      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${branchId}`;
+      
+      // ここで画像をデータに変換（通信待機をここで終わらせる）
+      const qrDataUrl = await toDataURL(qrApiUrl);
+
+      ticketsHtml += `
+        <div class="print-ticket-box" style="display:flex; border:1.5mm solid #000; margin-bottom:20px; page-break-inside:avoid; background:#fff; height:120px;">
+          <div style="flex:3; padding:10px; border-right:1mm dashed #000; text-align:left;">
+            <img src="${logoUrl}" style="width:40px; float:left; margin-right:10px;">
+            <p style="font-size:10px; margin:0; color:#666;">RYUKYU NO KAZE 2026</p>
+            <h1 style="font-size:18px; margin:0; font-weight:bold; color:#1e3a8a;">琉球の風 2026</h1>
+            <div style="margin-top:10px;">
+              <span style="font-size:9px; color:#999;">SERIAL: ${branchId}</span>
+              <div style="font-size:16px; font-weight:bold; margin-top:5px;">【 ${type} 】</div>
+            </div>
           </div>
-        </div>
-        <div class="print-ticket-right">
-          <img src="${qrUrl}" class="p-qr-img">
-          <div class="p-type-sub">${type}</div>
-        </div>
-      </div>`;
-  });
+          <div style="flex:1; text-align:center; padding:10px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <img src="${qrDataUrl}" style="width:80px; height:80px;">
+            <div style="font-size:8px; font-weight:bold;">${type}</div>
+          </div>
+        </div>`;
+    }
 
-  // 2. 印刷専用の「一時的な場所」を作成
-  let printArea = document.getElementById("print-temporary-area");
-  if (!printArea) {
-    printArea = document.createElement("div");
-    printArea.id = "print-temporary-area";
-    document.body.appendChild(printArea);
-  }
-  printArea.innerHTML = ticketsHtml;
+    // 一時エリアに流し込む
+    let printArea = document.getElementById("print-temporary-area");
+    if (!printArea) {
+      printArea = document.createElement("div");
+      printArea.id = "print-temporary-area";
+      document.body.appendChild(printArea);
+    }
+    printArea.innerHTML = ticketsHtml;
 
-  // 3. 印刷実行（0.8秒待ってから。画像読み込み時間を確保）
-  setTimeout(() => {
+    // 🌟 既にデータ化されているので、待ち時間0で印刷実行可能！
     window.print();
-    // 印刷が終わったらお掃除
-    setTimeout(() => { printArea.innerHTML = ""; }, 1000);
-  }, 3000);
+    printArea.innerHTML = "";
+
+  } catch (err) {
+    alert("画像の読み込みに失敗しました。電波の良い所で再度お試しください。");
+    console.error(err);
+  } finally {
+    btn.innerText = originalText;
+    btn.disabled = false;
+  }
 }
 /** 5. 補助関数群 */
 async function handleStatusMail(id, action) {
