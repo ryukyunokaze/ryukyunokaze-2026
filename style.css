@@ -257,19 +257,16 @@ header h1 {
 }
 
 /* =========================================
-   5. 🌟 印刷用・モーダル設定（スマホ対応・決定版）
+   5. 🌟 印刷用・モーダル設定（PC・スマホ共通決定版）
    ========================================= */
 .print-only { display: none; }
 
-/* 🌟 通常時のモーダル設定（画面表示用） */
+/* 🌟 通常時のモーダル設定 */
 .modal {
   display: none;
   position: fixed;
   z-index: 9999 !important;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0; width: 100%; height: 100%;
   background-color: rgba(0, 0, 0, 0.7);
   overflow-y: auto;
 }
@@ -282,53 +279,61 @@ header h1 {
   width: 90%;
   max-width: 600px;
   position: relative;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
 /* 🌟 チケット印刷用の一時エリア（通常は隠す） */
 #print-temporary-area { display: none; }
 
-/* 🌟 印刷実行時の最強命令 */
+/* 🌟 印刷実行時の命令（ここが重要！） */
 @media print {
-  /* 1. 画面上のすべてを「不可視」にする（レイアウトは維持して真っ白にする） */
-  body * {
-    visibility: hidden !important;
+  /* 1. 画面上の主な要素を display: none で物理的に消す */
+  .admin-container, .fixed-header, .table-scroll-area, .modal, .no-print, header, .nav-btn {
+    display: none !important;
   }
 
-  /* 2. チケット印刷エリアとその中身だけを「可視」にする */
-  #print-temporary-area, #print-temporary-area * {
-    visibility: visible !important;
-  }
-
-  /* 3. チケットエリアを画面の最上部に強制配置 */
+  /* 2. チケットエリアだけを強制的に出現させる */
   #print-temporary-area {
     display: block !important;
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
     width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    background: white !important;
   }
 
-  /* 4. チケットのデザイン（横並びと枠線） */
+  /* 3. チケットの枠組みとレイアウト */
   .print-ticket-box {
     display: flex !important;
+    flex-direction: row !important; /* 横並びを強制 */
+    width: 100% !important;
+    height: 140px !important;
     border: 1.5mm solid #000 !important;
-    margin-bottom: 15mm !important;
+    margin-bottom: 10mm !important;
     page-break-inside: avoid !important;
-    height: 130px !important;
-    background: white !important;
     box-sizing: border-box !important;
-    visibility: visible !important;
   }
-  .print-ticket-left { flex: 3; padding: 15px; border-right: 1mm dashed #000 !important; visibility: visible !important; }
-  .print-ticket-right { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; visibility: visible !important; }
-  
-  /* 内部パーツの強制表示 */
-  .p-logo { width: 45px; float: left; margin-right: 12px; visibility: visible !important; }
-  .p-event-title { font-size: 18px; margin: 0; font-weight: bold; color: #1e3a8a !important; visibility: visible !important; }
-  .p-qr-img { width: 80px; height: 80px; visibility: visible !important; }
+
+  /* 内部の構成 */
+  .print-ticket-left {
+    flex: 3 !important;
+    padding: 15px !important;
+    border-right: 1mm dashed #000 !important;
+    text-align: left !important;
+  }
+
+  .print-ticket-right {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* 画像（ロゴ・QR）の表示を保証 */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
 }
 
 /* --- 編集フォームのモダンデザイン --- */

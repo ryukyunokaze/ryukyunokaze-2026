@@ -462,13 +462,13 @@ async function printTicket(id) {
     // 🌟 既にデータ化されているので、待ち時間0で印刷実行可能！
     window.print();
     printArea.innerHTML = "";
-    // 🌟 修正：少しだけ待って、スマホに「描画」の隙を与える
+    // 🌟 修正：前の window.print() は消して、ここだけにします
     setTimeout(() => {
       window.print();
-      // プレビューを閉じたら中身を消す
-      setTimeout(() => { printArea.innerHTML = ""; }, 1000);
-    }, 3000); // 0.3秒の溜め
-
+      // プレビューが閉じた後にお掃除（少し長めに待つのがコツ）
+      setTimeout(() => { printArea.innerHTML = ""; }, 2000);
+    }, 3000); // 3秒待ってから印刷画面を出す
+    
   } catch (err) {
     alert("画像の読み込みに失敗しました。電波の良い所で再度お試しください。");
     console.error(err);
