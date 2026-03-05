@@ -453,7 +453,13 @@ async function handleStatusMail(id, action) {
 
   const replaceTags = (text) => {
     if (!text) return "";
-    return String(text).replace(/{event_title}/g, eventTitle).replace(/{name}/g, name).replace(/{event_date}/g, getVal("event_date"))   // 🌟 追加：開催日
+
+    const rawDate = getVal("event_date");
+    const formattedDate = (rawDate && !isNaN(new Date(rawDate))) 
+      ? new Date(rawDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })
+      : rawDate;
+
+    return String(text).replace(/{event_title}/g, eventTitle).replace(/{name}/g, name).replace(/{event_date}/g, formattedDate)  // 🌟 追加：開催日
       .replace(/{event_venue}/g, getVal("event_venue")) // 🌟 追加：会場
       .replace(/{mail_signature}/g, getVal("mail_signature")); // 🌟 追加：署名;
   };
@@ -511,7 +517,7 @@ ${baseUrl}qr.html?id=${p.id}
   }
 
   // メールの組み立て
-  const fullBody = `${name} 様\n\n${bodyMain}${qrUrlSection}${signature}`;
+  const fullBody = bodyMain + qrUrlSection;
 
   // 🌟 メーラー起動
   const mailtoUrl = `mailto:${p.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fullBody)}`;
