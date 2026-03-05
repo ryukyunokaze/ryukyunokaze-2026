@@ -425,7 +425,6 @@ async function printTicket(id) {
       const branchId = `${p.id}-${i + 1}`;
       const qrData = await toDataURL(`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${branchId}`);
       
-      // 🌟 CSSの .print-ticket-box に完全に一致させる
       ticketsHtml += `
         <div class="print-ticket-box" style="background-image: url('${bgData}');">
           <div class="print-ticket-bg-overlay"></div>
@@ -451,23 +450,34 @@ async function printTicket(id) {
         </div>`;
     }
 
-    let printArea = document.getElementById("print-temporary-area");
-    if (!printArea) {
-      printArea = document.createElement("div");
-      printArea.id = "print-temporary-area";
-      document.body.appendChild(printArea);
-    }
-    printArea.innerHTML = ticketsHtml;
+    // 🌟 修正ポイント：今の画面ではなく、新しい窓（別タブ）を作る
+    const pWin = window.open('', '_blank');
+    if (!pWin) return alert("ポップアップを許可してください");
 
-    setTimeout(() => {
-      window.print();
-      setTimeout(() => { printArea.innerHTML = ""; }, 2000);
-    }, 1000); 
+    const htmlHeader = `<html><head><title>Print</title><style>
+      @page { size: A4 portrait; margin: 8mm; } 
+      body { margin: 0; padding: 0; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    </style></head><body>`;
+    
+    // 🌟 修正ポイント：印刷が終わったら自分（タブ）を閉じる魔法
+    const htmlFooter = `
+      <script>
+        window.onload = function() {
+          window.print();
+          window.onafterprint = function() { window.close(); };
+          // スマホ対応：ダイアログを閉じて3秒経っても窓があれば強制終了
+          setTimeout(function() { window.close(); }, 3000);
+        };
+      <\/script>
+      </body></html>`;
+    
+    pWin.document.write(htmlHeader + ticketsHtml + htmlFooter);
+    pWin.document.close();
 
   } catch (err) {
     alert("画像の読み込みに失敗しました。");
   } finally {
-    btn.innerText = originalText;
+    btn.innerText = "🎫 チケット印刷";
     btn.disabled = false;
   }
 }
