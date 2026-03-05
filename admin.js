@@ -227,6 +227,7 @@ function printOrderList() {
  * 4. 詳細モーダル
  */
 function openModal(id, mode) {
+  console.log("openModal called:", id, mode); // ←追加
   selectedId = id;
   const p = currentData.find(item => item.id === id);
   if (!p) return;
