@@ -392,83 +392,79 @@ function openModal(id, mode) {
 }
 
 
-/** 4. チケット印刷（個別）- 2026年最新安定版 */
+/** 4. チケット印刷（個別）- 最終・絶対安定版 */
 async function printTicket(id) {
   const p = currentData.find(item => String(item.id) === String(id));
-  if (!p) {
-    alert("エラー: 注文データが見つかりません。一覧を再読み込みしてください。");
-    return;
-  }
+  if (!p) return alert("データが見つかりません");
 
-  const btn = event.currentTarget; // ボタン要素を確実に取得
-  const originalText = btn.innerText;
+  const btn = event.currentTarget;
   btn.innerText = "生成中...";
-  btn.disabled = true;
 
   const logoUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026/logo.png"; 
 
-  let ticketsHtml = "";
   let ticketList = [];
   if (Number(p.s_a) > 0) for(let i=0; i < Number(p.s_a); i++) ticketList.push("Sエリア (大人)");
   if (Number(p.s_c) > 0) for(let i=0; i < Number(p.s_c); i++) ticketList.push("Sエリア (子供)");
   if (Number(p.g_a) > 0) for(let i=0; i < Number(p.g_a); i++) ticketList.push("一般エリア (大人)");
   if (Number(p.g_c) > 0) for(let i=0; i < Number(p.g_c); i++) ticketList.push("一般エリア (子供)");
 
-  // 🌟 画像をデータ形式に変換する関数（真っ白回避の核心）
+  // 🌟 画像を文字データに変換（DataURL化）して、別窓での「白紙」を防ぐ
   const toDataURL = url => fetch(url).then(r => r.blob()).then(b => new Promise((res) => {
     const f = new FileReader(); f.onloadend = () => res(f.result); f.readAsDataURL(b);
   }));
 
   try {
-    // ロゴを先に読み込む
     const logoData = await toDataURL(logoUrl);
+    let ticketsHtml = "";
 
     for (let i = 0; i < ticketList.length; i++) {
       const type = ticketList[i];
       const branchId = `${p.id}-${i + 1}`;
-      // QRコードも先に読み込む
       const qrData = await toDataURL(`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${branchId}`);
       
       ticketsHtml += `
-        <div class="print-ticket-box">
-          <div class="print-ticket-left">
-            <img src="${logoData}" style="width:45px; float:left; margin-right:12px;">
+        <div style="display:flex; border:1.5mm solid #000; margin-bottom:15mm; height:130px; width:100%; background:#fff; page-break-inside:avoid; font-family:sans-serif; box-sizing:border-box;">
+          <div style="flex:3; padding:15px; border-right:1mm dashed #000; text-align:left;">
+            <img src="${logoData}" style="width:40px; float:left; margin-right:12px;">
             <p style="font-size:10px; margin:0; color:#666;">RYUKYU NO KAZE 2026</p>
-            <h1 style="font-size:20px; margin:5px 0; color:#1e3a8a;">琉球の風 2026</h1>
-            <div style="font-size:11px; color:#999;">SERIAL: ${branchId}</div>
-            <div style="font-size:18px; font-weight:bold; margin-top:10px;">【 ${type} 】</div>
+            <h1 style="font-size:18px; margin:5px 0; color:#1e3a8a;">琉球の風 2026</h1>
+            <div style="font-size:10px; color:#999;">SERIAL: ${branchId}</div>
+            <div style="font-size:16px; font-weight:bold; margin-top:8px;">【 ${type} 】</div>
           </div>
-          <div class="print-ticket-right">
-            <img src="${qrData}" style="width:90px; height:90px;">
-            <div style="font-size:9px; font-weight:bold; margin-top:5px;">${type}</div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px;">
+            <img src="${qrData}" style="width:85px; height:85px;">
+            <div style="font-size:8px; font-weight:bold; margin-top:5px;">${type}</div>
           </div>
         </div>`;
     }
 
-    // 🌟 一時エリアに流し込む
-    let printArea = document.getElementById("print-temporary-area");
-    if (!printArea) {
-      printArea = document.createElement("div");
-      printArea.id = "print-temporary-area";
-      document.body.appendChild(printArea);
-    }
-    printArea.innerHTML = ticketsHtml;
+    // 🌟 【重要】現在の管理画面（admin.html）とは別の、真っさらな窓を作る
+    const pWin = window.open('', '_blank');
+    if (!pWin) return alert("ポップアップを許可してください");
 
-    // 🌟 重要：ブラウザが描画を完了するまで少し待ってから印刷画面を出す
-    setTimeout(() => {
-      window.print();
-      // 🌟 重要：印刷ダイアログを閉じた後にお掃除する
-      setTimeout(() => { printArea.innerHTML = ""; }, 2000);
-    }, 1000); 
+    pWin.document.write(`
+      <html>
+        <head><title>チケット印刷 - ${p.id}</title></head>
+        <body style="margin:0; padding:20px; background:#fff;">
+          ${ticketsHtml}
+          <script>
+            window.onload = function() {
+              window.print();
+              window.onafterprint = function() { window.close(); };
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    pWin.document.close();
 
-  } catch (err) {
-    alert("画像の読み込みに失敗しました。電波の良い所で再度お試しください。");
-    console.error(err);
+  } catch (e) {
+    alert("通信エラーが発生しました");
   } finally {
-    btn.innerText = originalText;
-    btn.disabled = false;
+    btn.innerText = "🎫 チケット印刷";
   }
 }
+
 /** 5. 補助関数群 */
 async function handleStatusMail(id, action) {
   const p = currentData.find(item => item.id === id);

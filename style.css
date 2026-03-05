@@ -286,10 +286,10 @@ header h1 {
 
 /* 🌟 印刷実行時の命令（ここが重要！） */
 @media print {
-  /* 1. 画面上の主な要素を display: none で物理的に消す */
-  .admin-container, .fixed-header, .table-scroll-area, .modal, .no-print, header, .nav-btn {
-    display: none !important;
-  }
+  /* 管理画面そのものを印刷しようとした時の白紙を防ぐ最低限の設定 */
+  .no-print, .fixed-header, .admin-menu, .modal { display: none !important; }
+  body { background: white !important; overflow: visible !important; }
+}
 
   /* 2. チケットエリアだけを強制的に出現させる */
   #print-temporary-area {
