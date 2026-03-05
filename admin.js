@@ -392,15 +392,18 @@ function openModal(id, mode) {
 }
 
 
-/** 4. チケット印刷（個別）- 最終・絶対安定版 */
+/** 4. チケット印刷（個別）- 背景画像＆A4 4枚配置 決定版 */
 async function printTicket(id) {
   const p = currentData.find(item => String(item.id) === String(id));
   if (!p) return alert("データが見つかりません");
 
   const btn = event.currentTarget;
+  const originalText = btn.innerText;
   btn.innerText = "生成中...";
 
+  // 🌟 1. 画像URLの設定（背景画像はここにURLを入れてください）
   const logoUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026/logo.png"; 
+  const bgImageUrl = "https://ryukyunokaze.github.io/ryukyunokaze-2026/logo.png"; // テスト用にロゴを指定していますが、背景画像URLに変更可
 
   let ticketList = [];
   if (Number(p.s_a) > 0) for(let i=0; i < Number(p.s_a); i++) ticketList.push("Sエリア (大人)");
@@ -408,13 +411,13 @@ async function printTicket(id) {
   if (Number(p.g_a) > 0) for(let i=0; i < Number(p.g_a); i++) ticketList.push("一般エリア (大人)");
   if (Number(p.g_c) > 0) for(let i=0; i < Number(p.g_c); i++) ticketList.push("一般エリア (子供)");
 
-  // 🌟 画像を文字データに変換（DataURL化）して、別窓での「白紙」を防ぐ
   const toDataURL = url => fetch(url).then(r => r.blob()).then(b => new Promise((res) => {
     const f = new FileReader(); f.onloadend = () => res(f.result); f.readAsDataURL(b);
   }));
 
   try {
     const logoData = await toDataURL(logoUrl);
+    const bgData = await toDataURL(bgImageUrl);
     let ticketsHtml = "";
 
     for (let i = 0; i < ticketList.length; i++) {
@@ -423,45 +426,40 @@ async function printTicket(id) {
       const qrData = await toDataURL(`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${branchId}`);
       
       ticketsHtml += `
-        <div style="display:flex; border:1.5mm solid #000; margin-bottom:15mm; height:130px; width:100%; background:#fff; page-break-inside:avoid; font-family:sans-serif; box-sizing:border-box;">
-          <div style="flex:3; padding:15px; border-right:1mm dashed #000; text-align:left;">
-            <img src="${logoData}" style="width:40px; float:left; margin-right:12px;">
-            <p style="font-size:10px; margin:0; color:#666;">RYUKYU NO KAZE 2026</p>
-            <h1 style="font-size:18px; margin:5px 0; color:#1e3a8a;">琉球の風 2026</h1>
-            <div style="font-size:10px; color:#999;">SERIAL: ${branchId}</div>
-            <div style="font-size:16px; font-weight:bold; margin-top:8px;">【 ${type} 】</div>
+        <div style="display:flex; border:1.5mm solid #000; margin-bottom:8mm; height:62mm; width:100%; position:relative; background-image: url('${bgData}'); background-size: cover; background-position: center; page-break-inside:avoid; font-family:sans-serif; box-sizing:border-box; color:#000; overflow: hidden;">
+          <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.7); z-index:1;"></div>
+          <div style="flex:3; padding:15px; border-right:1mm dashed #000; text-align:left; position:relative; z-index:2;">
+            <img src="${logoData}" style="width:50px; float:left; margin-right:12px;">
+            <p style="font-size:10px; margin:0; color:#444;">RYUKYU NO KAZE 2026</p>
+            <h1 style="font-size:22px; margin:5px 0; color:#1e3a8a;">琉球の風 2026</h1>
+            <div style="font-size:10px; color:#666;">SERIAL: ${branchId}</div>
+            <div style="font-size:20px; font-weight:bold; margin-top:15px;">【 ${type} 】</div>
           </div>
-          <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px;">
-            <img src="${qrData}" style="width:85px; height:85px;">
-            <div style="font-size:8px; font-weight:bold; margin-top:5px;">${type}</div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px; position:relative; z-index:2;">
+            <img src="${qrData}" style="width:100px; height:100px; background:#fff; padding:5px; border-radius:5px;">
+            <div style="font-size:9px; font-weight:bold; margin-top:5px;">${type}</div>
           </div>
         </div>`;
     }
 
-    // 🌟 【重要】現在の管理画面（admin.html）とは別の、真っさらな窓を作る
     const pWin = window.open('', '_blank');
     if (!pWin) return alert("ポップアップを許可してください");
 
-    pWin.document.write(`
-      <html>
-        <head><title>チケット印刷 - ${p.id}</title></head>
-        <body style="margin:0; padding:20px; background:#fff;">
-          ${ticketsHtml}
-          <script>
-            window.onload = function() {
-              window.print();
-              window.onafterprint = function() { window.close(); };
-            };
-          </script>
-        </body>
-      </html>
-    `);
+    // 🌟 エラーの起きていた document.write 部分を完全修正
+    pWin.document.write('<html><head><title>Ticket Print</title><style>' +
+      '@page { size: A4; margin: 10mm; } ' +
+      'body { margin: 0; padding: 0; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+      '</style></head><body>' + ticketsHtml +
+      '<script>' +
+      'window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };' +
+      '</script></body></html>');
     pWin.document.close();
 
   } catch (e) {
-    alert("通信エラーが発生しました");
+    console.error(e);
+    alert("生成エラーが発生しました。");
   } finally {
-    btn.innerText = "🎫 チケット印刷";
+    btn.innerText = originalText;
   }
 }
 
