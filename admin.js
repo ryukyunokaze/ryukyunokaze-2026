@@ -426,18 +426,39 @@ async function printTicket(id) {
       const qrData = await toDataURL(`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${branchId}`);
       
       ticketsHtml += `
-        <div style="display:flex; border:1.5mm solid #000; margin-bottom:8mm; height:62mm; width:100%; position:relative; background-image: url('${bgData}'); background-size: cover; background-position: center; page-break-inside:avoid; font-family:sans-serif; box-sizing:border-box; color:#000; overflow: hidden;">
+        <div class="ticket-unit" style="
+          display:flex; 
+          border:1.5mm solid #000; 
+          margin-bottom:8mm; 
+          height:65mm; 
+          width:100%; 
+          position:relative;
+          background-image: url('${bgData}');
+          background-size: cover;
+          background-position: center;
+          page-break-inside:avoid; 
+          font-family:sans-serif; 
+          box-sizing:border-box; 
+          color:#000;
+          overflow: hidden;
+        ">
           <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.7); z-index:1;"></div>
-          <div style="flex:3; padding:15px; border-right:1mm dashed #000; text-align:left; position:relative; z-index:2;">
-            <img src="${logoData}" style="width:50px; float:left; margin-right:12px;">
-            <p style="font-size:10px; margin:0; color:#444;">RYUKYU NO KAZE 2026</p>
-            <h1 style="font-size:22px; margin:5px 0; color:#1e3a8a;">琉球の風 2026</h1>
-            <div style="font-size:10px; color:#666;">SERIAL: ${branchId}</div>
-            <div style="font-size:20px; font-weight:bold; margin-top:15px;">【 ${type} 】</div>
+
+          <div style="flex:3; padding:25px; border-right:1.2mm dashed #000; text-align:left; position:relative; z-index:2; display:flex; flex-direction:column; justify-content:center;">
+            <div>
+              <img src="${logoData}" style="width:65px; float:left; margin-right:15px;">
+              <p style="font-size:12px; margin:0; color:#444; letter-spacing:1px;">RYUKYU NO KAZE 2026</p>
+              <h1 style="font-size:28px; margin:5px 0; color:#1e3a8a; font-weight:900;">琉球の風 2026</h1>
+            </div>
+            <div style="margin-top:20px;">
+              <div style="font-size:12px; color:#666; font-weight:bold;">SERIAL: ${branchId}</div>
+              <div style="font-size:26px; font-weight:900; margin-top:5px; color:#000;">【 ${type} 】</div>
+            </div>
           </div>
-          <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px; position:relative; z-index:2;">
-            <img src="${qrData}" style="width:100px; height:100px; background:#fff; padding:5px; border-radius:5px;">
-            <div style="font-size:9px; font-weight:bold; margin-top:5px;">${type}</div>
+
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:15px; position:relative; z-index:2; background:rgba(255,255,255,0.5);">
+            <img src="${qrData}" style="width:130px; height:130px; background:#fff; padding:8px; border:1px solid #ddd; border-radius:5px;">
+            <div style="font-size:11px; font-weight:bold; margin-top:10px;">${type}</div>
           </div>
         </div>`;
     }
