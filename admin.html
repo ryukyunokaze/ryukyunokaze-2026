@@ -240,59 +240,62 @@ div[style*="background:rgba(255,255,255,0.2)"] {
   text-shadow: none !important;
 }
 
-/* =========================================
-   3. スマホ専用：1列化・購入内容の文字切れ防止
-   ========================================= */
+/*/* --- 📱 スマホ専用：ボタン2列化・編集1列化・バツボタン固定 --- */
 @media screen and (max-width: 480px) {
 
-  /* 購入内容が切れないように、幅を広げて縦並びにする */
-  .modal-content div[style*="background:#fff7ed"] {
-    display: block !important;
-    padding: 15px !important;
-  }
-  
-  .modal-content div[style*="background:#fff7ed"] > div {
-    width: 100% !important;
-    margin-bottom: 10px !important;
-    display: block !important;
+  /* 1. 🌟 操作ボタン（入金・発送等）をPC同様に「2列」で整列 */
+  /* image_98376e.png の 3つ並びを解消し、2個ずつの綺麗なグリッドにします */
+  .modal-content div[style*="display:grid"]:last-of-type,
+  .modal-content .contact-button-row,
+  .modal-content div[style*="display:grid"][style*="margin-top:20px"] {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important; /* 強制的に2列 */
+    gap: 10px !important;
   }
 
-  /* 編集画面の入力欄を強制的に縦1列にする */
+  /* 「キャンセルボタン」だけは1列で横幅いっぱいに（押し間違い防止） */
+  .modal-content button[onclick*="handleCancelStatus"] {
+    grid-column: span 2 !important;
+    margin-top: 10px !important;
+  }
+
+  /* 2. 🌟 編集画面（入力欄）は「縦1列」を維持して文字切れを防止 */
   .modal-content div[style*="background:#f0fdf4"], 
   .modal-content div[style*="background:#f1f5f9"], 
+  .modal-content div[style*="background:#fff7ed"],
   .modal-content .ticket-edit-grid {
     display: block !important;
     width: 100% !important;
   }
 
-  /* 入力枠のサイズ調整 */
+  .modal-content div[style*="display:grid"] > div {
+    width: 100% !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* 3. 🌟 閉じるボタン（×）を右上に浮かせて固定 */
+  .close-btn {
+    position: fixed !important;
+    top: 15px !important;
+    right: 15px !important;
+    width: 44px !important;
+    height: 44px !important;
+    background: #1e3a8a !important;
+    color: white !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 1000000 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
+  }
+
+  /* 4. 入力枠のサイズとズーム防止 */
   .modal-content input, .modal-content select {
     width: 100% !important;
-    height: 52px !important;
+    height: 50px !important;
     font-size: 16px !important;
   }
-
-  /* 操作ボタン（入金・発送など）はPC同様に2列を維持 */
-  .modal-content div[style*="display:grid"]:last-of-type,
-  .modal-content .contact-button-row {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 10px !important;
-  }
-}
-
-/* =========================================
-   4. 金額デザイン：数字強調・円を小さく
-   ========================================= */
-#edit-total {
-  font-size: 32px !important;
-  font-weight: 900 !important;
-  color: #e11d48 !important;
-  border: none !important;
-  background: transparent !important;
-  text-align: right !important;
-  width: auto !important;
-  min-width: 120px !important;
 }
   </style>
 </head>
