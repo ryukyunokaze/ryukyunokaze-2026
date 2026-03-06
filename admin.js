@@ -377,12 +377,13 @@ function openModal(id, mode) {
             <div><label>一般子供</label><input type="number" id="edit-gc" value="${p.g_c}" oninput="reCalc()"></div>
           </div>
           
-          <div style="display:flex; justify-content:space-between; align-items:center; border-top:2px solid #ffedd5; padding-top:15px; margin-top:5px;">
-            <span style="font-weight:bold; font-size:1rem;">合計金額</span>
-            <div style="color:#e11d48; font-size:1.5rem; font-weight:900;">
-              <input type="number" id="edit-total" value="${p.total}" readonly style="width:120px; border:none !important; background:transparent !important; color:#e11d48; font-weight:900; text-align:right; font-size:1.5rem;">円
-            </div>
-          </div>
+          // --- 🌟 380行目〜385行目を以下に差し替え ---
+          <div style="display:flex; align-items:baseline; justify-content:flex-end; gap:8px; width:100%;">
+            <span style="font-size:14px; font-weight:bold; color:#e11d48;">合計</span>
+             <input type="text" id="edit-total" value="${Number(p.total).toLocaleString()}" readonly 
+             style="border:none !important; background:transparent !important; color:#e11d48; font-size:32px; font-weight:900; width:auto; text-align:right; outline:none;">
+            <span style="font-size:16px; font-weight:bold; color:#e11d48;">円</span>
+           </div>
         </div>
 
         <div style="background:#fff; padding:20px; border-radius:15px; border:1px solid #cbd5e1; margin-bottom:20px;">
