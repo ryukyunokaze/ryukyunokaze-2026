@@ -267,25 +267,25 @@
     max-width: 100% !important;
   }
 
-  /* 🌟 編集画面の「2列」を「1列」に物理的に解体 ＆ はみ出し防止 */
+  /* 🌟 編集画面の背景エリアを1列に */
   .modal-content div[style*="background"] {
     display: block !important; 
     width: 100% !important;
-    padding: 12px !important; /* 内側の余白を少し詰め、外に飛び出さないようにします */
+    padding: 12px !important; 
     margin: 10px 0 !important;
     box-sizing: border-box !important;
   }
 
-  /* 1列にした際の中身を横幅いっぱいに */
+  /* 🌟 編集画面の住所等の「中身」を1列に強制（これが抜けていた部分です） */
   .modal-content div[style*="display:grid"] > div,
   .modal-content .input-grid > div,
   .modal-content div[style*="background"] > div {
     width: 100% !important;
     margin-bottom: 12px !important;
     display: block !important;
-    }
- /* 🌟 [詳細画面] 入金日・発送日を「2行（縦並び）」に独立 
-     ※編集画面の住所欄など（dashedがない場所）には影響しません */
+  }
+
+  /* 🌟 [詳細画面] 入金日・発送日を「2段（行）」に独立 */
   .modal-content div[style*="border-bottom: 1px dashed"],
   .modal-content div[style*="border-bottom:1px dashed"] {
     display: block !important; 
@@ -297,21 +297,20 @@
     width: 100% !important;
     margin-bottom: 8px !important;
     font-size: 14px !important;
-    white-space: nowrap !important; /* 時間まで1行で表示 */
+    white-space: nowrap !important; 
   }
-  
 
-  /* 🌟 下部の操作ボタン（入金・発送等）だけは「2列」を維持 */
+  /* 🌟 [詳細・編集共通] 下部の操作ボタンを「2列」に維持 */
   .modal-content div[style*="margin-top:20px"],
-  .modal-content div[style*="margin-top: 20px"], /* スペースあり版も追加 */
-  .modal-content .contact-button-row,            /* クラス名指定 */
-  .modal-content div[style*="grid-template-columns: 1fr 1fr"] { /* 元々2列だったものを保護 */
-  
-  display: grid !important;
-  grid-template-columns: 1fr 1fr !important; /* 強制的に2分割 */
-  gap: 10px !important;
-  width: 100% !important;
-}
+  .modal-content div[style*="margin-top: 20px"], 
+  .modal-content .contact-button-row,
+  .modal-content .edit-action-grid,
+  .modal-content div[style*="grid-template-columns: 1fr 1fr"] { 
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important; 
+    gap: 10px !important;
+    width: 100% !important;
+  }
 
   /* 入力枠のサイズ調整（ズーム防止） */
   .modal-content input, .modal-content select {
@@ -320,6 +319,7 @@
     font-size: 16px !important;
     box-sizing: border-box !important;
   }
+
   /* モーダル本体の横幅とはみ出し防止 */
   .modal-content {
     width: 94% !important;
@@ -331,8 +331,18 @@
 /* =========================================
    4. 金額・ステータスのデザイン（PC/スマホ共通）
    ========================================= */
-/* 金額：数字を大きく */
-/* --- 金額表示のデザイン：改行を絶対に許さない設定 --- */
+
+/* 🌟 編集画面：金額の「円」を絶対に改行させない */
+.modal-content div[style*="justify-content:flex-end"] {
+  display: flex !important;
+  flex-direction: row !important; 
+  flex-wrap: nowrap !important;   /* 改行禁止 */
+  align-items: baseline !important;
+  justify-content: flex-end !important;
+  gap: 5px !important;
+  width: 100% !important;
+}
+
 #edit-total {
   font-size: 32px !important;
   font-weight: 900 !important;
@@ -342,25 +352,13 @@
   text-align: right !important;
   width: auto !important;
   min-width: 100px !important;
-  display: inline-block !important; /* 文字として扱う */
+  display: inline-block !important; 
 }
-
-/* 合計金額の親枠を強化 */
-.modal-content div[style*="justify-content:flex-end"] {
-  display: flex !important;
-  flex-direction: row !important; /* 横並びを強制 */
-  flex-wrap: nowrap !important;   /* 改行を禁止 */
-  align-items: baseline !important;
-  justify-content: flex-end !important;
-  gap: 5px !important;
-  width: 100% !important;
-}
-
 
 /* 🌟 ステータス別：ハッキリ色分け */
 .status-未入金 { background-color: #fee2e2 !important; color: #ff3838 !important; border: 1.5px solid #ef4444 !important; }
-.status-入金済み { background-color: #dcfce7 !important; color: #1ef56d !important; border: 1.5px solid #22c55e !important; }
-.status-完了 { background-color: #dcfce7 !important; color: #3764f8 !important; border: 1.5px solid #3b82f6 !important; }
+.status-入金済み { background-color: #dcfce7 !important; color: #62c504 !important; border: 1.5px solid #22c55e !important; }
+.status-完了 { background-color: #d9ebff !important; color: #3764f8 !important; border: 1.5px solid #3b82f6 !important; }
 .status-キャンセル { background-color: #f1f5f9 !important; color: #475569 !important; border: 1.5px solid #94a3b8 !important; }
 .status-オキチケ { background-color: #fef3c7 !important; color: #f57c31 !important; border: 1.5px solid #f59e0b !important; }
   </style>
