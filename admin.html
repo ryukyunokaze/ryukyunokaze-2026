@@ -195,20 +195,14 @@
 
 /* --- A. PC版・スマホ共通：閉じるボタンのデザイン --- */
 .close-btn {
-  position: absolute !important;
-  top: 15px !important;
-  right: 15px !important; /* PCでは右上に固定 */
-  width: 40px !important;
-  height: 40px !important;
-  background: #f1f5f9 !important;
-  color: #64748b !important;
-  border-radius: 50% !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 24px !important;
-  z-index: 10000 !important;
-  cursor: pointer !important;
+  position: absolute;
+  top: 15px;
+  right: 15px; /* モーダル枠の右上に配置 */
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #64748b;
+  z-index: 10;
 }
 
 /* --- B. スマホ専用設定（480px以下） --- */
@@ -247,24 +241,28 @@
 /* --- C. 金額表示のデザイン（PC/スマホ共通） --- */
 /* 「円」が大きすぎる問題を解決します */
 #edit-total {
-  font-size: 36px !important; /* 数字を巨大に */
-  font-weight: 900 !important;
-  color: #e11d48 !important;
-  border: none !important;
-  background: transparent !important;
-  text-align: right !important;
-  width: auto !important;
-  min-width: 100px !important;
-}
+    font-size: 32px !important; /* 数字だけを大きく */
+    font-weight: 900 !important;
+    color: #e11d48 !important;
+    width: auto !important;
+    min-width: 120px !important;
+    text-align: right !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: inline-block !important; /* 改行させない */
+  }
 
-/* 「円」という文字だけを小さくする設定 */
-.modal-content span:contains("円"), 
-#edit-total + span {
-  font-size: 16px !important; /* 円を小さく固定 */
-  font-weight: bold !important;
-  color: #e11d48 !important;
-  margin-left: 5px !important;
-}
+  /* 「合計金額」という文字と「円」のデザインを個別に指定 */
+  .modal-content div[style*="font-weight:bold"] {
+    display: flex !important;
+    align-items: baseline !important;
+    justify-content: flex-end !important;
+    gap: 5px !important;
+    font-size: 14px !important; /* 円やラベルはこのサイズに固定 */
+    color: #475569 !important;
+  }
   </style>
 </head>
 <body style="display:none;" id="admin-body">
