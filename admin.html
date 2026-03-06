@@ -188,91 +188,53 @@
     visibility: visible !important;
   }
 }
-/* --- 📱 スマホ編集画面：視認性・余白・ボタン位置 究極改善版 --- */
+/* --- 📱 スマホ編集画面：閉じるボタンの固定と1列化（完全版） --- */
 @media screen and (max-width: 480px) {
   
-  /* 1. 全体の余白とスクロール対応 */
-  .modal-content {
-    width: 94% !important;
-    margin: 10px auto !important;
-    padding: 60px 15px 20px !important; /* 🌟 上に閉じるボタン用の余白を確保 */
-    border-radius: 16px !important;
-    box-sizing: border-box !important;
-    position: relative !important; /* ボタン配置の基準 */
-  }
-
-  /* 2. 🌟 すべてを「1列」に強制：これで文字切れ解消 */
-  .modal-content .input-grid,
-  .modal-content .info-split,
-  .modal-content .ticket-edit-grid,
-  .modal-content .dashboard-grid,
-  .modal-content div[style*="display:grid"] {
-    grid-template-columns: 1fr !important; 
-    gap: 12px !important;
-  }
-
-  /* 3. 🌟 閉じるボタン（×）：右上に使いやすく固定 */
+  /* 1. 閉じるボタン（×）を画面右上に「浮かせて」固定 */
   .close-btn {
-    position: absolute !important;
-    top: 12px !important;
-    right: 12px !important;
-    width: 44px !important; /* 押しやすいサイズ */
+    position: fixed !important; /* 絶対位置ではなく固定位置に */
+    top: 20px !important;
+    right: 20px !important;
+    width: 44px !important;
     height: 44px !important;
-    background: #f1f5f9 !important;
-    color: #64748b !important;
+    background: white !important; /* 背景を白くして目立たせる */
+    color: #1e3a8a !important;
     border-radius: 50% !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    font-size: 28px !important;
-    z-index: 9999 !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+    font-size: 32px !important;
+    font-weight: bold !important;
+    z-index: 1000000 !important; /* 何よりも上に表示 */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+    cursor: pointer !important;
   }
 
-  /* 4. 🌟 金額の強調：数字をデカく、円を小さく */
-  #edit-total, 
-  .modal-content input[id$="total"] {
-    font-size: 32px !important; /* 数字を巨大に */
-    font-weight: 900 !important;
-    color: #e11d48 !important; /* 鮮やかな赤 */
-    width: auto !important;
-    min-width: 140px !important;
-    text-align: right !important;
-    background: transparent !important;
-    border: none !important;
+  /* 2. 編集画面内のグリッドをすべて「1列」に強制 */
+  .modal-content div[style*="display:grid"],
+  .modal-content .dashboard-grid,
+  .modal-content .input-grid,
+  .modal-content .ticket-edit-grid {
+    grid-template-columns: 1fr !important; /* 🌟 これで2列が1列になります */
+    gap: 15px !important;
   }
 
-  /* 金額ラベルと「円」のバランス調整 */
-  .modal-content div[style*="font-weight:bold"] {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    font-size: 14px !important;
-    color: #475569 !important;
+  /* 3. モーダル本体の余白調整 */
+  .modal-content {
+    width: 95% !important;
+    margin: 10px auto !important;
+    padding-top: 20px !important;
   }
 
-  /* 5. 入力枠：タップしやすく、文字がズームしないサイズ */
+  /* 4. 入力枠のサイズ調整（文字切れ防止） */
   .modal-content input, 
-  .modal-content select,
-  .modal-content textarea {
+  .modal-content select {
     width: 100% !important;
-    height: 50px !important;
-    font-size: 16px !important; /* 16px未満だとiPhoneでズームされるのを防ぐ */
-    padding: 12px !important;
-    border-radius: 10px !important;
-    margin-bottom: 5px !important;
-    background-color: #f8fafc !important;
+    height: 48px !important;
+    font-size: 16px !important;
   }
-
-  /* 6. チケット枚数ボックスの余白 */
-  .modal-content .ticket-box,
-  .modal-content div[style*="background:#fff7ed"] {
-    padding: 15px !important;
-    border-radius: 12px !important;
-    margin-bottom: 10px !important;
-  
 }
-
   /* ===== モーダルを必ず最前面に表示（最終上書き） ===== */
 #detail-modal.modal{
   position: fixed !important;
@@ -305,7 +267,6 @@
   z-index: 2;
 }
 .close-btn:hover{ color:#0f172a; 
-}
 }
 
   </style>
