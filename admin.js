@@ -661,8 +661,8 @@ async function saveEdit() {
     const res = await response.json();
     if (res.result === "success") { 
       alert("更新しました"); 
-      fetchData(); 
-      closeModal(); 
+      await fetchData(); 
+      openModal(selectedId, 'view'); // 閉じるのではなく詳細へ戻る 
     }
   } catch (e) {
     alert("エラーが発生しました");
