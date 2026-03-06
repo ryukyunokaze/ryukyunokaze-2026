@@ -188,79 +188,90 @@
     visibility: visible !important;
   }
 }
-/* --- 📱 スマホ編集画面：視認性・余白 究極改善版 --- */
+/* --- 📱 スマホ編集画面：視認性・余白・ボタン位置 究極改善版 --- */
 @media screen and (max-width: 480px) {
   
-  /* 1. 全体の余白：画面の端とコンテンツの間に「ゆとり」を作る */
+  /* 1. 全体の余白とスクロール対応 */
   .modal-content {
-    width: 92% !important; /* 画面幅に対して少し小さくして外側に余白を */
-    margin: 15px auto !important;
-    padding: 20px !important; /* 内側の余白を増やして窮屈さを解消 */
+    width: 94% !important;
+    margin: 10px auto !important;
+    padding: 60px 15px 20px !important; /* 🌟 上に閉じるボタン用の余白を確保 */
     border-radius: 16px !important;
     box-sizing: border-box !important;
+    position: relative !important; /* ボタン配置の基準 */
   }
 
-  /* 2. セクション間の区切りをハッキリさせ、間隔を空ける */
-  .modal-section {
-    margin-bottom: 25px !important;
-    padding-bottom: 10px !important;
-    border-bottom: 1px solid #e2e8f0 !important;
+  /* 2. 🌟 すべてを「1列」に強制：これで文字切れ解消 */
+  .modal-content .input-grid,
+  .modal-content .info-split,
+  .modal-content .ticket-edit-grid,
+  .modal-content .dashboard-grid,
+  .modal-content div[style*="display:grid"] {
+    grid-template-columns: 1fr !important; 
+    gap: 12px !important;
   }
 
-  /* 3. 「金額」の二行表示を解決：フォントサイズと並びを調整 */
-  .modal-content .total-amount-display,
-  #modal-total-amount {
+  /* 3. 🌟 閉じるボタン（×）：右上に使いやすく固定 */
+  .close-btn {
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    width: 44px !important; /* 押しやすいサイズ */
+    height: 44px !important;
+    background: #f1f5f9 !important;
+    color: #64748b !important;
+    border-radius: 50% !important;
     display: flex !important;
-    align-items: baseline !important;
+    align-items: center !important;
     justify-content: center !important;
-    font-size: 28px !important; /* 数字を大きく */
-    font-weight: 800 !important;
-    color: #1e3a8a !important;
-    white-space: nowrap !important; /* 🌟 絶対に改行させない */
-    gap: 4px !important;
-    margin: 15px 0 !important;
+    font-size: 28px !important;
+    z-index: 9999 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
   }
 
-  /* 「円」だけ少し小さくして、一行に収まりやすくする */
-  .modal-content .total-amount-display::after,
-  #modal-total-amount::after {
-    content: "円" !important;
-    font-size: 16px !important;
-    font-weight: bold !important;
+  /* 4. 🌟 金額の強調：数字をデカく、円を小さく */
+  #edit-total, 
+  .modal-content input[id$="total"] {
+    font-size: 32px !important; /* 数字を巨大に */
+    font-weight: 900 !important;
+    color: #e11d48 !important; /* 鮮やかな赤 */
+    width: auto !important;
+    min-width: 140px !important;
+    text-align: right !important;
+    background: transparent !important;
+    border: none !important;
   }
 
-  /* 4. 入力ラベルを見やすく：文字間隔と上下のゆとり */
-  .modal-content label {
-    display: block !important;
+  /* 金額ラベルと「円」のバランス調整 */
+  .modal-content div[style*="font-weight:bold"] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
     font-size: 14px !important;
     color: #475569 !important;
-    margin-bottom: 8px !important;
-    margin-top: 15px !important;
-    letter-spacing: 0.05em !important;
   }
 
-  /* 5. 入力枠：枠線を少し薄くして、内側に十分な余白を */
+  /* 5. 入力枠：タップしやすく、文字がズームしないサイズ */
   .modal-content input, 
-  .modal-content select {
+  .modal-content select,
+  .modal-content textarea {
     width: 100% !important;
     height: 50px !important;
-    padding: 12px 15px !important;
-    border: 1px solid #cbd5e1 !important;
+    font-size: 16px !important; /* 16px未満だとiPhoneでズームされるのを防ぐ */
+    padding: 12px !important;
     border-radius: 10px !important;
-    background-color: #f8fafc !important; /* ほんのりグレーで高級感を */
-    font-size: 16px !important;
-    box-sizing: border-box !important;
+    margin-bottom: 5px !important;
+    background-color: #f8fafc !important;
   }
 
-  /* 6. チケット枚数エリア：枠の中に余白を持たせる */
-  .modal-content .ticket-box {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
+  /* 6. チケット枚数ボックスの余白 */
+  .modal-content .ticket-box,
+  .modal-content div[style*="background:#fff7ed"] {
     padding: 15px !important;
-    margin-bottom: 12px !important;
     border-radius: 12px !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
-  }
+    margin-bottom: 10px !important;
+  
+}
 
   /* ===== モーダルを必ず最前面に表示（最終上書き） ===== */
 #detail-modal.modal{
