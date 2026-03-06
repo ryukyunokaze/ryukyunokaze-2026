@@ -188,86 +188,57 @@
     visibility: visible !important;
   }
 }
-/* --- 📱 スマホ編集画面：閉じるボタンの固定と1列化（完全版） --- */
+/* --- 📱 スマホ最適化：閲覧は2列維持、編集は1列化 --- */
 @media screen and (max-width: 480px) {
-  
-  /* 1. 閉じるボタン（×）を画面右上に「浮かせて」固定 */
+
+  /* 1. 🌟 編集画面（背景色がある入力枠）の中身だけを1列に強制 */
+  /* これにより、詳細画面の「電話・メールボタン」などは2列(1fr 1fr)のまま維持されます */
+  .modal-content div[style*="background:#f0fdf4"], 
+  .modal-content div[style*="background:#f1f5f9"], 
+  .modal-content div[style*="background:#fff7ed"],
+  .modal-content .ticket-edit-grid {
+    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  /* 2. 🌟 閉じるボタン（×）を画面右上に固定（スクロールしても付いてくる） */
   .close-btn {
-    position: fixed !important; /* 絶対位置ではなく固定位置に */
-    top: 20px !important;
-    right: 20px !important;
+    position: fixed !important; 
+    top: 15px !important;
+    right: 15px !important;
     width: 44px !important;
     height: 44px !important;
-    background: white !important; /* 背景を白くして目立たせる */
-    color: #1e3a8a !important;
+    background: #1e3a8a !important; /* 目立つ青 */
+    color: white !important;
     border-radius: 50% !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    font-size: 32px !important;
+    font-size: 28px !important;
     font-weight: bold !important;
-    z-index: 1000000 !important; /* 何よりも上に表示 */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+    z-index: 2000000 !important; /* 何よりも上に表示 */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
     cursor: pointer !important;
   }
 
-  /* 2. 編集画面内のグリッドをすべて「1列」に強制 */
-  .modal-content div[style*="display:grid"],
-  .modal-content .dashboard-grid,
-  .modal-content .input-grid,
-  .modal-content .ticket-edit-grid {
-    grid-template-columns: 1fr !important; /* 🌟 これで2列が1列になります */
-    gap: 15px !important;
-  }
-
-  /* 3. モーダル本体の余白調整 */
+  /* 3. モーダル本体の調整 */
   .modal-content {
     width: 95% !important;
     margin: 10px auto !important;
-    padding-top: 20px !important;
+    padding: 20px 15px 80px !important; /* 下に保存ボタン用の余白 */
+    border-radius: 20px !important;
   }
 
-  /* 4. 入力枠のサイズ調整（文字切れ防止） */
+  /* 4. 入力枠のサイズ調整（文字が切れないように横幅100%） */
   .modal-content input, 
   .modal-content select {
     width: 100% !important;
-    height: 48px !important;
-    font-size: 16px !important;
+    height: 50px !important;
+    font-size: 16px !important; /* スマホの自動ズーム防止 */
+    box-sizing: border-box !important;
   }
-
-  /* ===== モーダルを必ず最前面に表示（最終上書き） ===== */
-#detail-modal.modal{
-  position: fixed !important;
-  inset: 0 !important;
-  display: none; /* JSがblockにする */
-  background: rgba(0,0,0,.45) !important;
-  z-index: 999999 !important;
-}
-
-#detail-modal .modal-content{
-  position: absolute !important;
-  left: 50% !important;
-  top: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  width: min(92vw, 560px) !important;
-  max-height: 88vh !important;
-  overflow: auto !important;
-  background: #fff !important;
-  border-radius: 16px !important;
-}
-
-.close-btn{
-  position: absolute;
-  right: 14px;
-  top: 10px;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
-  color: #64748b;
-  z-index: 2;
-}
-.close-btn:hover{ color:#0f172a; 
-}
 }
   </style>
 </head>
