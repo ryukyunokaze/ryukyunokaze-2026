@@ -313,6 +313,7 @@
    4. 金額・ステータスのデザイン（PC/スマホ共通）
    ========================================= */
 /* 金額：数字を大きく */
+/* --- 金額表示のデザイン：改行を絶対に許さない設定 --- */
 #edit-total {
   font-size: 32px !important;
   font-weight: 900 !important;
@@ -321,8 +322,21 @@
   background: transparent !important;
   text-align: right !important;
   width: auto !important;
-  min-width: 120px !important;
+  min-width: 100px !important;
+  display: inline-block !important; /* 文字として扱う */
 }
+
+/* 合計金額の親枠を強化 */
+.modal-content div[style*="justify-content:flex-end"] {
+  display: flex !important;
+  flex-direction: row !important; /* 横並びを強制 */
+  flex-wrap: nowrap !important;   /* 改行を禁止 */
+  align-items: baseline !important;
+  justify-content: flex-end !important;
+  gap: 5px !important;
+  width: 100% !important;
+}
+
 
 /* 🌟 ステータス別：ハッキリ色分け */
 .status-未入金 { background-color: #fee2e2 !important; color: #b91c1c !important; border: 1.5px solid #ef4444 !important; }

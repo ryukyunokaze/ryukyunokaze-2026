@@ -235,7 +235,7 @@ function openModal(id, mode) {
   const body = document.getElementById("modal-body");
 
   const statusColors = {
-    "未入金": "#e11d48", "入金済み": "#10b981", "完了": "#1e3a8a", "キャンセル": "#64748b", "オキチケ": "#f59e0b"
+    "未入金": "#e11d48", "入金済み": "#12996c", "完了": "#1e3a8a", "キャンセル": "#64748b", "オキチケ": "#f59e0b"
   };
   const currentStatusColor = statusColors[p.status] || "#64748b";
 
