@@ -602,7 +602,10 @@ function reCalc() {
   const today = new Date(); today.setHours(0,0,0,0);
   if (today >= new Date(masterPrices.event_date)) total += (sa + ga) * (Number(masterPrices.door_ticket_fee) || 0);
   document.getElementById('edit-total').value = total;
+  if (totalEl.type === "number") totalEl.type = "text"; // カンマを表示するためにtext型へ
+  totalEl.value = total.toLocaleString(); // 🌟 これでカンマが付きます
 }
+
 
 function showPage(p) {
   document.getElementById('page-list').style.display = (p==='list')?'block':'none';
