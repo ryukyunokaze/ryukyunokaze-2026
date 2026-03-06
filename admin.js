@@ -542,13 +542,13 @@ async function handleStatusMail(id, action) {
       // 🌟 2. 目立つデザインのQRコードセクション（太線で囲む）
       const baseUrl = mySiteUrl.endsWith('/') ? mySiteUrl : mySiteUrl + '/';
       qrUrlSection = `
-━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━
  入場用QRチケットを表示する（合計 ${totalTickets} 枚分）
-━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━
 当日、受付にて以下のURLを開いてご提示ください。
 
 ${baseUrl}qr.html?id=${p.id}
-━━━━━━━━━━━━━━━━━━━━`;
+━━━━━━━━━━━━━━━━━━`;
 
       // 🌟 3. ここが重要！「会場」タグの直後にQRセクションを差し込む
       const rawBody = getVal("mail_sent_body_qr") || "チケットを発行いたしました。";
