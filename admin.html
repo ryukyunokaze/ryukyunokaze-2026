@@ -263,36 +263,35 @@
   .modal-content div, 
   .modal-content input, 
   .modal-content select {
-    box-sizing: border-box !important; /* 枠線や余白を横幅の内側に含める */
+    box-sizing: border-box !important; 
     max-width: 100% !important;
   }
 
-  /* 🌟 編集画面の「2列」を「1列」に物理的に解体 */
-  .modal-content div[style*="display:grid"],
-  .modal-content .input-grid,
-  .modal-content .ticket-edit-grid,
-  .modal-content div[style*="background:#f0fdf4"],
-  .modal-content div[style*="background:#f1f5f9"],
-  .modal-content div[style*="background:#fff7ed"] {
-    display: block !important; /* gridを捨てて縦並びに */
+  /* 🌟 編集画面の「2列」を「1列」に物理的に解体 ＆ はみ出し防止 */
+  .modal-content div[style*="background"] {
+    display: block !important; 
     width: 100% !important;
-    padding: 15px !important; /* 内側の余白を整えてはみ出し防止 */
+    padding: 12px !important; /* 内側の余白を少し詰め、外に飛び出さないようにします */
+    margin: 10px 0 !important;
+    box-sizing: border-box !important;
   }
 
   /* 1列にした際の中身を横幅いっぱいに */
   .modal-content div[style*="display:grid"] > div,
+  .modal-content .input-grid > div,
   .modal-content div[style*="background"] > div {
     width: 100% !important;
-    margin-bottom: 15px !important;
+    margin-bottom: 12px !important;
     display: block !important;
   }
 
-  /* 🌟 下部の操作ボタンだけは「2列」を維持 */
+  /* 🌟 下部の操作ボタン（入金・発送等）だけは「2列」を維持 */
   .modal-content div[style*="margin-top:20px"],
   .modal-content .contact-button-row {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
     gap: 10px !important;
+    width: 100% !important;
   }
 
   /* 入力枠のサイズ調整（ズーム防止） */
@@ -300,8 +299,8 @@
     width: 100% !important;
     height: 50px !important;
     font-size: 16px !important;
+    box-sizing: border-box !important;
   }
-
   /* モーダル本体の横幅とはみ出し防止 */
   .modal-content {
     width: 94% !important;

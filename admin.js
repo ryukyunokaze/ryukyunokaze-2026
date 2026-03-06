@@ -631,6 +631,7 @@ async function autoZip(z) {
 }
 
 async function saveEdit() {
+  const rawTotal = document.getElementById("edit-total").value.replace(/,/g, '');
   const d = {
     type: "editData", 
     id: selectedId,
@@ -647,16 +648,28 @@ async function saveEdit() {
     s_c: document.getElementById("edit-sc").value,
     g_a: document.getElementById("edit-ga").value,
     g_c: document.getElementById("edit-gc").value,
-    total: document.getElementById("edit-total").value,
+    total: rawTotal, // 🌟
     remarks: document.getElementById("edit-remarks").value
   };
+// 保存ボタンを一時的に無効化（二重送信防止）
+  const btn = event.currentTarget;
+  btn.disabled = true;
+  btn.innerText = "保存中...";
 
-  const response = await fetch(url, { method: "POST", body: JSON.stringify(d) });
-  const res = await response.json();
-  if (res.result === "success") { 
-    alert("更新しました"); 
-    fetchData(); 
-    closeModal(); 
+  try {
+    const response = await fetch(url, { method: "POST", body: JSON.stringify(d) });
+    const res = await response.json();
+    if (res.result === "success") { 
+      alert("更新しました"); 
+      fetchData(); 
+      closeModal(); 
+    }
+  } catch (e) {
+    alert("エラーが発生しました");
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "💾 変更を保存する";
   }
 }
 
