@@ -216,14 +216,41 @@
    ========================================= */
 /* グレーで見にくい、または色が消えた部分を強制着色 */
 .status-badge, 
-.modal-content select,
-.modal-content div[style*="background:rgba"] {
-  background-color: #f1f5f9 !important; /* 明るいグレー */
-  color: #1e3a8a !important;            /* 濃い青文字 */
-  border: 2px solid #3b82f6 !important; /* 青い枠線 */
-  font-weight: 800 !important;
-  padding: 8px !important;
-  border-radius: 8px !important;
+/* --- 🌟 ステータス別：専用色分け（一目でわかるデザイン） --- */
+.status-badge, 
+#edit-status {
+  padding: 6px 12px !important;
+  border-radius: 6px !important;
+  font-weight: 900 !important;
+  border: 2px solid transparent !important;
+}
+
+/* 未入金：警告の赤 */
+.status-未入金, select.status-未入金 {
+  background-color: #fee2e2 !important; /* 薄い赤 */
+  color: #b91c1c !important;            /* 濃い赤文字 */
+  border-color: #ef4444 !important;
+}
+
+/* 入金済み・完了：安心の緑 */
+.status-入金済み, .status-完了, select.status-入金済み, select.status-完了 {
+  background-color: #dcfce7 !important; /* 薄い緑 */
+  color: #15803d !important;            /* 濃い緑文字 */
+  border-color: #22c55e !important;
+}
+
+/* オキチケ：注意のオレンジ */
+.status-オキチケ, .status-未入金オキチケ, select.status-オキチケ {
+  background-color: #ffedd5 !important; /* 薄いオレンジ */
+  color: #c2410c !important;            /* 濃いオレンジ文字 */
+  border-color: #f97316 !important;
+}
+
+/* キャンセル：無効のグレー */
+.status-キャンセル, select.status-キャンセル {
+  background-color: #f1f5f9 !important; /* 薄いグレー */
+  color: #475569 !important;            /* 濃いグレー文字 */
+  border-color: #94a3b8 !important;
 }
 
 /* =========================================
