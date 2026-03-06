@@ -189,99 +189,99 @@
   }
 }
 
- /*=========================================
-   最終修正：PC/スマホ両対応・1列化・金額デザイン
+ /* =========================================
+   1. 閉じるボタン（×）：PC・スマホ共通デザイン
    ========================================= */
-
-/* --- 🌟 閉じるボタン（×）：PCはヘッダー内、スマホは画面右上に固定 --- */
 .close-btn {
-  /* PC版の基本設定：白いエリアの右端に配置 */
+  /* 🌟 PCでもスマホでも「詳細モーダルの右上」に固定 */
   position: absolute !important;
-  top: 10px !important;    /* 白いエリアの上下中央に寄せる */
-  right: 15px !important;  /* 右端の余白 */
-  width: 36px !important;
-  height: 36px !important;
-  background: #f1f5f9 !important; /* 明るいグレー */
-  color: #64748b !important;
+  top: 15px !important;
+  right: 15px !important;
+  width: 44px !important;
+  height: 44px !important;
+  background: #1e3a8a !important; /* 目立つ濃い青 */
+  color: #ffffff !important; /* 白いバツ印 */
   border-radius: 50% !important;
   display: flex !important;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 28px !important;
   font-weight: bold !important;
-  z-index: 10000 !important;
+  z-index: 1000000 !important;
   cursor: pointer !important;
-  transition: 0.2s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+  transition: transform 0.2s;
+}
+.close-btn:hover { transform: scale(1.1); background: #2563eb !important; }
+/* ステータスバーをハッキリした色にする */
+.status-update-bar, 
+div[style*="background:#ebf4ff"] {
+  background: #f1f5f9 !important; /* 明るいグレー */
+  border: 1px solid #3b82f6 !important; /* 青い枠線 */
+  color: #1e3a8a !important; /* 濃い青文字 */
 }
 
-.close-btn:hover {
-  background: #e2e8f0 !important;
+/* 編集画面のステータスラベル */
+.modal-content label {
   color: #1e3a8a !important;
+  font-weight: 800 !important;
+}
+/* =========================================
+   2. ステータス表示：視認性アップ
+   ========================================= */
+/* グレーで見にくい部分を、ハッキリした白文字と濃い色に変更 */
+.status-badge, 
+div[style*="background:rgba(255,255,255,0.2)"] {
+  background: #f1f5f9 !important; /* 背景を明るいグレーに */
+  color: #1e3a8a !important;      /* 文字を濃い青に */
+  font-weight: 900 !important;
+  padding: 6px 14px !important;
+  border: 1px solid #cbd5e1 !important;
+  text-shadow: none !important;
 }
 
-/* --- B. スマホ専用設定（480px以下） --- */
-/* --- 📱 スマホ専用設定（480px以下） --- */
+/* --- 📱 スマホ編集画面：一列化・文字切れ・バツボタン 最終解決 --- */
 @media screen and (max-width: 480px) {
 
-  /* 1. 🌟 入力項目（住所や電話番号など）だけを強制的に「1列」にする */
-  /* 背景色がついている入力エリアを狙い撃ちで1列化します */
-  .modal-content div[style*="background:#f0fdf4"], 
-  .modal-content div[style*="background:#f1f5f9"], 
-  .modal-content div[style*="background:#fff7ed"],
-  .modal-content .ticket-edit-grid {
-    display: block !important; 
+  /* 1. 🌟 編集画面の「2列」を「1列」に強制解体 */
+  /* div[style*="grid"] を狙い撃ちし、grid機能を物理的にOFFにします */
+  .modal-content div[style*="display:grid"],
+  .modal-content .input-grid,
+  .modal-content .ticket-edit-grid,
+  .modal-content .info-split {
+    display: block !important; /* gridを解除して縦並びに強制 */
     width: 100% !important;
   }
 
-  /* 2. 🌟 下部の操作ボタン（入金・発送・編集・印刷）はスマホでも「2列」を維持 */
-  /* これにより、PCと同じように2列(横並び)で表示されます */
-  .modal-content div[style*="display:grid"]:last-of-type,
-  .modal-content .contact-button-row {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important; 
-    gap: 10px !important;
+  /* 2. 🌟 一列になった各項目の横幅を100%に広げる */
+  .modal-content div[style*="display:grid"] > div,
+  .modal-content .input-grid > div {
+    width: 100% !important;
+    margin-bottom: 12px !important;
+    display: block !important;
   }
 
-  /* 3. 🌟 閉じるボタン（×）をスマホでは「右上に固定」 */
-  .close-btn {
-    position: fixed !important; 
-    top: 15px !important;
-    right: 15px !important;
-    background: #1e3a8a !important; /* スマホで見やすい濃い青 */
-    color: white !important;
-    width: 44px !important;
-    height: 44px !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+  /* 3. 購入内容（チケット枚数エリア）の文字切れ防止 */
+  .modal-content div[style*="background:#fff7ed"] {
+    display: block !important;
+    padding: 15px !important;
   }
 
-  /* 入力枠の高さ調整 */
-  .modal-content input, .modal-content select {
+  /* 4. 入力枠を指のサイズに合わせ、横幅をいっぱいに */
+  .modal-content input, 
+  .modal-content select, 
+  .modal-content textarea {
     width: 100% !important;
     height: 50px !important;
+    font-size: 16px !important; /* ズーム防止 */
+    box-sizing: border-box !important;
   }
-}
 
-/* --- C. 金額表示のデザイン（PC/スマホ共通） --- */
-/* 数字を大きく、円やラベルのサイズを固定して改行を防ぐ */
-#edit-total {
-  font-size: 32px !important; 
-  font-weight: 900 !important;
-  color: #e11d48 !important;
-  width: auto !important;
-  min-width: 120px !important;
-  text-align: right !important;
-  background: transparent !important;
-  border: none !important;
-  display: inline-block !important; 
-}
-
-.modal-content div[style*="font-weight:bold"] {
-  display: flex !important;
-  align-items: baseline !important;
-  justify-content: flex-end !important;
-  gap: 5px !important;
-  font-size: 14px !important;
-  color: #475569 !important;
+  /* 5. ステータス等のセレクトボックスがはみ出さないように固定 */
+  .modal-content select {
+    appearance: auto !important;
+    padding: 10px !important;
+  }
 }
   </style>
 </head>

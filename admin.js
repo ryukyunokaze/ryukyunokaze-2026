@@ -377,7 +377,6 @@ function openModal(id, mode) {
             <div><label>一般子供</label><input type="number" id="edit-gc" value="${p.g_c}" oninput="reCalc()"></div>
           </div>
           
-          // --- 🌟 380行目〜385行目を以下に差し替え ---
           <div style="display:flex; align-items:baseline; justify-content:flex-end; gap:8px; width:100%;">
             <span style="font-size:14px; font-weight:bold; color:#e11d48;">合計</span>
              <input type="text" id="edit-total" value="${Number(p.total).toLocaleString()}" readonly 
