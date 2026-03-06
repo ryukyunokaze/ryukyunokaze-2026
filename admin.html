@@ -240,47 +240,61 @@ div[style*="background:rgba(255,255,255,0.2)"] {
   text-shadow: none !important;
 }
 
-/* --- 📱 スマホ編集画面：一列化・文字切れ・バツボタン 最終解決 --- */
+/* --- 📱 スマホ専用：ボタン2列化・編集1列化・バツボタン固定 --- */
 @media screen and (max-width: 480px) {
 
-  /* 1. 🌟 編集画面の「2列」を「1列」に強制解体 */
-  /* div[style*="grid"] を狙い撃ちし、grid機能を物理的にOFFにします */
-  .modal-content div[style*="display:grid"],
-  .modal-content .input-grid,
-  .modal-content .ticket-edit-grid,
-  .modal-content .info-split {
-    display: block !important; /* gridを解除して縦並びに強制 */
+  /* 1. 🌟 操作ボタン（入金・発送等）をPC同様に「2列」で整列 */
+  /* image_98376e.png の 3つ並びを解消し、2個ずつの綺麗なグリッドにします */
+  .modal-content div[style*="display:grid"]:last-of-type,
+  .modal-content .contact-button-row,
+  .modal-content div[style*="display:grid"][style*="margin-top:20px"] {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important; /* 強制的に2列 */
+    gap: 10px !important;
+  }
+
+  /* 「キャンセルボタン」だけは1列で横幅いっぱいに（押し間違い防止） */
+  .modal-content button[onclick*="handleCancelStatus"] {
+    grid-column: span 2 !important;
+    margin-top: 10px !important;
+  }
+
+  /* 2. 🌟 編集画面（入力欄）は「縦1列」を維持して文字切れを防止 */
+  .modal-content div[style*="background:#f0fdf4"], 
+  .modal-content div[style*="background:#f1f5f9"], 
+  .modal-content div[style*="background:#fff7ed"],
+  .modal-content .ticket-edit-grid {
+    display: block !important;
     width: 100% !important;
   }
 
-  /* 2. 🌟 一列になった各項目の横幅を100%に広げる */
-  .modal-content div[style*="display:grid"] > div,
-  .modal-content .input-grid > div {
+  .modal-content div[style*="display:grid"] > div {
     width: 100% !important;
     margin-bottom: 12px !important;
-    display: block !important;
   }
 
-  /* 3. 購入内容（チケット枚数エリア）の文字切れ防止 */
-  .modal-content div[style*="background:#fff7ed"] {
-    display: block !important;
-    padding: 15px !important;
+  /* 3. 🌟 閉じるボタン（×）を右上に浮かせて固定 */
+  .close-btn {
+    position: fixed !important;
+    top: 15px !important;
+    right: 15px !important;
+    width: 44px !important;
+    height: 44px !important;
+    background: #1e3a8a !important;
+    color: white !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 1000000 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
   }
 
-  /* 4. 入力枠を指のサイズに合わせ、横幅をいっぱいに */
-  .modal-content input, 
-  .modal-content select, 
-  .modal-content textarea {
+  /* 4. 入力枠のサイズとズーム防止 */
+  .modal-content input, .modal-content select {
     width: 100% !important;
     height: 50px !important;
-    font-size: 16px !important; /* ズーム防止 */
-    box-sizing: border-box !important;
-  }
-
-  /* 5. ステータス等のセレクトボックスがはみ出さないように固定 */
-  .modal-content select {
-    appearance: auto !important;
-    padding: 10px !important;
+    font-size: 16px !important;
   }
 }
   </style>
