@@ -104,10 +104,7 @@ function renderList(data) {
     const item = document.createElement("div");
     item.className = "order-item";
     item.setAttribute("data-id", row.id); // 🌟 IDを確実に拾うための目印
-    item.onclick = function() {
-      console.log("clicked,id");
-      openModal(row.id, 'view');
-    } 
+    item.onclick = () => openModal(row.id, 'view');
 
     item.innerHTML = `
       <div>
@@ -396,7 +393,8 @@ function openModal(id, mode) {
         <button type="button" onclick="saveEdit()" class="save-btn" style="width:100%; padding:20px; background:#1e3a8a; color:white; border:none; border-radius:15px; font-size:1.1rem; font-weight:bold; cursor:pointer; box-shadow:0 4px 12px rgba(30,58,138,0.3);">💾 変更を保存する</button>
       </div>`;
   }
-  document.getElementById("detail-modal").style.display = "block";
+  const modal = document.getElementById("detail-modal");
+if (modal) modal.style.display = "block";
 }
 
 /** 4. チケット印刷（個別）- 最終安定・自動クローズ版 */
