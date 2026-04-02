@@ -1,3 +1,36 @@
+// Firebase認証トークン取得
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDI-XqCP3Bb6my_nz_7OgIBgOGCSxzHqEM",
+  authDomain: "ryukyunokaze-admin.firebaseapp.com",
+  projectId: "ryukyunokaze-admin",
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    document.getElementById("admin-body").style.display = "block";
+    fetchData();
+  } else {
+    location.href = "./login.html";
+  }
+});
+
+
+async function getToken() {
+  const user = auth.currentUser;
+  if (!user) return null;
+  return await user.getIdToken();
+}
+
+window.doLogout = async () => {
+  await signOut(auth);
+  location.href = "./login.html";
+};
+
 const url = "https://script.google.com/macros/s/AKfycbznb1pfd74mU8lH-oVrKbJNg935KAPPtIjmGwMsuB3Zv5PoZwbRuH3rJcgj_ZhEDCy1PQ/exec"; 
              
 let currentData = [];
@@ -14,7 +47,8 @@ async function fetchData() {
   }
 
   try {
-    const response = await fetch(`${url}?type=getAdmin`);
+    const token = await getToken();
+    const response = await fetch(`${url}?type=getAdmin&token=${token}`);
     const result = await response.json();
 
     currentData = result.orders.reverse();
@@ -681,5 +715,5 @@ async function handleCancelStatus(id) {
 }
 
 function closeModal() { document.getElementById("detail-modal").style.display = "none"; }
-window.onload = fetchData;
+
 

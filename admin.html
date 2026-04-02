@@ -369,9 +369,15 @@
       
       <div class="admin-fixed-container no-print">
         <div class="admin-fixed-inner">
-          <header style="text-align:center; margin-bottom:15px;">
+          <header style="text-align:center; margin-bottom:15px; position:relative;">
             <h1 style="font-size: 1.2rem; color: #1e3a8a; margin: 0;">🎫 チケット管理パネル</h1>
+             <button onclick="doLogout()" 
+                     style="position:absolute; top:0; right:0; background:#e53935; color:white;
+                     border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:12px;">
+                     🚪 ログアウト
+            </button>
           </header>
+
 
           <div class="dashboard-grid">
             <div class="stat-card"><h3>総申込数</h3><p><span id="stat-total-orders">0</span> 件</p></div>
@@ -433,11 +439,7 @@
   <div id="detail-modal" class="modal"><div class="modal-content" style="max-width: 500px; border-radius: 15px;"><span class="close-btn" onclick="closeModal()">&times;</span><div id="modal-body"></div></div></div>
   <div id="print-ticket-area"><div id="print-content"></div></div>
 
-  <script>
-    const pass = prompt("パスワードを入力");
-    if (pass === "1234") { document.getElementById("admin-body").style.display = "block"; }
-    else { window.location.href = "index.html"; }
-  </script>
-  <script src="admin.js"></script>
+
+  <script type="module" src="admin.js"></script>
 </body>
 </html>

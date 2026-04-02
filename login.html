@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>管理画面ログイン</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f7f7f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .login-box {
+      background: #fff;
+      padding: 32px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 380px;
+    }
+    h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: #111;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #message {
+      color: red;
+      font-size: 14px;
+      margin-top: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>管理画面ログイン</h2>
+    <input type="email" id="email" placeholder="メールアドレス" />
+    <input type="password" id="password" placeholder="パスワード" />
+    <button id="loginBtn">ログイン</button>
+    <p id="message"></p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+     apiKey: "AIzaSyDI-XqCP3Bb6my_nz_7OgIBgOGCSxzHqEM",
+     authDomain: "ryukyunokaze-admin.firebaseapp.com",
+     projectId: "ryukyunokaze-admin",
+     storageBucket: "ryukyunokaze-admin.firebasestorage.app",
+     messagingSenderId: "1061460973001",
+     appId: "1:1061460973001:web:61e49a5ce2984bc632c418"
+    };
+
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        location.href = "./admin.html";
+      }
+    });
+
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const message = document.getElementById("message");
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        location.href = "./admin.html";
+      } catch (error) {
+        message.textContent = "ログイン失敗：メールアドレスかパスワードを確認してください";
+      }
+    });
+  </script>
+</body>
+</html>
